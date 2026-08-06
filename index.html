@@ -142,7 +142,6 @@
       stroke: #fff;
     }
 
-    /* icon-only buttons (dark mode toggle) */
     .icon-btn {
       padding: 0.5rem 0.8rem !important;
     }
@@ -150,7 +149,6 @@
       display: block;
     }
 
-    /* ----- sort badge (on sort button) ----- */
     .sort-badge {
       font-weight: 600;
       margin-left: 0.2rem;
@@ -314,7 +312,7 @@
       background: var(--accent-hover);
     }
 
-    /* ----- bottom sheets (sort & download) ----- */
+    /* bottom sheet for sort */
     .bottom-sheet {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -325,7 +323,7 @@
       box-shadow: 0 -10px 30px rgba(0,0,0,0.15);
       transform: translateY(100%);
       transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-      margin-top: auto; /* pushes to bottom */
+      margin-top: auto;
     }
     .modal-overlay.active .bottom-sheet {
       transform: translateY(0);
@@ -389,12 +387,11 @@
       background: var(--bg);
     }
 
-    /* align overlay for bottom sheets: flex-end */
     .modal-overlay.sheet-overlay {
       align-items: flex-end;
     }
 
-    /* ----- responsive adjustments ----- */
+    /* ----- responsive ----- */
     @media (max-width: 600px) {
       header { flex-direction: column; align-items: stretch; }
       .controls input { min-width: unset; width: 100%; }
@@ -411,7 +408,7 @@
     <div class="controls">
       <!-- Search -->
       <input type="text" id="searchInput" placeholder="Search by name or category…" />
-      <!-- Sort button (triggers bottom sheet) -->
+      <!-- Sort button -->
       <button id="sortBtn" aria-label="Sort fonts">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M7 6h10" />
@@ -421,9 +418,9 @@
         <span>Sort</span>
         <span class="sort-badge" id="sortLabel">Name</span>
       </button>
-      <!-- About modal trigger -->
+      <!-- About -->
       <button id="aboutBtn">About</button>
-      <!-- Dark mode toggle -->
+      <!-- Dark mode -->
       <button id="darkToggle" class="icon-btn" aria-label="Toggle dark mode">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
@@ -436,7 +433,7 @@
   <div class="stats" id="countDisplay">0 fonts</div>
 </div>
 
-<!-- About Modal (centered) -->
+<!-- About Modal -->
 <div id="aboutModal" class="modal-overlay">
   <div class="modal">
     <h2>Typace</h2>
@@ -462,21 +459,7 @@
       Category
       <span class="check" id="checkCategory">✓</span>
     </button>
-    <button class="sheet-option" data-sort="designer">
-      Designer
-      <span class="check" id="checkDesigner">✓</span>
-    </button>
     <button class="cancel-btn" id="sortCancelBtn">Cancel</button>
-  </div>
-</div>
-
-<!-- Download Format Bottom Sheet -->
-<div id="downloadModal" class="modal-overlay sheet-overlay">
-  <div class="bottom-sheet">
-    <div class="handle"></div>
-    <h2 id="downloadTitle">Download</h2>
-    <div id="formatList"></div>
-    <button class="cancel-btn" id="downloadCancelBtn">Cancel</button>
   </div>
 </div>
 
@@ -499,13 +482,6 @@
     const sortLabel = document.getElementById('sortLabel');
     const checkName = document.getElementById('checkName');
     const checkCategory = document.getElementById('checkCategory');
-    const checkDesigner = document.getElementById('checkDesigner');
-
-    // Download sheet
-    const downloadModal = document.getElementById('downloadModal');
-    const downloadCancel = document.getElementById('downloadCancelBtn');
-    const downloadTitle = document.getElementById('downloadTitle');
-    const formatList = document.getElementById('formatList');
 
     // ----- modal controls -----
     function openAbout() { aboutModal.classList.add('active'); }
@@ -524,39 +500,10 @@
       if (e.target === sortModal) closeSort();
     });
 
-    function openDownload(fontName, formats) {
-      downloadTitle.textContent = `Download ${fontName}`;
-      formatList.innerHTML = '';
-      formats.forEach(f => {
-        const btn = document.createElement('button');
-        btn.className = 'sheet-option';
-        btn.textContent = f.format.toUpperCase();
-        btn.dataset.file = f.file;
-        btn.addEventListener('click', () => {
-          // trigger download
-          const a = document.createElement('a');
-          a.href = `fonts/${encodeURIComponent(f.file)}`;
-          a.download = f.file;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          closeDownload();
-        });
-        formatList.appendChild(btn);
-      });
-      downloadModal.classList.add('active');
-    }
-    function closeDownload() { downloadModal.classList.remove('active'); }
-    downloadCancel.addEventListener('click', closeDownload);
-    downloadModal.addEventListener('click', (e) => {
-      if (e.target === downloadModal) closeDownload();
-    });
-
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeAbout();
         closeSort();
-        closeDownload();
       }
     });
 
@@ -579,17 +526,13 @@
     let currentSort = 'name';
     const sortLabels = {
       name: 'Name',
-      category: 'Category',
-      designer: 'Designer'
+      category: 'Category'
     };
 
     function updateSortUI() {
-      // hide all checks
       document.querySelectorAll('#sortModal .check').forEach(c => c.classList.remove('active'));
-      // show active
       if (currentSort === 'name') checkName.classList.add('active');
       else if (currentSort === 'category') checkCategory.classList.add('active');
-      else if (currentSort === 'designer') checkDesigner.classList.add('active');
       sortLabel.textContent = sortLabels[currentSort] || 'Sort';
     }
 
@@ -611,8 +554,7 @@
       const query = searchInput.value.toLowerCase().trim();
       let filtered = allFonts.filter(f =>
         f.name.toLowerCase().includes(query) ||
-        (f.category && f.category.toLowerCase().includes(query)) ||
-        (f.designer && f.designer.toLowerCase().includes(query))
+        (f.category && f.category.toLowerCase().includes(query))
       );
 
       // apply sort
@@ -622,9 +564,6 @@
           break;
         case 'category':
           filtered.sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
-          break;
-        case 'designer':
-          filtered.sort((a, b) => (a.designer || '').localeCompare(b.designer || '') || a.name.localeCompare(b.name));
           break;
         default:
           break;
@@ -639,22 +578,21 @@
       }
 
       let html = '';
-      filtered.forEach((f, index) => {
+      filtered.forEach((f) => {
         html += `
-          <div class="font-card" data-index="${index}">
+          <div class="font-card">
             <div class="name" style="font-family: '${f.name}', sans-serif;">${f.name}</div>
             <div class="meta">
               ${f.category ? `<span>${f.category}</span>` : ''}
-              ${f.designer ? `<span>${f.designer}</span>` : ''}
             </div>
             <div class="actions">
-              <button class="download-toggle" data-index="${index}">
+              <button class="download-btn" data-file="${f.file}">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
-                Download ▾
+                Download
               </button>
             </div>
           </div>
@@ -662,21 +600,20 @@
       });
       grid.innerHTML = html;
 
-      // attach download toggle events
-      grid.querySelectorAll('.download-toggle').forEach(btn => {
+      grid.querySelectorAll('.download-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          const idx = parseInt(btn.dataset.index);
-          const font = filteredFonts[idx];
-          if (font && font.files && font.files.length) {
-            openDownload(font.name, font.files);
-          } else {
-            alert('No downloadable formats available for this font.');
-          }
+          const file = btn.dataset.file;
+          const a = document.createElement('a');
+          a.href = `fonts/${encodeURIComponent(file)}`;
+          a.download = file;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
         });
       });
     }
 
-    // ----- load fonts & register with FontFace (use best format) -----
+    // ----- load fonts & register with FontFace -----
     async function loadFonts() {
       try {
         const res = await fetch('fonts.json');
@@ -684,22 +621,10 @@
         const data = await res.json();
         allFonts = data;
 
-        // Prefer woff2 > woff > otf > ttf
-        const formatPriority = ['woff2', 'woff', 'otf', 'ttf'];
+        // Load each font for preview
         const loadPromises = allFonts.map(async (f) => {
-          if (!f.files || f.files.length === 0) return;
-          // find best format
-          let best = null;
-          for (const fmt of formatPriority) {
-            const match = f.files.find(file => file.format === fmt);
-            if (match) {
-              best = match;
-              break;
-            }
-          }
-          if (!best) best = f.files[0]; // fallback
           try {
-            const face = new FontFace(f.name, `url(fonts/${encodeURIComponent(best.file)})`);
+            const face = new FontFace(f.name, `url(fonts/${encodeURIComponent(f.file)})`);
             await face.load();
             document.fonts.add(face);
           } catch (err) {
