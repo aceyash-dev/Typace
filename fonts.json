@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Cabinet Grotesk",
+    "file": "CabinetGrotesk-Variable.ttf",
+    "category": "Sans Serif"
+  },
+  {
+    "name": "DM Sans",
+    "file": "DMSans-Variable.ttf",
+    "category": "Sans Serif"
+  },
+  {
+    "name": "Instrument Serif",
+    "file": "InstrumentSerif-Regular.ttf",
+    "category": "Serif"
+  },
+  {
+    "name": "Kalam",
+    "file": "Kalam-Regular.ttf",
+    "category": "Handwriting"
+  },
+  {
+    "name": "Open Sans Italic",
+    "file": "OpenSans-Italic-Variable.ttf",
+    "category": "Sans Serif"
+  },
+  {
+    "name": "Outfit",
+    "file": "Outfit-Variable.ttf",
+    "category": "Sans Serif"
+  },
+  {
+    "name": "Spectral",
+    "file": "Spectral-Regular.ttf",
+    "category": "Serif"
+  }
+]
