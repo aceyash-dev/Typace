@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>Typace</title>
+    <title>Typace · font browser</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -34,8 +34,7 @@
             --modal-overlay: rgba(0, 0, 0, 0.3);
             --font-family: 'Grandstander', cursive, system-ui, sans-serif;
             --chip-radius: 40px;
-            --card-gap: 0.6rem;
-          --button-text: #2d2a24;
+            --card-gap: 0.7rem;
         }
         .dark {
             --bg: #1e1b17;
@@ -43,7 +42,6 @@
             --text: #efebe6;
             --muted: #aaa395;
             --border: #3f3a33;
-          --button-text: #efebe6;
             --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
             --modal-overlay: rgba(0, 0, 0, 0.7);
         }
@@ -97,127 +95,244 @@
             align-items: center;
             justify-content: space-between;
             gap: 0.6rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             flex-shrink: 0;
+            position: relative;
         }
-        h1 {
+
+        /* ── Dropdown ── */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: none;
+            border: none;
+            font-family: var(--font-family);
             font-size: 1.8rem;
             font-weight: 700;
             letter-spacing: -0.5px;
-            line-height: 1.2;
+            color: var(--text);
+            cursor: pointer;
+            padding: 0.2rem 0.4rem;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+        .dropdown-trigger:hover {
+            background: var(--border);
+        }
+        .dropdown-trigger svg {
+            transition: transform 0.2s ease;
+            stroke: currentColor;
+            width: 20px;
+            height: 20px;
+        }
+        .dropdown-trigger.open svg {
+            transform: rotate(180deg);
         }
 
-        .top-row {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 0.5rem;
-            width: 100%;
-        }
-        .top-row .search-wrap {
-            flex: 1;
-            min-width: 140px;
-            position: relative;
-        }
-        .top-row .search-wrap input {
-            width: 100%;
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            min-width: 240px;
             background: var(--surface);
-            color: var(--text);
             border: 1px solid var(--border);
-            border-radius: 15px;
-            padding-left:3rem;
-            font-family: var(--font-family);
-            height:45px;
-    font-size:1.25rem;
-            outline: none;
-            transition: 0.15s;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            padding: 0.4rem;
+            opacity: 0;
+            transform: translateY(-8px);
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 100;
+        }
+        .dark .dropdown-menu {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .dropdown-menu.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: var(--text);
+            transition: background 0.1s;
+            cursor: pointer;
+        }
+        .dropdown-item:hover {
+            background: var(--bg);
+        }
+        .dropdown-item .item-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.05rem;
+        }
+        .dropdown-item .item-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .dropdown-item .item-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+        .dropdown-item .item-check {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .dropdown-item.active .item-check {
+            opacity: 1;
+        }
+        .dropdown-item .external-icon {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-left: 0.2rem;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.3rem 0.6rem;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .toolbar button {
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            border: none;
+            border-radius: 999px;
+            color: var(--text);
+            background: var(--surface);
             box-shadow: var(--shadow);
+            display: grid;
+            place-items: center;
+            transition: 0.2s;
+            cursor: pointer;
         }
-        .top-row .search-wrap input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(196, 122, 90, 0.15);
+
+        .toolbar button:hover {
+            transform: translateY(-2px) scale(1.03);
+            background: var(--accent);
+            color: #fff;
         }
-        .top-row .search-wrap .search-icon {
-            position:absolute;
+
+        .toolbar button svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+        }
+        .toolbar button:hover svg {
+            stroke: #fff;
+        }
+      /* ── Search ───────────────────────── */
+
+.top-row{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:var(--bg);
+    padding-bottom:.8rem;
+}
+
+.search-wrap{
+    position:relative;
+    width:100%;
+}
+
+.search-wrap input{
+    width:100%;
+    height:52px;
+    padding:0 1rem 0 3rem;
+    border:1px solid var(--border);
+    border-radius:999px;
+    background:var(--surface);
+    color:var(--text);
+    font-family:var(--font-family);
+    font-size:1rem;
+    outline:none;
+    transition:
+        border-color .2s,
+        box-shadow .2s,
+        background .2s;
+    box-shadow:var(--shadow);
+}
+
+.search-wrap input::placeholder{
+    color:var(--muted);
+}
+
+.search-wrap input:focus{
+    border-color:var(--accent);
+    box-shadow:
+        0 0 0 4px rgba(196,139,99,.16),
+        var(--shadow);
+}
+
+.search-icon{
+    position:absolute;
     left:16px;
     top:50%;
     transform:translateY(-50%);
-    color:var(--muted);
     display:flex;
     align-items:center;
     justify-content:center;
+    color:var(--muted);
     pointer-events:none;
-        }
-      .search-icon svg{
+}
+
+.search-icon svg{
     width:20px;
     height:20px;
     stroke:currentColor;
-    opacity:.75;
-      }
-
-        .toolbar{
-    display:flex;
-    gap:.75rem;
 }
 
-.toolbar button{
-    width:52px;
-    height:52px;
-    padding:0;
-    border:none;
-    border-radius:999px;
-  color:var(--button-text);
+.dark .search-wrap input{
     background:var(--surface);
-    box-shadow:var(--shadow);
-    display:grid;
-    place-items:center;
-    transition:.2s;
-}
-
-.toolbar button:hover{
-    transform:translateY(-2px);
-    background:var(--accent);
-    color:#fff;
-}
-
-.toolbar button svg{
-    width:24px;
-    height:24px;
-}
-        .top-row .toolbar button:hover svg {
-            stroke: #fff;
-        }
-        .icon-btn {
-            padding: 0.45rem 0.7rem !important;
-        }
-        .icon-btn svg {
-            display: block;
-        }
+          }
 
         /* ── category chips ── */
         .chips {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.4rem;
-            margin: 0.6rem 0 1rem;
+            gap: 0.5rem;
+            margin: 0.8rem 0 1.2rem;
             flex-shrink: 0;
         }
         .chips button {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--chip-radius);
-            height:42px;
-    padding:0 1rem;
-    font-size:.95rem;
+            height: 40px;
+            padding: 0 1.1rem;
+            font-size: 0.9rem;
             font-family: var(--font-family);
             color: var(--text);
             cursor: pointer;
-            transition: 0.15s;
+            transition: 0.2s;
             box-shadow: var(--shadow);
             white-space: nowrap;
-            font-weight: 500;
+            font-weight: 600;
         }
         .chips button:hover {
+            transform: translateY(-2px);
             background: var(--accent);
             color: #fff;
             border-color: var(--accent);
@@ -230,11 +345,11 @@
         .chips button .count {
             font-weight: 400;
             opacity: 0.6;
-            font-size: 0.75rem;
-            margin-left: 0.2rem;
+            font-size: 0.7rem;
+            margin-left: 0.25rem;
         }
         .chips button.active .count {
-            opacity: 0.8;
+            opacity: 0.85;
         }
 
         /* ── font list ── */
@@ -246,41 +361,42 @@
             padding-bottom: 1rem;
         }
 
-        .font-item{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:24px;
-    padding:1.25rem;
-    min-height:140px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:1rem;
-    box-shadow:var(--shadow);
-    transition:.18s;
-}
+        .font-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 1.25rem 1.5rem;
+            min-height: 130px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+            transition: 0.2s;
+            cursor: pointer;
+        }
 
-.font-item:hover{
-    transform:translateY(-2px);
-    border-color:var(--accent);
-}
-        
+        .font-item:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+        }
+
         .font-item .left {
             display: flex;
             flex-direction: column;
-            gap: 0.1rem;
+            gap: 0.25rem;
             flex: 1;
-            min-width: 120px;
+            min-width: 100px;
         }
         .font-item .name {
-            font-size: 5rem;
+            font-size: clamp(1.6rem, 5vw, 2.2rem);
             font-weight: 700;
-            letter-spacing: -0.2px;
-            line-height: 1.3;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            margin-bottom:.35rem;
         }
         .font-item .name .loading-dots {
             color: var(--muted);
@@ -288,61 +404,51 @@
             font-size: 0.8rem;
             margin-left: 0.4rem;
         }
-        .font-item .category{
-    display:inline-flex;
-    align-items:center;
-    gap:.3rem;
-    padding:.28rem .8rem;
-    border-radius:999px;
-    background:rgba(196,139,99,.12);
-    border:none;
-    color:var(--accent);
-    font-weight:600;
-    font-size:.75rem;
-}
+        .font-item .category {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(196, 139, 99, 0.12);
+            border: none;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.7rem;
+            align-self: flex-start;
+            letter-spacing: 0.02em;
+        }
         .font-item .actions {
             display: flex;
-            gap: 0.3rem;
+            gap: 0.4rem;
             flex-shrink: 0;
         }
         .font-item .actions button {
-            background:var(--accent);
-    color:#fff;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 0.25rem 0.8rem;
-            flex:1;
-    height:50px;
-    font-size:1rem;
-    font-weight:700;
-            font-family: var(--font-family);
-            cursor: pointer;
-            transition: 0.1s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            pointer-events: auto;
-        }
-        .font-item .actions button:hover {
             background: var(--accent);
             color: #fff;
-            border-color: var(--accent);
+            border: none;
+            border-radius: 14px;
+            padding: 0.3rem 1rem;
+            height: 48px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: var(--font-family);
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            pointer-events: auto;
+            box-shadow: 0 2px 6px rgba(196, 139, 99, 0.25);
         }
-        .font-item .actions button:hover svg {
-            stroke: #fff;
+        .font-item .actions button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px) scale(1.02);
         }
         .font-item .actions button svg {
             stroke: currentColor;
-        }
-
-        .font-item .preview-tag {
-            font-size: 0.65rem;
-            color: var(--muted);
-            background: var(--bg);
-            padding: 0.1rem 0.5rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            opacity: 0.7;
+            width: 18px;
+            height: 18px;
         }
 
         .font-item.loading .name {
@@ -354,7 +460,6 @@
             padding: 3rem 1rem;
             color: var(--muted);
             font-size: 1.1rem;
-            grid-column: 1 / -1;
         }
         .empty-state .emoji {
             font-size: 2.4rem;
@@ -474,6 +579,7 @@
             gap: 0.2rem;
             font-family: var(--font-family);
             padding: 0.2rem 0.4rem;
+            transition: color 0.15s;
         }
         .preview-header .back-btn:hover {
             color: var(--accent);
@@ -494,13 +600,14 @@
             font-family: var(--font-family);
             font-size: 0.8rem;
             cursor: pointer;
-            transition: background 0.15s;
+            transition: background 0.15s, transform 0.15s;
             display: flex;
             align-items: center;
             gap: 0.3rem;
         }
         .preview-header .preview-download:hover {
             background: var(--accent-hover);
+            transform: scale(1.03);
         }
 
         .preview-body {
@@ -602,12 +709,13 @@
             font-size: 0.7rem;
             cursor: pointer;
             color: var(--text);
-            transition: 0.1s;
+            transition: 0.15s;
         }
         .weight-options button:hover {
             background: var(--accent);
             color: #fff;
             border-color: var(--accent);
+            transform: translateY(-1px);
         }
         .weight-options button.active {
             background: var(--accent);
@@ -638,38 +746,65 @@
             body {
                 padding: 0.8rem 0.6rem 1.2rem;
             }
-            h1 {
+            header {
+                margin-bottom: 1rem;
+            }
+            .dropdown-trigger {
                 font-size: 1.4rem;
             }
+            .dropdown-trigger svg {
+                width: 18px;
+                height: 18px;
+            }
+            .dropdown-menu {
+                min-width: 200px;
+                left: -8px;
+            }
+            .toolbar button {
+                width: 44px;
+                height: 44px;
+            }
+            .toolbar button svg {
+                width: 20px;
+                height: 20px;
+            }
             .top-row .search-wrap input {
-                font-size: 0.85rem;
-                padding: 0.4rem 0.8rem 0.4rem 2rem;
+                font-size: 0.95rem;
+                height: 44px;
+                padding: 0 0.8rem 0 2.8rem;
             }
             .top-row .search-wrap .search-icon {
-                left: 0.6rem;
-                font-size: 0.85rem;
+                left: 12px;
             }
-            .top-row .toolbar button {
-                font-size: 0.75rem;
-                padding: 0.35rem 0.6rem;
+            .search-icon svg {
+                width: 18px;
+                height: 18px;
             }
             .chips button {
-                font-size: 0.75rem;
-                padding: 0.2rem 0.7rem;
+                height: 36px;
+                font-size: 0.8rem;
+                padding: 0 0.8rem;
             }
             .font-item {
-                padding: 0.6rem 0.7rem;
-                min-height: 56px;
+                padding: 0.9rem 1rem;
+                min-height: 100px;
+                border-radius: 22px;
             }
             .font-item .name {
-                font-size: 1rem;
+                font-size: clamp(1.2rem, 4.5vw, 1.6rem);
             }
             .font-item .category {
-                font-size: 0.65rem;
+                font-size: 0.6rem;
+                padding: 0.15rem 0.6rem;
             }
             .font-item .actions button {
-                font-size: 0.65rem;
-                padding: 0.15rem 0.5rem;
+                height: 40px;
+                font-size: 0.8rem;
+                padding: 0.2rem 0.8rem;
+            }
+            .font-item .actions button svg {
+                width: 16px;
+                height: 16px;
             }
             .preview-text {
                 font-size: 1.4rem;
@@ -690,26 +825,54 @@
                 padding-top: 0.6rem;
                 margin-top: 0.5rem;
             }
+            .chips {
+                gap: 0.4rem;
+                margin: 0.5rem 0 0.8rem;
+            }
         }
+
         @media (max-width: 400px) {
+            .font-item {
+                padding: 0.7rem 0.8rem;
+                min-height: 80px;
+                border-radius: 18px;
+            }
             .font-item .name {
-                font-size: 0.9rem;
+                font-size: clamp(1rem, 4vw, 1.2rem);
             }
             .font-item .actions button {
-                font-size: 0.6rem;
-                padding: 0.1rem 0.4rem;
+                height: 34px;
+                font-size: 0.7rem;
+                padding: 0.15rem 0.6rem;
+            }
+            .font-item .actions button svg {
+                width: 14px;
+                height: 14px;
             }
             .chips button {
-                font-size: 0.65rem;
-                padding: 0.15rem 0.5rem;
+                height: 32px;
+                font-size: 0.7rem;
+                padding: 0 0.6rem;
             }
             .top-row .search-wrap input {
-                font-size: 0.8rem;
-                padding: 0.35rem 0.6rem 0.35rem 1.8rem;
+                font-size: 0.85rem;
+                height: 40px;
+                padding: 0 0.6rem 0 2.4rem;
             }
             .top-row .search-wrap .search-icon {
-                left: 0.5rem;
-                font-size: 0.75rem;
+                left: 10px;
+            }
+            .search-icon svg {
+                width: 16px;
+                height: 16px;
+            }
+            .toolbar button {
+                width: 40px;
+                height: 40px;
+            }
+            .toolbar button svg {
+                width: 18px;
+                height: 18px;
             }
         }
     </style>
@@ -718,17 +881,48 @@
     <div class="container">
         <!-- header -->
         <header>
-            <h1>Typace</h1>
+            <div class="dropdown">
+                <button class="dropdown-trigger" id="titleBtn" aria-label="Navigate Typace">
+                    <span>Typace</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                </button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="/" class="dropdown-item active" data-path="/">
+                        <div class="item-left">
+                            <span class="item-title">Browse</span>
+                            <span class="item-sub">Explore fonts</span>
+                        </div>
+                        <span class="item-check">✓</span>
+                    </a>
+                    <a href="/convert" class="dropdown-item" data-path="/convert">
+                        <div class="item-left">
+                            <span class="item-title">Convert</span>
+                            <span class="item-sub">Convert formats</span>
+                        </div>
+                        <span class="item-check">✓</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="https://github.com/your-repo" target="_blank" class="dropdown-item" rel="noopener noreferrer">
+                        <div class="item-left">
+                            <span class="item-title">Contribute</span>
+                            <span class="item-sub">GitHub <span class="external-icon">↗</span></span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
             <div class="toolbar">
                 <button id="aboutBtn" class="icon-btn" aria-label="About">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 16v-4"/>
-        <path d="M12 8h.01"/>
-    </svg>
-</button>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 16v-4"/>
+                        <path d="M12 8h.01"/>
+                    </svg>
+                </button>
                 <button id="darkToggle" class="icon-btn" aria-label="Toggle dark mode">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                     </svg>
                 </button>
@@ -739,13 +933,11 @@
         <div class="top-row">
             <div class="search-wrap">
                 <span class="search-icon" aria-hidden="true">
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none"
-         stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="7"></circle>
-        <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
-    </svg>
-</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+                    </svg>
+                </span>
                 <input type="text" id="searchInput" placeholder="Search fonts…" aria-label="Search fonts" />
             </div>
         </div>
@@ -784,7 +976,7 @@
             </button>
             <span class="preview-title" id="previewTitle">Font</span>
             <button class="preview-download" id="previewDownload">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />
@@ -849,6 +1041,11 @@
             const aboutModal = document.getElementById('aboutModal');
             const modalClose = document.getElementById('modalCloseBtn');
 
+            // Dropdown
+            const trigger = document.getElementById('titleBtn');
+            const menu = document.getElementById('dropdownMenu');
+            const dropdownItems = menu.querySelectorAll('.dropdown-item');
+
             // Preview
             const previewOverlay = document.getElementById('previewOverlay');
             const previewBack = document.getElementById('previewBack');
@@ -878,6 +1075,7 @@
             let searchTimer = null;
             let observer = null;
             let categories = new Set();
+            let isMenuOpen = false;
 
             // ── localStorage ──
             function storageGet(key, fallback) {
@@ -887,6 +1085,31 @@
 
             function storageSet(key, val) {
                 try { localStorage.setItem('typace_' + key, JSON.stringify(val)); } catch (_) {}
+            }
+
+            // ── Dropdown logic ──
+            function toggleMenu(e) {
+                e.stopPropagation();
+                isMenuOpen = !isMenuOpen;
+                trigger.classList.toggle('open', isMenuOpen);
+                menu.classList.toggle('open', isMenuOpen);
+            }
+
+            function closeMenu() {
+                isMenuOpen = false;
+                trigger.classList.remove('open');
+                menu.classList.remove('open');
+            }
+
+            function setActiveItem(path) {
+                dropdownItems.forEach(item => {
+                    const itemPath = item.dataset.path;
+                    if (itemPath) {
+                        item.classList.toggle('active', itemPath === path);
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
             }
 
             // ── Font loading ──
@@ -941,12 +1164,10 @@
 
                 let working = [...allFonts];
 
-                // Category filter
                 if (currentCategory !== 'All') {
                     working = working.filter(f => (f.category || 'Uncategorized') === currentCategory);
                 }
 
-                // Search scoring
                 if (query) {
                     const scored = working.map(f => {
                         const ns = scoreMatch(f.name, query);
@@ -956,7 +1177,6 @@
                     scored.sort((a, b) => b.score - a.score);
                     working = scored.map(r => r.font);
                 } else {
-                    // sort by name A-Z
                     working.sort((a, b) => a.name.localeCompare(b.name));
                 }
 
@@ -993,7 +1213,7 @@
                             </div>
                             <div class="actions">
                                 <button class="download-btn" data-file="${f.file}">
-                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                         <polyline points="7 10 12 15 17 10" />
                                         <line x1="12" y1="15" x2="12" y2="3" />
@@ -1007,19 +1227,16 @@
 
                 list.innerHTML = html;
 
-                // Attach events
                 list.querySelectorAll('.font-item').forEach(el => {
                     const idx = parseInt(el.dataset.index);
                     const font = filteredFonts[idx];
                     if (!font) return;
 
-                    // Click on item → preview
                     el.addEventListener('click', (e) => {
                         if (e.target.closest('.download-btn')) return;
                         openPreview(font);
                     });
 
-                    // Download
                     const btn = el.querySelector('.download-btn');
                     if (btn) {
                         btn.addEventListener('click', (e) => {
@@ -1029,10 +1246,7 @@
                     }
                 });
 
-                // Trigger lazy loading for visible cards
-                if (observer) {
-                    observer.disconnect();
-                }
+                if (observer) observer.disconnect();
                 observer = new IntersectionObserver((entries) => {
                     for (const entry of entries) {
                         if (entry.isIntersecting) {
@@ -1042,7 +1256,6 @@
                                 const font = filteredFonts[idx];
                                 if (font && !isLoaded(font) && !loadingFonts.has(font.file)) {
                                     loadFont(font).then(() => {
-                                        // update the card
                                         const nameEl = el.querySelector('.name');
                                         if (nameEl) {
                                             nameEl.style.fontFamily = `'${font.name}', sans-serif`;
@@ -1058,7 +1271,6 @@
                     }
                 }, { rootMargin: '300px' });
 
-                // Observe all items
                 list.querySelectorAll('.font-item').forEach(el => observer.observe(el));
             }
 
@@ -1067,7 +1279,6 @@
                     observer.disconnect();
                     observer = null;
                 }
-                // Re-run after render
                 setTimeout(() => {
                     const items = list.querySelectorAll('.font-item');
                     if (items.length === 0) return;
@@ -1148,7 +1359,6 @@
                 currentPreviewFont = font;
                 previewTitle.textContent = font.name;
 
-                // Load if needed
                 if (!isLoaded(font)) {
                     previewText.textContent = 'Loading…';
                     previewText.style.fontFamily = 'var(--font-family)';
@@ -1197,8 +1407,8 @@
             function applyDark(enabled) {
                 document.body.classList.toggle('dark', enabled);
                 darkToggle.innerHTML = enabled ?
-                    `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>` :
-                    `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+                    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>` :
+                    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
                 storageSet('dark', enabled);
             }
             applyDark(darkMode);
@@ -1246,6 +1456,7 @@
                 if (e.key === 'Escape') {
                     if (previewOverlay.classList.contains('active')) closePreview();
                     else if (aboutModal.classList.contains('active')) aboutModal.classList.remove('active');
+                    else if (isMenuOpen) closeMenu();
                 }
                 if (previewOverlay.classList.contains('active') && currentPreviewFont) {
                     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -1272,15 +1483,11 @@
                 const cached = storageGet('fontsData', null);
                 if (cached && Array.isArray(cached) && cached.length) {
                     allFonts = cached;
-                    // Build categories
                     categories = new Set(allFonts.map(f => f.category || 'Uncategorized'));
                     render();
-                    // Preload first few
                     const preload = allFonts.slice(0, 6);
                     await Promise.allSettled(preload.map(f => loadFont(f)));
-                    // Re-render to show loaded fonts
                     render();
-                    // Fetch fresh in background
                     fetchFresh();
                 } else {
                     await fetchFresh();
@@ -1310,10 +1517,33 @@
                 }
             }
 
+            // ── Dropdown events ──
+            trigger.addEventListener('click', toggleMenu);
+
+            document.addEventListener('click', (e) => {
+                if (isMenuOpen && !menu.contains(e.target) && !trigger.contains(e.target)) {
+                    closeMenu();
+                }
+            });
+
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    // Don't close immediately for external links, let the browser handle it
+                    if (!item.getAttribute('target')) {
+                        closeMenu();
+                    } else {
+                        closeMenu();
+                    }
+                });
+            });
+
+            // Highlight active page on load
+            const currentPath = window.location.pathname;
+            setActiveItem(currentPath);
+
             // ── Start ──
             loadFontsData();
 
-            // Expose for debugging
             window.__typace = {
                 all: () => allFonts,
                 filtered: () => filteredFonts,
