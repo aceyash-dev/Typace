@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Typace</title>
+  <!-- Grandstander from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ----- reset & global ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    ::selection {
+      background: #c48b63;
+      color: #fff;
+    }
+    ::-moz-selection {
+      background: #c48b63;
+      color: #fff;
+    }
+
+    :root {
+      --bg: #fbf7f0;
+      --surface: #ffffff;
+      --text: #2d2a24;
+      --muted: #6b655a;
+      --border: #e5dfd6;
+      --shadow: 0 4px 12px rgba(0,0,0,0.06);
+      --radius: 16px;
+      --accent: #c48b63;
+      --accent-hover: #ab7350;
+      --modal-overlay: rgba(0,0,0,0.3);
+      --font-family: 'Grandstander', cursive, system-ui, sans-serif;
+    }
+    .dark {
+      --bg: #1e1b17;
+      --surface: #2b2722;
+      --text: #efebe6;
+      --muted: #aaa395;
+      --border: #3f3a33;
+      --shadow: 0 4px 12px rgba(0,0,0,0.3);
+      --modal-overlay: rgba(0,0,0,0.6);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-family);
+      padding: 2rem 1.5rem;
+      transition: background 0.25s, color 0.25s;
+      min-height: 100vh;
+    }
+
+    /* ----- scrollbar (almond) ----- */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f7f2ea;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c48b63;
+      border-radius: 999px;
+      border: 2px solid #f7f2ea;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #ab7350;
+    }
+    .dark ::-webkit-scrollbar-track {
+      background: #2b2722;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      border-color: #2b2722;
+    }
+
+    /* ----- layout ----- */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .controls input,
+    .controls button {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 0.5rem 1rem;
+      font-family: var(--font-family);
+      font-size: 0.95rem;
+      outline: none;
+      transition: 0.15s;
+      box-shadow: var(--shadow);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .controls input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(196, 122, 90, 0.15);
+    }
+    .controls input {
+      min-width: 200px;
+    }
+    .controls button:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .controls button svg {
+      stroke: currentColor;
+    }
+    .controls button:hover svg {
+      stroke: #fff;
+    }
+
+    /* icon-only buttons (dark mode toggle) */
+    .icon-btn {
+      padding: 0.5rem 0.8rem !important;
+    }
+    .icon-btn svg {
+      display: block;
+    }
+
+    /* ----- sort badge (on sort button) ----- */
+    .sort-badge {
+      font-weight: 600;
+      margin-left: 0.2rem;
+    }
+
+    /* ----- font grid ----- */
+    .font-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.2rem;
+      margin-top: 1.5rem;
+    }
+    .font-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1rem 1rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.1s, box-shadow 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .font-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+    .font-card .name {
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      padding-bottom: 0.2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.2rem;
+    }
+    .font-card .meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.8rem;
+    }
+    .font-card .meta span {
+      background: var(--bg);
+      padding: 0.1rem 0.6rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+    .font-card .actions {
+      margin-top: 0.6rem;
+      display: flex;
+      gap: 0.4rem;
+    }
+    .font-card .actions button {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.8rem;
+      font-family: var(--font-family);
+      cursor: pointer;
+      color: var(--text);
+      transition: 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .font-card .actions button:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .font-card .actions button svg {
+      stroke: currentColor;
+    }
+    .font-card .actions button:hover svg {
+      stroke: #fff;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 3rem 0;
+      color: var(--muted);
+      font-size: 1.2rem;
+      grid-column: 1 / -1;
+    }
+
+    .stats {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      text-align: center;
+    }
+
+    /* ----- modals (overlay) ----- */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--modal-overlay);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* centered modal (about) */
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 400px;
+      width: 90%;
+      padding: 2rem 1.8rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      transform: scale(0.95);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.active .modal {
+      transform: scale(1);
+    }
+    .modal h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .modal p {
+      margin: 0.5rem 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .modal a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .modal a:hover {
+      text-decoration: underline;
+    }
+    .modal .close-btn {
+      margin-top: 1.2rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 40px;
+      padding: 0.5rem 1.5rem;
+      font-family: var(--font-family);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .modal .close-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    /* ----- bottom sheets (sort & download) ----- */
+    .bottom-sheet {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius) var(--radius) 0 0;
+      max-width: 500px;
+      width: 100%;
+      padding: 1.5rem 1.8rem 2rem;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.15);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      margin-top: auto; /* pushes to bottom */
+    }
+    .modal-overlay.active .bottom-sheet {
+      transform: translateY(0);
+    }
+    .bottom-sheet .handle {
+      width: 40px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin: 0 auto 1rem;
+    }
+    .bottom-sheet h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      text-align: center;
+    }
+    .sheet-option {
+      display: block;
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-family);
+      font-size: 1rem;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .sheet-option:last-of-type {
+      border-bottom: none;
+    }
+    .sheet-option:hover {
+      background: var(--bg);
+    }
+    .sheet-option .check {
+      display: none;
+      float: right;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .sheet-option .check.active {
+      display: inline;
+    }
+    .bottom-sheet .cancel-btn {
+      margin-top: 1rem;
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 0.6rem;
+      font-family: var(--font-family);
+      font-size: 1rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .bottom-sheet .cancel-btn:hover {
+      background: var(--bg);
+    }
+
+    /* align overlay for bottom sheets: flex-end */
+    .modal-overlay.sheet-overlay {
+      align-items: flex-end;
+    }
+
+    /* ----- responsive adjustments ----- */
+    @media (max-width: 600px) {
+      header { flex-direction: column; align-items: stretch; }
+      .controls input { min-width: unset; width: 100%; }
+      .controls { flex-wrap: wrap; }
+      .font-grid { grid-template-columns: 1fr; }
+      .bottom-sheet { padding: 1.2rem 1.2rem 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Typace</h1>
+    <div class="controls">
+      <!-- Search -->
+      <input type="text" id="searchInput" placeholder="Search by name or category…" />
+      <!-- Sort button (triggers bottom sheet) -->
+      <button id="sortBtn" aria-label="Sort fonts">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M7 6h10" />
+          <path d="M7 12h7" />
+          <path d="M7 18h4" />
+        </svg>
+        <span>Sort</span>
+        <span class="sort-badge" id="sortLabel">Name</span>
+      </button>
+      <!-- About modal trigger -->
+      <button id="aboutBtn">About</button>
+      <!-- Dark mode toggle -->
+      <button id="darkToggle" class="icon-btn" aria-label="Toggle dark mode">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="fontGrid" class="font-grid"></div>
+  <div class="stats" id="countDisplay">0 fonts</div>
+</div>
+
+<!-- About Modal (centered) -->
+<div id="aboutModal" class="modal-overlay">
+  <div class="modal">
+    <h2>Typace</h2>
+    <p>A curated font collection for your next project.</p>
+    <p>Search, sort, and download fonts instantly.</p>
+    <p style="font-size:0.85rem; margin-top:0.2rem;">
+      Find us on the <a href="https://ace-base.indevs.in" target="_blank" rel="noopener noreferrer">web</a>.
+    </p>
+    <button class="close-btn" id="modalCloseBtn">Close</button>
+  </div>
+</div>
+
+<!-- Sort Bottom Sheet -->
+<div id="sortModal" class="modal-overlay sheet-overlay">
+  <div class="bottom-sheet">
+    <div class="handle"></div>
+    <h2>Sort Fonts</h2>
+    <button class="sheet-option" data-sort="name">
+      Name (A–Z)
+      <span class="check" id="checkName">✓</span>
+    </button>
+    <button class="sheet-option" data-sort="category">
+      Category
+      <span class="check" id="checkCategory">✓</span>
+    </button>
+    <button class="sheet-option" data-sort="designer">
+      Designer
+      <span class="check" id="checkDesigner">✓</span>
+    </button>
+    <button class="cancel-btn" id="sortCancelBtn">Cancel</button>
+  </div>
+</div>
+
+<!-- Download Format Bottom Sheet -->
+<div id="downloadModal" class="modal-overlay sheet-overlay">
+  <div class="bottom-sheet">
+    <div class="handle"></div>
+    <h2 id="downloadTitle">Download</h2>
+    <div id="formatList"></div>
+    <button class="cancel-btn" id="downloadCancelBtn">Cancel</button>
+  </div>
+</div>
+
+<script>
+  (() => {
+    'use strict';
+
+    // ----- DOM refs -----
+    const grid = document.getElementById('fontGrid');
+    const searchInput = document.getElementById('searchInput');
+    const countDisplay = document.getElementById('countDisplay');
+    const darkToggle = document.getElementById('darkToggle');
+    const aboutBtn = document.getElementById('aboutBtn');
+    const aboutModal = document.getElementById('aboutModal');
+    const modalClose = document.getElementById('modalCloseBtn');
+    const sortBtn = document.getElementById('sortBtn');
+    const sortModal = document.getElementById('sortModal');
+    const sortCancel = document.getElementById('sortCancelBtn');
+    const sortOptions = document.querySelectorAll('#sortModal .sheet-option');
+    const sortLabel = document.getElementById('sortLabel');
+    const checkName = document.getElementById('checkName');
+    const checkCategory = document.getElementById('checkCategory');
+    const checkDesigner = document.getElementById('checkDesigner');
+
+    // Download sheet
+    const downloadModal = document.getElementById('downloadModal');
+    const downloadCancel = document.getElementById('downloadCancelBtn');
+    const downloadTitle = document.getElementById('downloadTitle');
+    const formatList = document.getElementById('formatList');
+
+    // ----- modal controls -----
+    function openAbout() { aboutModal.classList.add('active'); }
+    function closeAbout() { aboutModal.classList.remove('active'); }
+    aboutBtn.addEventListener('click', openAbout);
+    modalClose.addEventListener('click', closeAbout);
+    aboutModal.addEventListener('click', (e) => {
+      if (e.target === aboutModal) closeAbout();
+    });
+
+    function openSort() { sortModal.classList.add('active'); }
+    function closeSort() { sortModal.classList.remove('active'); }
+    sortBtn.addEventListener('click', openSort);
+    sortCancel.addEventListener('click', closeSort);
+    sortModal.addEventListener('click', (e) => {
+      if (e.target === sortModal) closeSort();
+    });
+
+    function openDownload(fontName, formats) {
+      downloadTitle.textContent = `Download ${fontName}`;
+      formatList.innerHTML = '';
+      formats.forEach(f => {
+        const btn = document.createElement('button');
+        btn.className = 'sheet-option';
+        btn.textContent = f.format.toUpperCase();
+        btn.dataset.file = f.file;
+        btn.addEventListener('click', () => {
+          // trigger download
+          const a = document.createElement('a');
+          a.href = `fonts/${encodeURIComponent(f.file)}`;
+          a.download = f.file;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          closeDownload();
+        });
+        formatList.appendChild(btn);
+      });
+      downloadModal.classList.add('active');
+    }
+    function closeDownload() { downloadModal.classList.remove('active'); }
+    downloadCancel.addEventListener('click', closeDownload);
+    downloadModal.addEventListener('click', (e) => {
+      if (e.target === downloadModal) closeDownload();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAbout();
+        closeSort();
+        closeDownload();
+      }
+    });
+
+    // ----- dark mode -----
+    let darkMode = localStorage.getItem('typace_dark') === 'true';
+    function applyDark(enabled) {
+      document.body.classList.toggle('dark', enabled);
+      darkToggle.innerHTML = enabled
+        ? `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`
+        : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+      localStorage.setItem('typace_dark', String(enabled));
+    }
+    applyDark(darkMode);
+    darkToggle.addEventListener('click', () => {
+      darkMode = !darkMode;
+      applyDark(darkMode);
+    });
+
+    // ----- sorting state -----
+    let currentSort = 'name';
+    const sortLabels = {
+      name: 'Name',
+      category: 'Category',
+      designer: 'Designer'
+    };
+
+    function updateSortUI() {
+      // hide all checks
+      document.querySelectorAll('#sortModal .check').forEach(c => c.classList.remove('active'));
+      // show active
+      if (currentSort === 'name') checkName.classList.add('active');
+      else if (currentSort === 'category') checkCategory.classList.add('active');
+      else if (currentSort === 'designer') checkDesigner.classList.add('active');
+      sortLabel.textContent = sortLabels[currentSort] || 'Sort';
+    }
+
+    sortOptions.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentSort = btn.dataset.sort;
+        updateSortUI();
+        closeSort();
+        render();
+      });
+    });
+
+    // ----- state -----
+    let allFonts = [];
+    let filteredFonts = [];
+
+    // ----- render -----
+    function render() {
+      const query = searchInput.value.toLowerCase().trim();
+      let filtered = allFonts.filter(f =>
+        f.name.toLowerCase().includes(query) ||
+        (f.category && f.category.toLowerCase().includes(query)) ||
+        (f.designer && f.designer.toLowerCase().includes(query))
+      );
+
+      // apply sort
+      switch (currentSort) {
+        case 'name':
+          filtered.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'category':
+          filtered.sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
+          break;
+        case 'designer':
+          filtered.sort((a, b) => (a.designer || '').localeCompare(b.designer || '') || a.name.localeCompare(b.name));
+          break;
+        default:
+          break;
+      }
+
+      filteredFonts = filtered;
+      countDisplay.textContent = `${filtered.length} font${filtered.length !== 1 ? 's' : ''}`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="empty">😕 No fonts found</div>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach((f, index) => {
+        html += `
+          <div class="font-card" data-index="${index}">
+            <div class="name" style="font-family: '${f.name}', sans-serif;">${f.name}</div>
+            <div class="meta">
+              ${f.category ? `<span>${f.category}</span>` : ''}
+              ${f.designer ? `<span>${f.designer}</span>` : ''}
+            </div>
+            <div class="actions">
+              <button class="download-toggle" data-index="${index}">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download ▾
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      grid.innerHTML = html;
+
+      // attach download toggle events
+      grid.querySelectorAll('.download-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.index);
+          const font = filteredFonts[idx];
+          if (font && font.files && font.files.length) {
+            openDownload(font.name, font.files);
+          } else {
+            alert('No downloadable formats available for this font.');
+          }
+        });
+      });
+    }
+
+    // ----- load fonts & register with FontFace (use best format) -----
+    async function loadFonts() {
+      try {
+        const res = await fetch('fonts.json');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        allFonts = data;
+
+        // Prefer woff2 > woff > otf > ttf
+        const formatPriority = ['woff2', 'woff', 'otf', 'ttf'];
+        const loadPromises = allFonts.map(async (f) => {
+          if (!f.files || f.files.length === 0) return;
+          // find best format
+          let best = null;
+          for (const fmt of formatPriority) {
+            const match = f.files.find(file => file.format === fmt);
+            if (match) {
+              best = match;
+              break;
+            }
+          }
+          if (!best) best = f.files[0]; // fallback
+          try {
+            const face = new FontFace(f.name, `url(fonts/${encodeURIComponent(best.file)})`);
+            await face.load();
+            document.fonts.add(face);
+          } catch (err) {
+            console.warn(`Could not load font "${f.name}":`, err);
+          }
+        });
+        await Promise.allSettled(loadPromises);
+
+        updateSortUI();
+        render();
+      } catch (err) {
+        grid.innerHTML = `<div class="empty">❌ Failed to load - ${err.message}</div>`;
+        console.error('Typace: error loading fonts.json', err);
+      }
+    }
+
+    // ----- event listeners -----
+    searchInput.addEventListener('input', render);
+
+    // ----- start -----
+    loadFonts();
+  })();
+</script>
+</body>
+</html>
