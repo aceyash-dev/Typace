@@ -53,5 +53,75 @@
     "name": "Spectral",
     "file": "Spectral-Regular.ttf",
     "category": "Serif"
+  },
+  {
+    "name": "Audiowide",
+    "file": "Audiowide-Regular.ttf",
+    "category": "Display"
+  },
+  {
+    "name": "Courier Prime",
+    "file": "CourierPrime-Regular.ttf",
+    "category": "Monospace"
+  },
+  {
+    "name": "Geo",
+    "file": "Geo-Regular.ttf",
+    "category": "Sans Serif"
+  },
+  {
+    "name": "Lora",
+    "file": "Lora-Variable.ttf",
+    "category": "Serif"
+  },
+  {
+    "name": "Merienda",
+    "file": "Merienda-Variable.ttf",
+    "category": "Handwriting"
+  },
+  {
+    "name": "Montserrat",
+    "file": "Montserrat-Variable.ttf",
+    "category": "Sans Serif"
+  },
+  {
+    "name": "Mystery Quest",
+    "file": "MysteryQuest-Regular.ttf",
+    "category": "Display"
+  },
+  {
+    "name": "Orbitron",
+    "file": "Orbitron-Variable.ttf",
+    "category": "Display"
+  },
+  {
+    "name": "Permanent Marker",
+    "file": "PermanentMarker-Regular.ttf",
+    "category": "Handwriting"
+  },
+  {
+    "name": "Seaweed Script",
+    "file": "SeaweedScript-Regular.ttf",
+    "category": "Handwriting"
+  },
+  {
+    "name": "Space Grotesk",
+    "file": "SpaceGrotesk-Variable.ttf",
+    "category": "Sans Serif"
+  },
+  {
+    "name": "VT323",
+    "file": "VT323-Regular.ttf",
+    "category": "Monospace"
+  },
+  {
+    "name": "Xanh Mono",
+    "file": "XanhMono-Regular.ttf",
+    "category": "Monospace"
+  },
+  {
+    "name": "Zen Dots",
+    "file": "ZenDots-Regular.ttf",
+    "category": "Display"
   }
 ]
