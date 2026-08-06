@@ -123,5 +123,125 @@
     "name": "Zen Dots",
     "file": "ZenDots-Regular.ttf",
     "category": "Display"
-  }
+  },
+{
+  "name": "AGENCYB",
+  "file": "AGENCYB.TTF",
+  "category": "Display"
+},
+{
+  "name": "BOONE",
+  "file": "BOONE.ttf",
+  "category": "Serif"
+},
+{
+  "name": "CANIS MAJOR",
+  "file": "CANIS-MAJOR.ttf",
+  "category": "Display"
+},
+{
+  "name": "Chunky Charmer",
+  "file": "Chunky Charmer.ttf",
+  "category": "Display"
+},
+{
+  "name": "Digital Dreamer",
+  "file": "Digital Dreamer.ttf",
+  "category": "Display"
+},
+{
+  "name": "Galter",
+  "file": "Galter.ttf",
+  "category": "Serif"
+},
+{
+  "name": "Golden Avocado Sans",
+  "file": "GoldenAvocadoSans.ttf",
+  "category": "Sans Serif"
+},
+{
+  "name": "Golden Taylor",
+  "file": "GoldenTaylor.ttf",
+  "category": "Display"
+},
+{
+  "name": "GRACEFUL",
+  "file": "GRACEFUL.ttf",
+  "category": "Serif"
+},
+{
+  "name": "Ink Pearcer",
+  "file": "Ink_Pearcer.ttf",
+  "category": "Handwriting"
+},
+{
+  "name": "Khaviax",
+  "file": "Khaviax.ttf",
+  "category": "Display"
+},
+{
+  "name": "LAGISTHA",
+  "file": "LAGISTHA.ttf",
+  "category": "Display"
+},
+{
+  "name": "LT Serif Demo",
+  "file": "LT.SerifDemo.ttf",
+  "category": "Serif"
+},
+{
+  "name": "Madrid",
+  "file": "Madrid.ttf",
+  "category": "Display"
+},
+{
+  "name": "Martian Mono",
+  "file": "MartianMono.ttf",
+  "category": "Monospace"
+},
+{
+  "name": "PLAYER ONE",
+  "file": "PLAYER_ONE.ttf",
+  "category": "Display"
+},
+{
+  "name": "Redhawk",
+  "file": "Redhawk.ttf",
+  "category": "Display"
+},
+{
+  "name": "Soul Daisy",
+  "file": "SoulDaisy.ttf",
+  "category": "Handwriting"
+},
+{
+  "name": "Stay Chill",
+  "file": "StayChill-PVVD7.ttf",
+  "category": "Display"
+},
+{
+  "name": "Tarragon",
+  "file": "Tarragon.ttf",
+  "category": "Display"
+},
+{
+  "name": "Timeless Memories",
+  "file": "TimelessMemoriesRegular-2vvwo.ttf",
+  "category": "Handwriting"
+},
+{
+  "name": "Ubuntu Mono",
+  "file": "UbuntuMono-Regular.ttf",
+  "category": "Monospace"
+},
+{
+  "name": "Waffle Mango",
+  "file": "Waffle Mango.ttf",
+  "category": "Display"
+},
+{
+  "name": "Windhavi",
+  "file": "Windhavi.ttf",
+  "category": "Handwriting"
+}
 ]
