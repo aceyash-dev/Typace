@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Font Converter — Typace</title>
+
+    <!-- ── Pinned CDN versions ── -->
+    <script src="https://cdn.jsdelivr.net/npm/fonteditor-core@2.6.2/dist/fonteditor-core.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js">
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Grandstander:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ── Reset ── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        input,
+        textarea,
+        code,
+        pre,
+        .selectable {
+            user-select: text;
+        }
+        ::selection {
+            background: var(--accent-soft);
+            color: inherit;
+        }
+
+        /* ── Variables ── */
+        :root {
+            --bg: #fbf7f0;
+            --surface: #ffffff;
+            --text: #2d2a24;
+            --muted: #6b655a;
+            --border: #e5dfd6;
+            --accent: #c48b63;
+            --accent-hover: #ab7350;
+            --accent-soft: #f0e6dc;
+            --button-text: #2d2a24;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.08);
+            --radius-card: 24px;
+            --radius-input: 15px;
+            --radius-btn: 999px;
+            --radius-chip: 999px;
+            --transition: 0.2s ease;
+            --dot-color: #c48b63;
+        }
+        html.dark {
+            --bg: #1e1b17;
+            --surface: #2b2722;
+            --text: #efebe6;
+            --muted: #aaa395;
+            --border: #3f3a33;
+            --accent: #c48b63;
+            --accent-hover: #ab7350;
+            --accent-soft: #3d322a;
+            --button-text: #efebe6;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.6);
+            --dot-color: #2d7a4a;
+        }
+
+        body {
+            font-family: 'Grandstander', system-ui, -apple-system, sans-serif;
+            font-weight: 400;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        .container {
+            max-width: 880px;
+            width: 100%;
+            background: var(--surface);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-lg);
+            padding: 40px 40px 48px;
+            transition: background var(--transition), box-shadow var(--transition);
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .header h1 {
+            font-weight: 700;
+            font-size: 1.75rem;
+            letter-spacing: -0.01em;
+            color: var(--text);
+            transition: color var(--transition);
+        }
+        .header h1 span {
+            color: var(--accent);
+        }
+        .theme-toggle {
+            background: var(--accent-soft);
+            border: none;
+            border-radius: var(--radius-btn);
+            padding: 8px 18px;
+            font-family: 'Grandstander', system-ui, sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: background var(--transition), color var(--transition), transform 0.1s;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .theme-toggle:hover {
+            background: var(--accent);
+            color: var(--button-text);
+        }
+        .theme-toggle:active {
+            transform: scale(0.95);
+        }
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            fill: currentColor;
+        }
+
+        /* ── Engine Status ── */
+        .engine-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: -8px 0 20px;
+            color: var(--muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            transition: color var(--transition);
+        }
+        .engine-status .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--accent);
+            transition: background 0.4s ease;
+            flex-shrink: 0;
+        }
+        .engine-status.ready .dot {
+            background: #2d7a4a;
+        }
+        .engine-status .label {
+            transition: color var(--transition);
+        }
+
+        /* ── Source Switcher ── */
+        .source-switcher {
+            display: flex;
+            gap: 4px;
+            background: var(--bg);
+            border-radius: var(--radius-btn);
+            padding: 4px;
+            margin-bottom: 20px;
+            transition: background var(--transition);
+        }
+        .source-btn {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-btn);
+            font-family: 'Grandstander', system-ui, sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background var(--transition), color var(--transition), transform 0.1s;
+            background: transparent;
+            color: var(--muted);
+        }
+        .source-btn:hover {
+            color: var(--text);
+        }
+        .source-btn:active {
+            transform: scale(0.96);
+        }
+        .source-btn.active {
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: var(--shadow);
+        }
+        html.dark .source-btn.active {
+            background: var(--surface);
+        }
+        .source-panel {
+            display: none;
+            animation: fadeSlide 0.25s ease;
+        }
+        .source-panel.active {
+            display: block;
+        }
+        @keyframes fadeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Drop Zone ── */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-card);
+            padding: 40px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color var(--transition), background var(--transition), transform 0.1s;
+            background: var(--bg);
+            position: relative;
+        }
+        .drop-zone:hover {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+        .drop-zone.dragover {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+            transform: scale(1.01);
+        }
+        .drop-zone .icon-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent-soft);
+            margin-bottom: 12px;
+            transition: background var(--transition);
+        }
+        .drop-zone .icon-wrap svg {
+            width: 28px;
+            height: 28px;
+            fill: var(--accent);
+        }
+        .drop-zone p {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .drop-zone .sub {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+        .drop-zone .sub span {
+            display: inline-block;
+            background: var(--accent-soft);
+            padding: 0 10px;
+            border-radius: var(--radius-chip);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0 2px;
+            transition: background var(--transition), color var(--transition);
+        }
+        .drop-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ── Library Select ── */
+        .library-select-wrap {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .library-select-wrap select {
+            flex: 1;
+            min-width: 160px;
+            padding: 12px 18px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-input);
+            font-family: 'Grandstander', system-ui, sans-serif;
+            font-size: 0.95rem;
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color var(--transition), background var(--transition), color var(--transition);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b655a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+        html.dark .library-select-wrap select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23aaa395' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        }
+        .library-select-wrap select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(196, 139, 99, 0.2);
+        }
+        .library-select-wrap select option {
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        /* ── File List ── */
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            background: var(--bg);
+            border-radius: var(--radius-input);
+            border: 1px solid var(--border);
+            transition: background var(--transition), border-color var(--transition);
+            cursor: pointer;
+        }
+        .file-item .name {
+            font-weight: 600;
+            flex: 1;
+            min-width: 80px;
+            word-break: break-all;
+            font-size: 0.9rem;
+        }
+        .file-item .size {
+            color: var(--muted);
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        .file-item .status {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: var(--radius-chip);
+            background: var(--accent-soft);
+            color: var(--text);
+            white-space: nowrap;
+        }
+        .file-item .status.loaded {
+            background: #d4edda;
+            color: #1a4d2e;
+        }
+        .file-item .status.error {
+            background: #fde8e8;
+            color: #7a2e2e;
+        }
+        html.dark .file-item .status.loaded {
+            background: #1e3d2e;
+            color: #c8ead8;
+        }
+        html.dark .file-item .status.error {
+            background: #3d2222;
+            color: #f0c8c8;
+        }
+        .file-item .remove-btn {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 0 4px;
+            font-size: 1.1rem;
+            line-height: 1;
+            transition: color var(--transition);
+        }
+        .file-item .remove-btn:hover {
+            color: #d14c4c;
+        }
+        .file-item .file-icon {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+            fill: var(--accent);
+        }
+
+        /* ── Metadata Cards ── */
+        .metadata-grid {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .metadata-grid.visible {
+            display: grid;
+        }
+        .meta-card {
+            background: var(--bg);
+            border-radius: var(--radius-input);
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            transition: background var(--transition), border-color var(--transition);
+        }
+        .meta-card .label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+        .meta-card .value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-top: 2px;
+            word-break: break-word;
+        }
+        .meta-card .value.mono {
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-weight: 400;
+            font-size: 0.8rem;
+        }
+
+        /* ── Conversion Info ── */
+        .conversion-info {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+            padding: 12px 18px;
+            background: var(--bg);
+            border-radius: var(--radius-input);
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+            transition: background var(--transition), border-color var(--transition);
+        }
+        .conversion-info.visible {
+            display: flex;
+        }
+        .conversion-info .arrow {
+            color: var(--muted);
+            font-weight: 300;
+        }
+        .conversion-info .badge {
+            padding: 2px 12px;
+            border-radius: var(--radius-chip);
+            font-weight: 600;
+            font-size: 0.75rem;
+            background: var(--accent-soft);
+            color: var(--text);
+        }
+        .conversion-info .badge.success {
+            background: #d4edda;
+            color: #1a4d2e;
+        }
+        html.dark .conversion-info .badge.success {
+            background: #1e3d2e;
+            color: #c8ead8;
+        }
+
+        /* ── Preview ── */
+        .preview-section {
+            margin-top: 20px;
+        }
+        .preview-section .label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .preview-section .label-row label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .preview-section .label-row .hint {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        .preview-text-input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-input);
+            font-family: 'Grandstander', system-ui, sans-serif;
+            font-size: 1rem;
+            background: var(--bg);
+            color: var(--text);
+            transition: border-color var(--transition), background var(--transition), color var(--transition);
+            margin-bottom: 12px;
+            user-select: text;
+        }
+        .preview-text-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(196, 139, 99, 0.2);
+        }
+        .preview-canvas-wrap {
+            border-radius: var(--radius-input);
+            border: 1px solid var(--border);
+            background: var(--bg);
+            overflow: hidden;
+            transition: border-color var(--transition), background var(--transition);
+            position: relative;
+            min-height: 120px;
+        }
+        .preview-canvas-wrap canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: var(--surface);
+            transition: background var(--transition);
+        }
+        .preview-specimen {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 12px;
+            margin-top: 10px;
+            padding: 10px 16px;
+            background: var(--bg);
+            border-radius: var(--radius-input);
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--muted);
+            transition: background var(--transition), border-color var(--transition);
+        }
+        .preview-specimen .spec-label {
+            font-weight: 600;
+            color: var(--text);
+            margin-right: 4px;
+        }
+        .preview-specimen .spec-text {
+            font-family: 'Grandstander', system-ui, sans-serif;
+            color: var(--text);
+            word-break: break-all;
+        }
+
+        /* ── Controls ── */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            transition: border-color var(--transition);
+        }
+        .controls .format-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .controls .format-group label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+        .controls select {
+            padding: 8px 16px 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-btn);
+            font-family: 'Grandstander', system-ui, sans-serif;
+            font-size: 0.95rem;
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color var(--transition), background var(--transition), color var(--transition);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b655a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+        html.dark .controls select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23aaa395' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        }
+        .controls select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(196, 139, 99, 0.2);
+        }
+        .controls select option {
+            background: var(--surface);
+            color: var(--text);
+        }
+        .controls .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+
+        .btn {
+            padding: 10px 26px;
+            border: none;
+            border-radius: var(--radius-btn);
+            font-family: 'Grandstander', system-ui, sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background var(--transition), color var(--transition), transform 0.1s, opacity var(--transition), box-shadow var(--transition);
+            box-shadow: var(--shadow);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .btn svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            fill: currentColor;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: var(--button-text);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1.5px solid var(--border);
+            box-shadow: none;
+        }
+        .btn-outline:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+        .btn-success {
+            background: #2d7a4a;
+            color: #fff;
+        }
+        .btn-success:hover:not(:disabled) {
+            background: #23633b;
+        }
+        .btn-success svg {
+            fill: #fff;
+        }
+
+        /* ── CSS Generator ── */
+        .css-generator {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            transition: border-color var(--transition);
+        }
+        .css-generator .gen-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .css-generator .gen-header h3 {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+        .css-generator .gen-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .css-generator .gen-actions .btn {
+            padding: 6px 16px;
+            font-size: 0.8rem;
+        }
+        .css-generator textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-input);
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 0.8rem;
+            background: var(--bg);
+            color: var(--text);
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color var(--transition), background var(--transition), color var(--transition);
+            user-select: text;
+        }
+        .css-generator textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(196, 139, 99, 0.2);
+        }
+
+        .format-note {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 6px;
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--surface);
+            color: var(--text);
+            padding: 14px 28px;
+            border-radius: var(--radius-btn);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            pointer-events: none;
+            z-index: 100;
+            max-width: 90%;
+            text-align: center;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.error {
+            border-color: #d14c4c;
+            background: #fde8e8;
+            color: #7a2e2e;
+        }
+        .toast.success {
+            border-color: #2d7a4a;
+            background: #e6f5ed;
+            color: #1a4d2e;
+        }
+        html.dark .toast.error {
+            background: #3d2222;
+            color: #f0c8c8;
+            border-color: #7a3a3a;
+        }
+        html.dark .toast.success {
+            background: #1e3d2e;
+            color: #c8ead8;
+            border-color: #2d6a4a;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px 16px 28px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .drop-zone {
+                padding: 28px 16px;
+            }
+            .drop-zone .icon-wrap {
+                width: 44px;
+                height: 44px;
+            }
+            .drop-zone .icon-wrap svg {
+                width: 22px;
+                height: 22px;
+            }
+            .metadata-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .meta-card {
+                padding: 10px 12px;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .controls .btn-group {
+                margin-left: 0;
+                justify-content: stretch;
+            }
+            .controls .btn-group .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            .controls .format-group {
+                justify-content: center;
+            }
+            .preview-canvas-wrap canvas {
+                aspect-ratio: 16 / 6;
+            }
+            .source-btn {
+                font-size: 0.8rem;
+                padding: 8px 12px;
+            }
+            .library-select-wrap {
+                flex-direction: column;
+            }
+            .library-select-wrap select {
+                width: 100%;
+            }
+            .file-item {
+                flex-wrap: wrap;
+                padding: 8px 12px;
+            }
+            .file-item .name {
+                font-size: 0.8rem;
+                min-width: 60px;
+            }
+            .conversion-info {
+                font-size: 0.8rem;
+                padding: 10px 14px;
+            }
+            .css-generator textarea {
+                font-size: 0.7rem;
+                min-height: 80px;
+            }
+        }
+        @media (max-width: 400px) {
+            .metadata-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .container {
+                padding: 14px 10px 20px;
+            }
+            .btn {
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+            .header h1 {
+                font-size: 1.1rem;
+            }
+        }
+        .hidden {
+            display: none !important;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-muted {
+            color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ─── Toast ─── -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ─── Container ─── -->
+    <div class="container">
+
+        <!-- Header -->
+        <div class="header">
+            <h1>Font <span>Converter</span></h1>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 16a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/><path d="M12 7v10a5 5 0 0 0 0-10z"/></svg>
+                <span id="themeLabel">Dark</span>
+            </button>
+        </div>
+
+        <!-- Engine Status -->
+        <div class="engine-status" id="engineStatus">
+            <span class="dot" id="engineDot"></span>
+            <span class="label" id="engineLabel">Initializing converter…</span>
+        </div>
+
+        <!-- Source Switcher -->
+        <div class="source-switcher" id="sourceSwitcher">
+            <button class="source-btn active" data-source="upload">📁 Upload</button>
+            <button class="source-btn" data-source="library">📚 Library</button>
+        </div>
+
+        <!-- ─── Upload Panel ─── -->
+        <div class="source-panel active" id="panelUpload">
+            <div class="drop-zone" id="dropZone">
+                <div class="icon-wrap">
+                    <svg viewBox="0 0 24 24"><path d="M12 16l-4-4h2.5V7h3v5H16l-4 4z"/><path d="M19 13v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5H3v5a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4v-5h-2z"/></svg>
+                </div>
+                <p><strong>Drop fonts here</strong> or click to browse</p>
+                <p class="sub">
+                    <span>TTF</span> <span>OTF</span> <span>WOFF</span> <span>WOFF2</span>
+                    &nbsp;·&nbsp; up to 5 at once
+                </p>
+                <input type="file" id="fileInput" multiple accept=".ttf,.otf,.woff,.woff2" />
+            </div>
+
+            <div class="file-list" id="fileList"></div>
+
+            <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;" id="batchActions">
+                <button class="btn btn-outline" id="clearAllBtn" style="font-size:0.8rem; padding:6px 16px;">✕ Clear all</button>
+                <span style="font-size:0.8rem; color:var(--muted); align-self:center;" id="fileCountLabel">0 fonts loaded</span>
+            </div>
+        </div>
+
+        <!-- ─── Library Panel ─── -->
+        <div class="source-panel" id="panelLibrary">
+            <div class="library-select-wrap">
+                <select id="fontLibrarySelect">
+                    <option value="">— Select a font —</option>
+                </select>
+            </div>
+            <p class="text-muted" style="font-size:0.8rem; margin-top:8px;">
+                Select a font from the Typace library — loads instantly.
+            </p>
+            <div class="file-list" id="libraryFileList" style="margin-top:12px;"></div>
+        </div>
+
+        <!-- ─── Metadata ─── -->
+        <div class="metadata-grid" id="metadataGrid">
+            <div class="meta-card"><div class="label">Family</div><div class="value" id="metaFamily">—</div></div>
+            <div class="meta-card"><div class="label">Style</div><div class="value" id="metaStyle">—</div></div>
+            <div class="meta-card"><div class="label">Weight</div><div class="value" id="metaWeight">—</div></div>
+            <div class="meta-card"><div class="label">Version</div><div class="value mono" id="metaVersion">—</div></div>
+            <div class="meta-card"><div class="label">Glyphs</div><div class="value" id="metaGlyphs">—</div></div>
+            <div class="meta-card"><div class="label">Format</div><div class="value" id="metaFormat">—</div></div>
+            <div class="meta-card"><div class="label">Size</div><div class="value" id="metaSize">—</div></div>
+        </div>
+
+        <!-- ─── Conversion Info ─── -->
+        <div class="conversion-info" id="conversionInfo">
+            <span id="convInput">—</span>
+            <span class="arrow">→</span>
+            <span id="convOutput">—</span>
+            <span class="badge" id="convBadge">—</span>
+        </div>
+
+        <!-- ─── Preview ─── -->
+        <div class="preview-section">
+            <div class="label-row">
+                <label for="previewText">Preview</label>
+                <span class="hint">type to update</span>
+            </div>
+            <input type="text" class="preview-text-input" id="previewText"
+            value="Aa Hamburgefonstiv · The quick brown fox jumps over the lazy dog · 0123456789 · !@#$%^&*()" />
+            <div class="preview-canvas-wrap">
+                <canvas id="previewCanvas"></canvas>
+            </div>
+            <div class="preview-specimen">
+                <span class="spec-label">Specimen:</span>
+                <span class="spec-text" id="specimenText">Aa Hamburgefonstiv · The quick brown fox jumps over the lazy dog · 0123456789 · !@#$%^&*()</span>
+            </div>
+        </div>
+
+        <!-- ─── Controls ─── -->
+        <div class="controls">
+            <div class="format-group">
+                <label for="formatSelect">Convert to</label>
+                <select id="formatSelect">
+                    <option value="ttf">TTF</option>
+                    <option value="woff">WOFF</option>
+                    <option value="woff2" selected>WOFF2</option>
+                </select>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="convertBtn" disabled>
+                    <svg viewBox="0 0 24 24"><path d="M4 12l4-4v2.5h6v-2.5l4 4-4 4v-2.5H8v2.5L4 12z"/></svg>
+                    Convert
+                </button>
+                <button class="btn btn-outline" id="downloadBtn" disabled>
+                    <svg viewBox="0 0 24 24"><path d="M12 16l-4-4h2.5V7h3v5H16l-4 4z"/><path d="M19 13v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5H3v5a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4v-5h-2z"/></svg>
+                    Download
+                </button>
+            </div>
+        </div>
+
+        <p class="format-note">
+            OTF files are read and converted to TTF. WOFF2 conversion uses WebAssembly — runs entirely in your browser.
+        </p>
+
+        <!-- ─── CSS Generator ─── -->
+        <div class="css-generator" id="cssGenerator">
+            <div class="gen-header">
+                <h3>🎨 @font-face CSS</h3>
+                <div class="gen-actions">
+                    <button class="btn btn-outline" id="copyCssBtn" style="padding:6px 16px; font-size:0.8rem;">📋 Copy</button>
+                    <button class="btn btn-outline" id="downloadCssBtn" style="padding:6px 16px; font-size:0.8rem;">⬇ CSS</button>
+                </div>
+            </div>
+            <textarea id="cssOutput" readonly>Load a font to generate CSS.</textarea>
+        </div>
+
+        <p class="text-muted text-center" style="font-size:0.7rem; margin-top:20px; opacity:0.5;">
+            Powered by fonteditor-core &amp; opentype.js &nbsp;·&nbsp; ⌘+Enter Convert &nbsp;·&nbsp; ⌘+D Download
+        </p>
+    </div>
+
+    <script>
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  STATE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        const state = {
+            fonts: new Map(),
+            activeFontId: null,
+            convertedBuffer: null,
+            convertedFormat: null,
+            currentFormat: null,
+            libraryFonts: [],
+            source: 'upload',
+            nextId: 0,
+        };
+
+        // ── Converter engine state ──
+        const converter = {
+            ready: false,
+            initializing: null,
+        };
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  DOM REFS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        const $ = id => document.getElementById(id);
+        const dropZone = $('dropZone');
+        const fileInput = $('fileInput');
+        const fileList = $('fileList');
+        const fileCountLabel = $('fileCountLabel');
+        const clearAllBtn = $('clearAllBtn');
+        const metadataGrid = $('metadataGrid');
+        const metaFamily = $('metaFamily');
+        const metaStyle = $('metaStyle');
+        const metaWeight = $('metaWeight');
+        const metaVersion = $('metaVersion');
+        const metaGlyphs = $('metaGlyphs');
+        const metaFormat = $('metaFormat');
+        const metaSize = $('metaSize');
+        const previewCanvas = $('previewCanvas');
+        const previewText = $('previewText');
+        const specimenText = $('specimenText');
+        const formatSelect = $('formatSelect');
+        const convertBtn = $('convertBtn');
+        const downloadBtn = $('downloadBtn');
+        const conversionInfo = $('conversionInfo');
+        const convInput = $('convInput');
+        const convOutput = $('convOutput');
+        const convBadge = $('convBadge');
+        const toast = $('toast');
+        const themeToggle = $('themeToggle');
+        const themeLabel = $('themeLabel');
+        const sourceSwitcher = $('sourceSwitcher');
+        const panelUpload = $('panelUpload');
+        const panelLibrary = $('panelLibrary');
+        const fontLibrarySelect = $('fontLibrarySelect');
+        const libraryFileList = $('libraryFileList');
+        const cssOutput = $('cssOutput');
+        const copyCssBtn = $('copyCssBtn');
+        const downloadCssBtn = $('downloadCssBtn');
+        const engineStatus = $('engineStatus');
+        const engineDot = $('engineDot');
+        const engineLabel = $('engineLabel');
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  THEME
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function getPreferredTheme() {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        let currentTheme = getPreferredTheme();
+
+        function applyTheme(theme) {
+            const html = document.documentElement;
+            if (theme === 'dark') html.classList.add('dark');
+            else html.classList.remove('dark');
+            currentTheme = theme;
+            themeLabel.textContent = theme === 'dark' ? 'Light' : 'Dark';
+            const svg = themeToggle.querySelector('svg');
+            if (theme === 'dark') {
+                svg.innerHTML =
+                    '<path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 16a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/><path d="M12 7v10a5 5 0 0 0 0-10z"/>';
+            } else {
+                svg.innerHTML =
+                    '<path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12z"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
+            }
+        }
+        applyTheme(currentTheme);
+        themeToggle.addEventListener('click', () => {
+            applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  TOAST
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        let toastTimer = null;
+
+        function showToast(msg, type = 'info', duration = 3000) {
+            clearTimeout(toastTimer);
+            toast.textContent = msg;
+            toast.className = 'toast';
+            if (type === 'error') toast.classList.add('error');
+            if (type === 'success') toast.classList.add('success');
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  UTILITY
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function generateId() { return ++state.nextId; }
+
+        function getWeightName(w) {
+            const map = {
+                100: 'Thin',
+                200: 'ExtraLight',
+                300: 'Light',
+                400: 'Regular',
+                500: 'Medium',
+                600: 'SemiBold',
+                700: 'Bold',
+                800: 'ExtraBold',
+                900: 'Black'
+            };
+            return map[w] || String(w);
+        }
+
+        // ── Detect font format from binary signature ──
+        function detectFontFormat(buffer) {
+            const bytes = new Uint8Array(buffer);
+            if (bytes.length < 4) return null;
+            const tag = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]);
+            switch (tag) {
+                case 'wOFF':
+                    return 'woff';
+                case 'wOF2':
+                    return 'woff2';
+                case 'OTTO':
+                    return 'otf';
+                case 'true':
+                    return 'ttf';
+                case '\0\1\0\0':
+                    return 'ttf';
+                default:
+                    return null;
+            }
+        }
+
+        function getFontMime(format) {
+            const mime = {
+                ttf: 'font/ttf',
+                otf: 'font/otf',
+                woff: 'font/woff',
+                woff2: 'font/woff2'
+            };
+            return mime[format] || 'application/octet-stream';
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  ENGINE INITIALIZATION (WOFF2 WASM)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function setEngineStatus(ready, message) {
+            engineStatus.classList.toggle('ready', ready);
+            engineLabel.textContent = message;
+        }
+
+        async function initConverter() {
+            if (converter.ready) return;
+            if (converter.initializing) return converter.initializing;
+
+            converter.initializing = (async () => {
+                setEngineStatus(false, 'Initializing converter…');
+                try {
+                    // fonteditor-core exposes its WOFF2 module under fonteditor.woff2
+                    const woff2 = fonteditor.woff2;
+                    if (!woff2 || typeof woff2.init !== 'function') {
+                        throw new Error('WOFF2 module not available.');
+                    }
+                    // Path to woff2.wasm — adjust if your deployment differs.
+                    // For static hosting, place woff2.wasm alongside this HTML or in /wasm/
+                    const wasmPath = '/wasm/woff2.wasm';
+                    await woff2.init(wasmPath);
+                    converter.ready = true;
+                    setEngineStatus(true, 'Converter ready · runs locally');
+                    console.log('✅ WOFF2 WASM initialized successfully.');
+                } catch (err) {
+                    console.error('WOFF2 init error:', err);
+                    setEngineStatus(false, '⚠️ WOFF2 engine failed to load');
+                    showToast('WOFF2 conversion engine could not be loaded. Some formats may not work.', 'error', 5000);
+                    throw err;
+                } finally {
+                    converter.initializing = null;
+                }
+            })();
+
+            return converter.initializing;
+        }
+
+        // ── Kick off engine init on page load ──
+        initConverter().catch(() => {
+            // error already shown in toast
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  FONT LOADING (opentype.js + fonteditor-core)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        async function loadFontData(buffer, ext) {
+            let otFont = null;
+            let feFont = null;
+
+            // opentype.js for metadata & preview
+            try {
+                otFont = opentype.parse(buffer);
+            } catch (err) {
+                console.warn('opentype.js parse failed:', err);
+            }
+
+            // fonteditor-core for conversion
+            try {
+                await initConverter();
+                const Font = fonteditor.Font;
+                feFont = Font.create(buffer, {
+                    type: ext,
+                    hinting: true,
+                });
+            } catch (err) {
+                console.warn(`fonteditor-core failed to parse ${ext}:`, err);
+            }
+
+            if (!otFont && !feFont) {
+                throw new Error('This font could not be parsed by either engine.');
+            }
+
+            return { otFont, feFont };
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  FONT STATE MANAGEMENT
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function createFontEntry(file, buffer, otFont, feFont, format) {
+            return {
+                id: generateId(),
+                file,
+                arrayBuffer: buffer,
+                otFont,
+                feFont,
+                format: format, // detected format, not filename extension
+                loaded: true,
+                error: null,
+                size: buffer.byteLength,
+                name: file.name,
+            };
+        }
+
+        function addFontEntry(entry) {
+            state.fonts.set(entry.id, entry);
+            if (!state.activeFontId) state.activeFontId = entry.id;
+            renderFileList();
+            updateUI(entry.id);
+        }
+
+        function removeFontEntry(id) {
+            state.fonts.delete(id);
+            if (state.activeFontId === id) {
+                state.activeFontId = state.fonts.size > 0 ? [...state.fonts.keys()][0] : null;
+            }
+            renderFileList();
+            if (state.activeFontId) updateUI(state.activeFontId);
+            else clearUI();
+        }
+
+        function clearAllFonts() {
+            state.fonts.clear();
+            state.activeFontId = null;
+            state.convertedBuffer = null;
+            state.convertedFormat = null;
+            state.currentFormat = null;
+            renderFileList();
+            clearUI();
+            showToast('Cleared all fonts', 'info', 1200);
+        }
+
+        function getActiveFont() {
+            if (!state.activeFontId) return null;
+            return state.fonts.get(state.activeFontId) || null;
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  RENDER FILE LIST
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function renderFileList() {
+            const container = state.source === 'upload' ? fileList : libraryFileList;
+            container.innerHTML = '';
+            const entries = [...state.fonts.values()];
+            if (entries.length === 0) {
+                container.innerHTML =
+                    '<div style="color:var(--muted); font-size:0.9rem; padding:8px 0; text-align:center;">No fonts loaded</div>';
+                fileCountLabel.textContent = '0 fonts loaded';
+                return;
+            }
+            entries.forEach(entry => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.innerHTML = `
+              <svg class="file-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 2v6h6"/></svg>
+              <span class="name">${entry.name}</span>
+              <span class="size">${formatSize(entry.size)}</span>
+              <span class="status ${entry.loaded ? 'loaded' : 'error'}">${entry.loaded ? '✓ Loaded' : '✗ Error'}</span>
+              ${state.activeFontId === entry.id ? '<span style="font-size:0.7rem; color:var(--accent); font-weight:600;">● active</span>' : ''}
+              <button class="remove-btn" data-id="${entry.id}" aria-label="Remove">✕</button>
+            `;
+                const removeBtn = div.querySelector('.remove-btn');
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeFontEntry(entry.id);
+                });
+                div.addEventListener('click', () => {
+                    if (state.activeFontId !== entry.id) {
+                        state.activeFontId = entry.id;
+                        renderFileList();
+                        updateUI(entry.id);
+                    }
+                });
+                container.appendChild(div);
+            });
+            fileCountLabel.textContent = `${entries.length} font${entries.length > 1 ? 's' : ''} loaded`;
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  UI UPDATE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function clearUI() {
+            metadataGrid.classList.remove('visible');
+            conversionInfo.classList.remove('visible');
+            convertBtn.disabled = true;
+            downloadBtn.disabled = true;
+            state.convertedBuffer = null;
+            state.convertedFormat = null;
+            state.currentFormat = null;
+            cssOutput.textContent = 'Load a font to generate CSS.';
+            const ctx = previewCanvas.getContext('2d');
+            const rect = previewCanvas.parentElement.getBoundingClientRect();
+            const w = rect.width || 800;
+            const ratio = window.devicePixelRatio || 1;
+            previewCanvas.width = Math.round(w * ratio);
+            previewCanvas.height = Math.round((w * 0.3) * ratio);
+            previewCanvas.style.width = w + 'px';
+            previewCanvas.style.height = (w * 0.3) + 'px';
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.clearRect(0, 0, w, (w * 0.3));
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#fff';
+            ctx.fillRect(0, 0, w, (w * 0.3));
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#999';
+            ctx.font = '18px Grandstander, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Upload a font to preview', w / 2, (w * 0.3) / 2);
+        }
+
+        function updateUI(fontId) {
+            const entry = state.fonts.get(fontId);
+            if (!entry) { clearUI(); return; }
+
+            const { otFont, feFont, file, format, size, arrayBuffer } = entry;
+
+            // Metadata
+            if (otFont) {
+                const family = otFont.familyName || '—';
+                const style = otFont.styleName || '—';
+                const version = otFont.version || '—';
+                const glyphCount = otFont.glyphs ? otFont.glyphs.length : '—';
+                let weight = '—';
+                try {
+                    if (otFont.tables && otFont.tables.os2 && otFont.tables.os2.usWeightClass) {
+                        weight = getWeightName(otFont.tables.os2.usWeightClass);
+                    }
+                } catch (_) {}
+                metaFamily.textContent = family;
+                metaStyle.textContent = style;
+                metaWeight.textContent = weight;
+                metaVersion.textContent = version;
+                metaGlyphs.textContent = glyphCount;
+                metaFormat.textContent = format.toUpperCase();
+                metaSize.textContent = formatSize(size);
+                metadataGrid.classList.add('visible');
+            } else {
+                metadataGrid.classList.remove('visible');
+            }
+
+            state.currentFormat = format;
+            state.convertedBuffer = null;
+            state.convertedFormat = null;
+            conversionInfo.classList.remove('visible');
+
+            const target = formatSelect.value;
+            if (format === target) {
+                convertBtn.disabled = true;
+                convertBtn.innerHTML =
+                    `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg> Already ${target.toUpperCase()}`;
+                state.convertedBuffer = new Uint8Array(arrayBuffer);
+                state.convertedFormat = format;
+                downloadBtn.disabled = false;
+                downloadBtn.className = 'btn btn-success';
+                downloadBtn.innerHTML =
+                    `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M12 16l-4-4h2.5V7h3v5H16l-4 4z"/><path d="M19 13v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5H3v5a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4v-5h-2z"/></svg> Download`;
+                convInput.textContent = `${format.toUpperCase()} ${formatSize(size)}`;
+                convOutput.textContent = `${format.toUpperCase()} ${formatSize(size)}`;
+                convBadge.textContent = '✓ Same format';
+                convBadge.className = 'badge success';
+                conversionInfo.classList.add('visible');
+            } else {
+                convertBtn.disabled = false;
+                convertBtn.innerHTML =
+                    `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M4 12l4-4v2.5h6v-2.5l4 4-4 4v-2.5H8v2.5L4 12z"/></svg> Convert`;
+                downloadBtn.disabled = true;
+                downloadBtn.className = 'btn btn-outline';
+                downloadBtn.innerHTML =
+                    `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M12 16l-4-4h2.5V7h3v5H16l-4 4z"/><path d="M19 13v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5H3v5a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4v-5h-2z"/></svg> Download`;
+                conversionInfo.classList.remove('visible');
+            }
+
+            renderPreview(entry);
+            generateCSS(entry);
+            renderFileList();
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  PREVIEW (with fixed canvas transform)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function renderPreview(entry) {
+            const canvas = previewCanvas;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const w = rect.width || 800;
+            const ratio = window.devicePixelRatio || 1;
+            const h = Math.max(120, w * 0.3);
+
+            canvas.width = Math.round(w * ratio);
+            canvas.height = Math.round(h * ratio);
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+
+            // Reset transform then apply DPI scale
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+            const surfaceColor = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#fff';
+            ctx.fillStyle = surfaceColor;
+            ctx.fillRect(0, 0, w, h);
+
+            const text = previewText.value || 'Preview text';
+            const ot = entry.otFont;
+
+            if (!ot) {
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#999';
+                ctx.font = '18px Grandstander, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('Font preview unavailable', w / 2, h / 2);
+                return;
+            }
+
+            try {
+                const fontName = ot.familyName || 'CustomFont';
+                const url = URL.createObjectURL(new Blob([entry.arrayBuffer], { type: 'font/' + entry.format }));
+                const font = new FontFace(fontName, `url(${url}) format('${entry.format}')`);
+                font.load().then(() => {
+                    document.fonts.add(font);
+                    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() ||
+                        '#2d2a24';
+                    let fontSize = Math.min(h * 0.7, 72);
+                    ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    let metrics = ctx.measureText(text);
+                    let maxWidth = w - 40;
+                    if (metrics.width > maxWidth) {
+                        fontSize = fontSize * (maxWidth / metrics.width);
+                        ctx.font = fontSize + 'px "' + fontName + '", sans-serif';
+                    }
+                    ctx.fillText(text, w / 2, h / 2 + fontSize * 0.1);
+                    specimenText.style.fontFamily = fontName + ', Grandstander, sans-serif';
+                    specimenText.textContent = text;
+                }).catch(() => {
+                    drawWithOpentype(ctx, ot, text, w, h);
+                });
+            } catch (_) {
+                drawWithOpentype(ctx, ot, text, w, h);
+            }
+        }
+
+        function drawWithOpentype(ctx, ot, text, w, h) {
+            let fontSize = Math.min(h * 0.7, 72);
+            const metrics = ot.getAdvanceWidth(text, fontSize);
+            const maxWidth = w - 40;
+            if (metrics > maxWidth) {
+                fontSize = Math.floor(fontSize * (maxWidth / metrics));
+            }
+            fontSize = Math.min(Math.max(fontSize, 12), 140);
+            const x = w / 2,
+                y = h / 2 + fontSize * 0.35;
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#2d2a24';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            try {
+                const path = ot.getPath(text, x, y, fontSize);
+                path.draw(ctx);
+                specimenText.style.fontFamily = 'Grandstander, sans-serif';
+                specimenText.textContent = text;
+            } catch (e) {
+                ctx.font = fontSize + 'px "' + (ot.familyName || 'sans-serif') + '"';
+                ctx.fillText(text, x, y);
+                specimenText.textContent = text;
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  CSS GENERATOR
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function generateCSS(entry) {
+            const ot = entry.otFont;
+            if (!ot) {
+                cssOutput.textContent = 'Font metadata not available for CSS generation.';
+                return;
+            }
+            const family = ot.familyName || 'CustomFont';
+            const ext = entry.format;
+            const weight = (() => {
+                try {
+                    if (ot.tables && ot.tables.os2 && ot.tables.os2.usWeightClass) {
+                        return ot.tables.os2.usWeightClass;
+                    }
+                } catch (_) {}
+                return 400;
+            })();
+            const style = (() => {
+                try { return ot.styleName || 'normal'; } catch (_) { return 'normal'; }
+            })();
+            const css = `@font-face {
+          font-family: "${family}";
+          src: url("${family}.${ext}") format("${ext}");
+          font-weight: ${weight};
+          font-style: ${style};
+          font-display: swap;
+        }
+
+        .${family.toLowerCase().replace(/\s/g, '-')} {
+          font-family: "${family}", sans-serif;
+        }
+
+        /* <link rel="preload" href="${family}.${ext}" as="font" type="font/${ext}" crossorigin> */`;
+            cssOutput.textContent = css;
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  CONVERSION (with proper WASM init)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        async function convertActiveFont() {
+            const entry = getActiveFont();
+            if (!entry) { showToast('No font loaded.', 'error'); return; }
+
+            const target = formatSelect.value;
+            const current = entry.format;
+
+            if (current === target) {
+                state.convertedBuffer = new Uint8Array(entry.arrayBuffer);
+                state.convertedFormat = target;
+                downloadBtn.disabled = false;
+                showToast(`Already in ${target.toUpperCase()} format.`, 'info');
+                return;
+            }
+
+            if (!entry.feFont) {
+                showToast('This font cannot be converted.', 'error');
+                return;
+            }
+
+            convertBtn.disabled = true;
+            downloadBtn.disabled = true;
+            convertBtn.innerHTML = '⟳ Converting…';
+
+            try {
+                // Ensure WASM is ready (especially for WOFF2)
+                await initConverter();
+
+                const result = entry.feFont.write({ type: target });
+                const output = result instanceof ArrayBuffer ?
+                    new Uint8Array(result) :
+                    new Uint8Array(result.buffer || result);
+
+                state.convertedBuffer = output;
+                state.convertedFormat = target;
+
+                const inSize = entry.arrayBuffer.byteLength;
+                const outSize = output.byteLength;
+                const percentage = ((1 - outSize / inSize) * 100);
+
+                convInput.textContent = `${current.toUpperCase()} ${formatSize(inSize)}`;
+                convOutput.textContent = `${target.toUpperCase()} ${formatSize(outSize)}`;
+
+                if (percentage >= 0) {
+                    convBadge.textContent = `${percentage.toFixed(0)}% smaller`;
+                    convBadge.className = 'badge success';
+                } else {
+                    convBadge.textContent = `${Math.abs(percentage).toFixed(0)}% larger`;
+                    convBadge.className = 'badge';
+                }
+                conversionInfo.classList.add('visible');
+
+                downloadBtn.disabled = false;
+                downloadBtn.className = 'btn btn-success';
+                downloadBtn.innerHTML =
+                    `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M12 16l-4-4h2.5V7h3v5H16l-4 4z"/><path d="M19 13v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5H3v5a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4v-5h-2z"/></svg> ✔ Download`;
+
+                showToast(`Converted to ${target.toUpperCase()}!`, 'success');
+
+            } catch (err) {
+                console.error('Conversion error:', err);
+                state.convertedBuffer = null;
+                state.convertedFormat = null;
+                showToast(`Conversion failed: ${err.message || err}`, 'error', 5000);
+                downloadBtn.disabled = true;
+                downloadBtn.className = 'btn btn-outline';
+                downloadBtn.innerHTML =
+                    `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M12 16l-4-4h2.5V7h3v5H16l-4 4z"/><path d="M19 13v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5H3v5a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4v-5h-2z"/></svg> Download`;
+            } finally {
+                const currentFmt = entry.format;
+                const targetFmt = formatSelect.value;
+                convertBtn.disabled = (currentFmt === targetFmt);
+                if (currentFmt === targetFmt) {
+                    convertBtn.innerHTML =
+                        `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg> Already ${targetFmt.toUpperCase()}`;
+                } else {
+                    convertBtn.innerHTML =
+                        `<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M4 12l4-4v2.5h6v-2.5l4 4-4 4v-2.5H8v2.5L4 12z"/></svg> Convert`;
+                }
+                downloadBtn.disabled = !state.convertedBuffer;
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  DOWNLOAD
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function downloadFont() {
+            if (!state.convertedBuffer) {
+                showToast('Convert a font first.', 'error');
+                return;
+            }
+            const entry = getActiveFont();
+            const baseName = entry ? entry.name.replace(/\.[^.]+$/, '') : 'converted-font';
+            const format = state.convertedFormat || 'ttf';
+            const filename = `${baseName}-converted.${format}`;
+            const blob = new Blob([state.convertedBuffer], { type: getFontMime(format) });
+            saveAs(blob, filename);
+            showToast(`Downloaded ${filename}`, 'success', 2000);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  HANDLE FILES (with format detection)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        const MAX_FILES = 5;
+
+        async function handleFiles(fileList) {
+            const files = Array.from(fileList);
+            if (files.length === 0) return;
+            if (files.length > MAX_FILES) {
+                showToast(`Maximum ${MAX_FILES} fonts at once.`, 'error');
+                return;
+            }
+
+            let loaded = 0;
+            for (const file of files) {
+                try {
+                    const buffer = await file.arrayBuffer();
+                    // Detect actual format from signature
+                    const detectedFormat = detectFontFormat(buffer);
+                    if (!detectedFormat) {
+                        showToast(`Skipped: ${file.name} (unrecognized font format)`, 'error', 2500);
+                        continue;
+                    }
+
+                    const { otFont, feFont } = await loadFontData(buffer, detectedFormat);
+                    const entry = createFontEntry(file, buffer, otFont, feFont, detectedFormat);
+                    entry.loaded = true;
+                    addFontEntry(entry);
+                    loaded++;
+                } catch (err) {
+                    console.error('Error loading font:', err);
+                    showToast(`Failed to load ${file.name}: ${err.message}`, 'error', 2500);
+                }
+            }
+
+            if (loaded > 0) {
+                showToast(`Loaded ${loaded} font${loaded > 1 ? 's' : ''}`, 'success', 1500);
+            }
+            setSource('upload');
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  LIBRARY
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        async function loadLibrary() {
+            try {
+                const res = await fetch('fonts.json');
+                if (!res.ok) throw new Error('Could not fetch fonts.json');
+                const data = await res.json();
+                state.libraryFonts = data;
+                populateLibrarySelect();
+            } catch (e) {
+                console.warn('Library load error:', e);
+                state.libraryFonts = [
+                    { name: 'Inter', file: 'Inter-Regular.ttf', category: 'Sans Serif' },
+                    { name: 'Poppins', file: 'Poppins-Regular.ttf', category: 'Sans Serif' },
+                    { name: 'Satoshi', file: 'Satoshi-Regular.ttf', category: 'Sans Serif' },
+                    { name: 'Geist', file: 'Geist-Regular.ttf', category: 'Sans Serif' },
+                ];
+                populateLibrarySelect();
+                showToast('Using fallback library (fonts.json not found)', 'info', 2000);
+            }
+        }
+
+        function populateLibrarySelect() {
+            fontLibrarySelect.innerHTML = '<option value="">— Select a font —</option>';
+            state.libraryFonts.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.file;
+                opt.textContent = f.name + ' (' + (f.category || '') + ')';
+                fontLibrarySelect.appendChild(opt);
+            });
+        }
+
+        // ── Instant library load ──
+        fontLibrarySelect.addEventListener("change", async () => {
+            const file = fontLibrarySelect.value;
+            if (!file) {
+                if (state.source === 'library') clearAllFonts();
+                return;
+            }
+            const fontInfo = state.libraryFonts.find(f => f.file === file);
+            if (!fontInfo) { showToast("Font not found in library.", "error"); return; }
+
+            try {
+                const res = await fetch("fonts/" + file);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const buffer = await res.arrayBuffer();
+                const detectedFormat = detectFontFormat(buffer);
+                if (!detectedFormat) {
+                    showToast("Unrecognized font format.", "error");
+                    return;
+                }
+
+                const { otFont, feFont } = await loadFontData(buffer, detectedFormat);
+                const fakeFile = new File([buffer], file, { type: "font/" + detectedFormat });
+                const entry = createFontEntry(fakeFile, buffer, otFont, feFont, detectedFormat);
+
+                state.fonts.clear();
+                state.activeFontId = null;
+                addFontEntry(entry);
+
+                if (state.source !== 'library') setSource('library');
+                showToast(`Loaded ${fontInfo.name} from library`, 'success', 1500);
+            } catch (err) {
+                console.error("Library load error:", err);
+                showToast("Couldn't load font from library.", "error");
+                if (state.source === 'library') clearAllFonts();
+            }
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  SOURCE SWITCHER
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function setSource(source) {
+            state.source = source;
+            document.querySelectorAll('.source-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.source === source);
+            });
+            panelUpload.classList.toggle('active', source === 'upload');
+            panelLibrary.classList.toggle('active', source === 'library');
+
+            if (source === 'upload') {
+                renderFileList();
+                if (state.activeFontId) updateUI(state.activeFontId);
+            } else {
+                renderFileList();
+                if (state.fonts.size === 0) clearUI();
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  EVENT BINDING
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        sourceSwitcher.addEventListener('click', (e) => {
+            const btn = e.target.closest('.source-btn');
+            if (!btn) return;
+            setSource(btn.dataset.source);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFiles(e.target.files);
+            fileInput.value = '';
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+        });
+
+        clearAllBtn.addEventListener('click', clearAllFonts);
+
+        formatSelect.addEventListener('change', () => {
+            if (state.activeFontId) updateUI(state.activeFontId);
+        });
+
+        convertBtn.addEventListener('click', convertActiveFont);
+        downloadBtn.addEventListener('click', downloadFont);
+
+        let previewTimer = null;
+        previewText.addEventListener('input', () => {
+            clearTimeout(previewTimer);
+            previewTimer = setTimeout(() => {
+                if (state.activeFontId) {
+                    const entry = state.fonts.get(state.activeFontId);
+                    if (entry) renderPreview(entry);
+                }
+            }, 120);
+        });
+
+        copyCssBtn.addEventListener('click', () => {
+            const text = cssOutput.value;
+            if (!text || text === 'Load a font to generate CSS.') {
+                showToast('No CSS to copy.', 'info');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('CSS copied to clipboard!', 'success');
+            }).catch(() => {
+                cssOutput.select();
+                document.execCommand('copy');
+                showToast('CSS copied!', 'success');
+            });
+        });
+
+        downloadCssBtn.addEventListener('click', () => {
+            const text = cssOutput.value;
+            if (!text || text === 'Load a font to generate CSS.') {
+                showToast('No CSS to download.', 'info');
+                return;
+            }
+            const entry = getActiveFont();
+            const name = entry ? entry.name.replace(/\.[^.]+$/, '') : 'font';
+            const blob = new Blob([text], { type: 'text/css' });
+            saveAs(blob, name + '.css');
+            showToast('CSS downloaded!', 'success');
+        });
+
+        // ── Keyboard shortcuts ──
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                if (!convertBtn.disabled) convertBtn.click();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                if (!downloadBtn.disabled) {
+                    e.preventDefault();
+                    downloadBtn.click();
+                }
+            }
+        });
+
+        // ── Resize canvas ──
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (state.activeFontId) {
+                    const entry = state.fonts.get(state.activeFontId);
+                    if (entry) renderPreview(entry);
+                }
+            }, 200);
+        });
+
+        // ── Init ──
+        loadLibrary();
+        clearUI();
+        setSource('upload');
+
+        console.log('🔤 Font Converter ready!');
+        console.log('  ⌘+Enter → Convert');
+        console.log('  ⌘+D     → Download');
+        console.log('  📚 Library fonts load instantly on selection.');
+        console.log('  🔒 All processing stays in your browser.');
+    </script>
+</body>
+</html>
