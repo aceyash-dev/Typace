@@ -243,5 +243,35 @@
   "name": "Windhavi",
   "file": "Windhavi.ttf",
   "category": "Handwriting"
-}
+},
+{
+    "name": "Crowk",
+    "file": "Crowk-Regular.ttf",
+    "category": "Display"
+  },
+  {
+    "name": "Fixedsys62",
+    "file": "Fixedsys62.ttf",
+    "category": "Monospace"
+  },
+  {
+    "name": "GFF",
+    "file": "GFF.ttf",
+    "category": "Display"
+  },
+  {
+    "name": "Lamour",
+    "file": "Lamour.ttf",
+    "category": "Handwriting"
+  },
+  {
+    "name": "Roblox",
+    "file": "Roblox.ttf",
+    "category": "Display"
+  },
+  {
+    "name": "Solid Mono",
+    "file": "Solid-Mono.ttf",
+    "category": "Monospace"
+  }
 ]
