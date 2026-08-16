@@ -1,0 +1,41 @@
+/* TEAM */
+
+Name: Typace
+Role: Independent Type Design Project
+Website: https://fonts.ace-base.indevs.in/
+
+/* PROJECT */
+
+Project: Typace
+Description: Independent typeface design and digital typography project.
+
+/* FOCUS */
+
+- Typeface design
+- Font engineering
+- Variable fonts
+- Digital typography
+- OpenType
+- Web typography
+
+/* FORMAT */
+
+Primary distribution format:
+- TrueType Font (.ttf)
+
+/* PRINCIPLES */
+
+- Original type design
+- Careful spacing and metrics
+- Practical glyph coverage
+- Clear licensing
+- Respect for type designers and intellectual property
+
+/* NOTE */
+
+Typeface-specific authorship, licensing, and technical information should
+always be taken from the individual typeface documentation.
+
+/* COPYRIGHT */
+
+© Typace

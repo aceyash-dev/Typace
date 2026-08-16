@@ -1,0 +1,75 @@
+# Typace
+
+> Typace is an independent type design project creating distinctive,
+> practical typefaces for digital and creative use.
+
+## Fonts
+
+Typace distributes fonts exclusively in TrueType Font (`.ttf`) format.
+
+Each typeface may include:
+- Regular fonts
+- Multiple weights
+- Variable TTF fonts
+- Custom glyphs
+- Extended punctuation
+- Currency symbols
+- OpenType features
+
+## Font Format
+
+Primary format:
+
+- TTF (TrueType Font)
+
+Do not claim that Typace provides OTF, WOFF, or WOFF2 unless explicitly
+listed for a specific typeface.
+
+## Typeface Information
+
+For each font, use the published metadata for:
+- Typeface name
+- Designer / foundry
+- Style
+- Weight
+- Glyph coverage
+- Variable axes
+- OpenType features
+- License
+
+Do not invent missing metadata.
+
+## Licensing
+
+Each typeface has its own license.
+
+Check the individual font's license before using it commercially,
+redistributing it, modifying it, embedding it, or including it in software.
+
+## Web Usage
+
+Typace fonts are distributed as TTF files.
+
+Example:
+
+@font-face {
+  font-family: "Typace Font";
+  src: url("/fonts/font.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+Only declare variable font ranges when the TTF actually contains
+a corresponding variable axis.
+
+## Brand
+
+Typace is the project / type foundry name.
+
+Individual typefaces retain their own names and identities.
+
+## Canonical Resources
+
+Homepage: https://fonts.ace-base.indevs.in/
+Fonts: https://fonts.ace-base.indevs.in/fonts/

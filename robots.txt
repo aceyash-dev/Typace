@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /private/
+Disallow: /drafts/
+Disallow: /api/
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /.github/
+Disallow: /src/
+Disallow: /tests/
+Disallow: /*.map$
+
+Sitemap: https://fonts.ace-base.indevs.in/sitemap.xml

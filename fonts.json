@@ -265,13 +265,33 @@
     "category": "Handwriting"
   },
   {
-    "name": "Roblox",
+    "name": "Robloxian",
     "file": "Roblox.ttf",
     "category": "Display"
   },
   {
     "name": "Solid Mono",
     "file": "Solid-Mono.ttf",
+    "category": "Monospace"
+  },
+  {
+    "name": "Serene",
+    "file": "SereneDisplay.ttf",
+    "category": "Serif"
+  },
+  {
+    "name": "Trace Sans",
+    "file": "Trace-Sans.ttf",
+    "category": "Sans Serif"
+  },
+  {
+    "name": "✨ | Ace Script",
+    "file": "AceScript.ttf",
+    "category": "Display"
+  },
+  {
+    "name": "Nothing",
+    "file": "Nothing.ttf",
     "category": "Monospace"
   }
 ]
