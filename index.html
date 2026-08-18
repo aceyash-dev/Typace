@@ -1,13 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<hea>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>Typace · font browser</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"
+    />
+
+    <title>Typace · Font Library</title>
+
+    <meta
+        name="description"
+        content="Typace is a curated font library for discovering, previewing, and using typefaces on the web."
+    />
+
+    <meta
+        name="keywords"
+        content="fonts, font library, typefaces, typography, web fonts, free fonts, font browser, Typace"
+    />
+
+    <meta name="author" content="Typace" />
+    <meta name="application-name" content="Typace" />
+    <meta name="generator" content="Typace" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://fonts.ace-base.indevs.in/" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#F3E4CF" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- Search engines -->
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Typace" />
+    <meta property="og:title" content="Typace · Font Library" />
+    <meta
+        property="og:description"
+        content="Discover, preview, and use beautiful typefaces with Typace."
+    />
+    <meta property="og:url" content="https://fonts.ace-base.indevs.in/" />
+    <meta
+        property="og:image"
+        content="https://fonts.ace-base.indevs.in/icon.png"
+    />
+    <meta property="og:image:alt" content="Typace" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Typace · Font Library" />
+    <meta
+        name="twitter:description"
+        content="Discover, preview, and use beautiful typefaces with Typace."
+    />
+    <meta
+        name="twitter:image"
+        content="https://fonts.ace-base.indevs.in/icon.png"
+    />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@400;600;700&display=swap" rel="stylesheet" />
 
+    <link
+        href="https://fonts.googleapis.com/css2?family=Grandstander:wght@400;600;700&display=swap"
+        rel="stylesheet"
+    />
     <style>
         /* ── reset & vars ── */
         * {
@@ -22,7 +87,7 @@
         }
 
         :root {
-            --bg: #fbf7f0;
+            --bg: #f1e9d2;
             --surface: #ffffff;
             --text: #2d2a24;
             --muted: #6b655a;
@@ -30,9 +95,9 @@
             --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             --radius: 14px;
             --accent: #c48b63;
-            --accent-hover: #ab7350;
+            --accent-hover: #915b15;
             --modal-overlay: rgba(0, 0, 0, 0.3);
-            --font-family: 'Grandstander', cursive, system-ui, sans-serif;
+            --font-family: 'Grandstander', system-ui, sans-serif;
             --chip-radius: 40px;
             --card-gap: 0.7rem;
         }
@@ -896,7 +961,7 @@
                         </div>
                         <span class="item-check">✓</span>
                     </a>
-                    <a href="blog.ace-base.indevs.in/convert-fonts" class="dropdown-item" data-path="/convert">
+                    <a href="https://blog.ace-base.indevs.in/posts/convert-fonts" class="dropdown-item" data-path="/convert">
                         <div class="item-left">
                             <span class="item-title">Convert</span>
                             <span class="item-sub">Convert formats</span>
@@ -1013,12 +1078,12 @@
                     </div>
                 </label>
                 <label>
-                    <span>Line Ht</span>
+                    <span>Line Height</span>
                     <input type="range" id="lineHeightSlider" min="1" max="3" step="0.1" value="1.6" />
                     <span class="range-value" id="lineHeightValue">1.6</span>
                 </label>
                 <label>
-                    <span>Letter Sp</span>
+                    <span>Letter Spacing</span>
                     <input type="range" id="letterSpacingSlider" min="0" max="0.3" step="0.01" value="0" />
                     <span class="range-value" id="letterSpacingValue">0</span>
                 </label>

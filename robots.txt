@@ -8,7 +8,6 @@ Disallow: /api/
 Disallow: /node_modules/
 Disallow: /.git/
 Disallow: /.github/
-Disallow: /src/
 Disallow: /tests/
 Disallow: /*.map$
 
