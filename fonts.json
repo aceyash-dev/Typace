@@ -1,7 +1,7 @@
 [
   {
     "name": "Aboreto",
-    "file": "Aboreto-Regular.ttf",
+    "file": "Aboreto.ttf",
     "category": "Display"
   },
   {
@@ -40,8 +40,8 @@
     "category": "Display"
   },
   {
-    "name": "Open Sans Italic",
-    "file": "OpenSans-Italic-Variable.ttf",
+    "name": "Open Sans",
+    "file": "OpenSans-Regular.ttf",
     "category": "Sans Serif"
   },
   {
@@ -216,7 +216,7 @@
 },
 {
   "name": "Stay Chill",
-  "file": "StayChill-PVVD7.ttf",
+  "file": "StayChill.ttf",
   "category": "Display"
 },
 {
@@ -226,7 +226,7 @@
 },
 {
   "name": "Timeless Memories",
-  "file": "TimelessMemoriesRegular-2vvwo.ttf",
+  "file": "TimelessMemoriesRegular.ttf",
   "category": "Handwriting"
 },
 {
