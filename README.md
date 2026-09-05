@@ -16,10 +16,10 @@ Philosophy
 Less interface.
 More typography.
 
--No frameworks.
--No build tools.
--No accounts.
--No tracking.
+- No frameworks.
+- No build tools.
+- No accounts.
+- No tracking.
 
 Just a lightweight interface for your type collection.
 
@@ -28,13 +28,14 @@ Just a lightweight interface for your type collection.
 
 Structure
 
-Typace/
-├── index.html
-├── fonts.json
-└── fonts/
-    ├── Font-One.woff2
-    ├── Font-Two.ttf
-    └── Font-Three.otf
+
+Typace/<br>
+├── index.html<br>
+├── fonts.json<br>
+└── fonts/<br>
+    ├── Font-One.woff2<br>
+    ├── Font-Two.ttf<br>
+    └── Font-Three.otf<br>
 
 
 ---
@@ -48,35 +49,35 @@ Add your own font files to /fonts and see them on the site!
 
 Supported formats include:
 
--WOFF2
+- WOFF2
 
--TTF
+- TTF
 
--OTF
+- OTF
 
 ---
 
 Features
 
--Local font collection
+- Local font collection
 
--Search and browsing
+- Search and browsing
 
--Live typography previews
+- Live typography previews
 
--Font metadata
+- Font metadata
 
--Multiple font formats
+- Multiple font formats
 
--Downloadable font files
+- Downloadable font files
 
--Light and dark themes
+- Light and dark themes
 
--Responsive interface
+- Responsive interface
 
--Offline-friendly architecture
+- Offline-friendly architecture
 
--No framework or build step
+- No framework or build step
 
 
 
