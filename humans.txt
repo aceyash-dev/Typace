@@ -2,7 +2,7 @@
 
 Name: Typace
 Role: Independent Type Design Project
-Website: https://fonts.ace-base.indevs.in/
+Website: https://fonts.ace-base.cc/
 
 /* PROJECT */
 

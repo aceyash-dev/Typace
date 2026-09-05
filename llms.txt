@@ -71,5 +71,5 @@ Individual typefaces retain their own names and identities.
 
 ## Canonical Resources
 
-Homepage: https://fonts.ace-base.indevs.in/
-Fonts: https://fonts.ace-base.indevs.in/fonts/
+Homepage: https://fonts.ace-base.cc/
+Fonts: https://fonts.ace-base.cc/fonts/
