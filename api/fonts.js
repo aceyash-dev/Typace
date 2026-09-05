@@ -1,14 +1,60 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-const FONT_EXTENSIONS = new Set([
-    ".ttf",
-    ".otf",
-    ".woff",
-    ".woff2"
-]);
+const FONT_TYPES = {
+    ".ttf": {
+        type: "ttf",
+        format: "truetype"
+    },
+    ".otf": {
+        type: "otf",
+        format: "opentype"
+    },
+    ".woff": {
+        type: "woff",
+        format: "woff"
+    },
+    ".woff2": {
+        type: "woff2",
+        format: "woff2"
+    }
+};
+
+function sendJSON(res, status, data) {
+    res.setHeader(
+        "Content-Type",
+        "application/json; charset=utf-8"
+    );
+
+    res.status(status).json(data);
+}
 
 export default async function handler(req, res) {
+    if (req.method === "OPTIONS") {
+        res.setHeader(
+            "Access-Control-Allow-Origin",
+            "*"
+        );
+
+        res.setHeader(
+            "Access-Control-Allow-Methods",
+            "GET, OPTIONS"
+        );
+
+        res.setHeader(
+            "Access-Control-Allow-Headers",
+            "Content-Type"
+        );
+
+        return res.status(204).end();
+    }
+
+    if (req.method !== "GET") {
+        return sendJSON(res, 405, {
+            error: "Method not allowed."
+        });
+    }
+
     try {
         const fontsDirectory = path.join(
             process.cwd(),
@@ -28,29 +74,36 @@ export default async function handler(req, res) {
                     return false;
                 }
 
-                const extension =
-                    path.extname(entry.name).toLowerCase();
+                const extension = path
+                    .extname(entry.name)
+                    .toLowerCase();
 
-                return FONT_EXTENSIONS.has(extension);
+                return Boolean(
+                    FONT_TYPES[extension]
+                );
             })
             .map(entry => {
-                const filename = entry.name;
+                const file = entry.name;
 
-                const extension =
-                    path.extname(filename);
+                const extension = path
+                    .extname(file)
+                    .toLowerCase();
 
-                // Filename without extension = font name.
-                const name =
-                    filename
-                        .slice(
-                            0,
-                            -extension.length
-                        )
-                        .trim();
+                const metadata =
+                    FONT_TYPES[extension];
+
+                const name = file
+                    .slice(
+                        0,
+                        -extension.length
+                    )
+                    .trim();
 
                 return {
                     name,
-                    file: filename
+                    file,
+                    type: metadata.type,
+                    format: metadata.format
                 };
             })
             .sort((a, b) =>
@@ -64,8 +117,8 @@ export default async function handler(req, res) {
             );
 
         res.setHeader(
-            "Content-Type",
-            "application/json; charset=utf-8"
+            "Access-Control-Allow-Origin",
+            "*"
         );
 
         res.setHeader(
@@ -73,18 +126,20 @@ export default async function handler(req, res) {
             "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400"
         );
 
-        res.status(200).json(fonts);
+        return sendJSON(
+            res,
+            200,
+            fonts
+        );
     } catch (error) {
         console.error(
             "Typace font discovery failed:",
             error
         );
 
-        res.status(500).json({
-            error: "Unable to read fonts directory."
-        });
-    }
-}            error: "Unable to scan the fonts directory."
+        return sendJSON(res, 500, {
+            error: "Unable to scan the fonts directory.",
+            code: "FONT_SCAN_FAILED"
         });
     }
 }
