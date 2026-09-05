@@ -16,10 +16,10 @@ Philosophy
 Less interface.
 More typography.
 
-No frameworks.
-No build tools.
-No accounts.
-No tracking.
+-No frameworks.
+-No build tools.
+-No accounts.
+-No tracking.
 
 Just a lightweight interface for your type collection.
 
@@ -43,60 +43,40 @@ Your Library
 
 Typace doesn't ship with a bundled font collection.
 
-Add your own font files to /fonts and describe them in fonts.json.
+Add your own font files to /fonts and see them on the site!
 
-Example:
-
-[
-  {
-    "name": "Instrument Serif",
-    "file": "Instrument Serif.woff2",
-    "type": "woff2"
-  },
-  {
-    "name": "Satoshi",
-    "file": "Satoshi.ttf",
-    "type": "ttf"
-  }
-]
 
 Supported formats include:
 
-WOFF2
+-WOFF2
 
-WOFF
+-TTF
 
-TTF
-
-OTF
-
-
-The file type can be provided explicitly in fonts.json, or inferred from the filename.
-
+-OTF
 
 ---
 
 Features
 
-Local font collection
+-Local font collection
 
-Search and browsing
+-Search and browsing
 
-Live typography previews
+-Live typography previews
 
-Font metadata
+-Font metadata
 
-Multiple font formats
+-Multiple font formats
 
-Downloadable font files
+-Downloadable font files
 
-Light and dark themes
+-Light and dark themes
 
-Responsive interface
+-Responsive interface
 
-Offline-friendly architecture
+-Offline-friendly architecture
 
-No framework or build step
+-No framework or build step
 
 
 
@@ -106,11 +86,11 @@ Architecture
 
 Typace keeps the stack deliberately small:
 
-HTML → CSS → JavaScript → fonts.json → /fonts
+HTML → CSS → JavaScript → api/fonts
 
-No database.
-No backend required for the basic library.
-No dependency pile pretending to be architecture.
+-No database.
+-No backend required for the basic library.
+-No dependency pile pretending to be architecture.
 
 
 ---
