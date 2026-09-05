@@ -1,41 +1,134 @@
-# Typace
+Typace
 
-> *Typography, beautifully organized.*
+> Typography, beautifully organized.
 
-A quiet, offline-first font library for collecting and browsing local fonts.
 
-Built with a single HTML file, a simple `fonts.json` index, and a `/fonts` directory.
+
+A quiet, minimal font library for collecting, browsing, previewing, and downloading typefaces.
+
+Built around a simple idea: your fonts, your library, no unnecessary machinery.
+
 
 ---
 
-## Philosophy
+Philosophy
 
-Less interface.  
+Less interface.
 More typography.
 
-No frameworks.  
-No build tools.  
-No unnecessary complexity.
+No frameworks.
+No build tools.
+No accounts.
+No tracking.
+
+Just a lightweight interface for your type collection.
+
 
 ---
 
-## Structure
+Structure
 
-```text
 Typace/
 ├── index.html
 ├── fonts.json
 └── fonts/
-```
+    ├── Font-One.woff2
+    ├── Font-Two.ttf
+    └── Font-Three.otf
+
 
 ---
 
-## Your Library
+Your Library
 
-Typace doesn't ship with fonts.
+Typace doesn't ship with a bundled font collection.
 
-Simply place your own font files inside `/fonts` and reference them in `fonts.json`.
+Add your own font files to /fonts and describe them in fonts.json.
+
+Example:
+
+[
+  {
+    "name": "Instrument Serif",
+    "file": "Instrument Serif.woff2",
+    "type": "woff2"
+  },
+  {
+    "name": "Satoshi",
+    "file": "Satoshi.ttf",
+    "type": "ttf"
+  }
+]
+
+Supported formats include:
+
+WOFF2
+
+WOFF
+
+TTF
+
+OTF
+
+
+The file type can be provided explicitly in fonts.json, or inferred from the filename.
+
 
 ---
 
-> *Typography deserves a quiet place.*
+Features
+
+Local font collection
+
+Search and browsing
+
+Live typography previews
+
+Font metadata
+
+Multiple font formats
+
+Downloadable font files
+
+Light and dark themes
+
+Responsive interface
+
+Offline-friendly architecture
+
+No framework or build step
+
+
+
+---
+
+Architecture
+
+Typace keeps the stack deliberately small:
+
+HTML → CSS → JavaScript → fonts.json → /fonts
+
+No database.
+No backend required for the basic library.
+No dependency pile pretending to be architecture.
+
+
+---
+
+CDN
+
+For deployments where fonts are hosted through GitHub, Typace can also load font files through jsDelivr, allowing the library to remain lightweight while serving the actual font assets from a CDN.
+
+
+---
+
+License
+
+Typace itself is open to whatever license you choose for the project.
+
+The fonts inside your library remain subject to their individual licenses. Make sure you have the right to redistribute any typeface you place in /fonts.
+
+
+---
+
+> Typography deserves a quiet place.
