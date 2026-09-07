@@ -22,6 +22,7 @@
 
     <meta name="author" content="Typace">
     <meta name="application-name" content="Typace">
+
     <meta
         name="robots"
         content="index, follow, max-image-preview:large"
@@ -29,7 +30,7 @@
 
     <meta
         name="theme-color"
-        content="#f3f3e8"
+        content="#fdfdf1"
     >
 
     <meta name="color-scheme" content="light dark">
@@ -127,6 +128,7 @@
         body {
             min-height: 100vh;
             margin: 0;
+
             padding:
                 calc(.8rem + env(safe-area-inset-top, 0px))
                 max(.75rem, 3vw)
@@ -142,8 +144,8 @@
             -webkit-tap-highlight-color: transparent;
 
             transition:
-                background .25s ease,
-                color .25s ease;
+                background .3s ease,
+                color .3s ease;
         }
 
         button,
@@ -155,7 +157,11 @@
         button {
             appearance: none;
             -webkit-appearance: none;
+
             border: 0;
+
+            cursor: pointer;
+
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -184,8 +190,8 @@
         ===================================================== */
 
         :root {
-            --bg: #f3ead5;
-            --surface: #f9f2e5;
+            --bg: #fdfdf1;
+            --surface: #fdfdf1;
             --surface-soft: #fff6c0;
 
             --text: #29251f;
@@ -193,7 +199,6 @@
 
             --border: #ded6c9;
 
-            /* Matched closely to the orange icon */
             --accent: #ee6716;
             --accent-dark: #c9520d;
             --accent-soft: rgba(238, 103, 22, .14);
@@ -218,6 +223,12 @@
                 BlinkMacSystemFont,
                 "Segoe UI",
                 sans-serif;
+
+            --spring:
+                cubic-bezier(.22, 1.25, .36, 1);
+
+            --spring-soft:
+                cubic-bezier(.2, .9, .25, 1.12);
         }
 
         body.dark {
@@ -282,12 +293,6 @@
             -webkit-user-select: none;
         }
 
-        /*
-         * Important:
-         * No background.
-         * No clipping.
-         * No rounded wrapper.
-         */
         .brand-logo {
             width: 48px;
             height: 54px;
@@ -304,6 +309,15 @@
             box-shadow: none;
 
             -webkit-user-drag: none;
+
+            transition:
+                transform .35s var(--spring);
+        }
+
+        .brand:hover .brand-logo {
+            transform:
+                rotate(-4deg)
+                scale(1.045);
         }
 
         .brand-name {
@@ -314,6 +328,7 @@
             );
 
             font-weight: 700;
+
             letter-spacing: -.045em;
             line-height: 1;
         }
@@ -330,6 +345,7 @@
         .toolbar {
             display: flex;
             align-items: center;
+
             gap: .45rem;
         }
 
@@ -348,22 +364,33 @@
 
             box-shadow: var(--shadow);
 
-            cursor: pointer;
-
             transition:
-                transform .18s ease,
+                transform .25s var(--spring),
                 background .18s ease,
                 color .18s ease,
-                border-color .18s ease;
+                border-color .18s ease,
+                box-shadow .25s ease;
         }
 
         .icon-button:hover {
-            transform: translateY(-2px);
+            transform:
+                translateY(-3px)
+                rotate(-3deg)
+                scale(1.04);
 
             background: var(--accent);
             color: #fff;
 
             border-color: var(--accent);
+
+            box-shadow: var(--shadow-hover);
+        }
+
+        .icon-button:active {
+            transform:
+                translateY(1px)
+                scale(.88)
+                rotate(0);
         }
 
         .icon-button svg {
@@ -377,7 +404,9 @@
 
         .sticky-tools {
             position: sticky;
+
             top: 0;
+
             z-index: 50;
 
             padding: .2rem 0 .8rem;
@@ -419,7 +448,8 @@
 
             transition:
                 border-color .2s ease,
-                box-shadow .2s ease;
+                box-shadow .3s var(--spring),
+                transform .3s var(--spring);
         }
 
         .search input::placeholder {
@@ -427,6 +457,8 @@
         }
 
         .search input:focus {
+            transform: translateY(-1px);
+
             border-color: var(--accent);
 
             box-shadow:
@@ -448,6 +480,19 @@
             transform: translateY(-50%);
 
             pointer-events: none;
+
+            transition:
+                color .2s ease,
+                transform .25s var(--spring);
+        }
+
+        .search:focus-within .search-icon {
+            color: var(--accent);
+
+            transform:
+                translateY(-50%)
+                scale(1.08)
+                rotate(-5deg);
         }
 
         .search-icon svg {
@@ -478,6 +523,7 @@
 
             display: inline-flex;
             align-items: center;
+
             gap: .4rem;
 
             padding: .35rem .8rem;
@@ -491,17 +537,34 @@
             box-shadow: var(--shadow);
 
             font-size: .72rem;
-            cursor: pointer;
+
+            transition:
+                transform .22s var(--spring),
+                border-color .18s ease,
+                color .18s ease,
+                box-shadow .22s ease;
         }
 
-        .sort-toggle svg {
-            width: 17px;
-            height: 17px;
+        .sort-toggle:hover {
+            transform:
+                translateY(-2px)
+                scale(1.015);
+
+            box-shadow: var(--shadow-hover);
+        }
+
+        .sort-toggle:active {
+            transform: scale(.93);
         }
 
         .sort-toggle.active {
             border-color: var(--accent);
             color: var(--accent);
+        }
+
+        .sort-toggle svg {
+            width: 17px;
+            height: 17px;
         }
 
         .sort-chips {
@@ -514,6 +577,7 @@
 
             display: flex;
             align-items: center;
+
             gap: .3rem;
 
             padding: .3rem;
@@ -529,20 +593,21 @@
             visibility: hidden;
 
             transform:
-                translateY(-5px)
-                scale(.98);
+                translateY(-7px)
+                scale(.95);
 
             transform-origin: top left;
 
             transition:
-                opacity .16s ease,
-                visibility .16s ease,
-                transform .16s ease;
+                opacity .18s ease,
+                visibility .18s ease,
+                transform .25s var(--spring);
         }
 
         .sort-chips.open {
             opacity: 1;
             visibility: visible;
+
             transform: none;
         }
 
@@ -560,17 +625,30 @@
 
             white-space: nowrap;
 
-            cursor: pointer;
+            transition:
+                transform .2s var(--spring),
+                background .18s ease,
+                color .18s ease;
         }
 
-        .sort-chip:hover,
+        .sort-chip:hover {
+            transform: translateY(-2px);
+        }
+
+        .sort-chip:active {
+            transform: scale(.9);
+        }
+
         .sort-chip.active {
             background: var(--accent);
             color: #fff;
+
+            animation:
+                pillPop .3s var(--spring);
         }
 
         /* =====================================================
-           DISPLAY MODE
+           VIEW SWITCH
         ===================================================== */
 
         .view-switch {
@@ -598,16 +676,40 @@
 
             font-size: .7rem;
 
-            cursor: pointer;
-
             transition:
+                transform .2s var(--spring),
                 background .18s ease,
                 color .18s ease;
+        }
+
+        .view-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .view-button:active {
+            transform: scale(.91);
         }
 
         .view-button.active {
             background: var(--accent);
             color: #fff;
+
+            animation:
+                pillPop .3s var(--spring);
+        }
+
+        @keyframes pillPop {
+            0% {
+                transform: scale(.84);
+            }
+
+            60% {
+                transform: scale(1.08);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         /* =====================================================
@@ -616,16 +718,13 @@
 
         .font-list {
             display: grid;
+
             grid-template-columns: 1fr;
 
             gap: .8rem;
 
             margin-top: .25rem;
         }
-
-        /*
-         * Cards view
-         */
 
         .font-card {
             --delay: 0ms;
@@ -643,10 +742,12 @@
                 clamp(1rem, 3vw, 1.35rem);
 
             border: 1px solid var(--border);
+
             border-radius:
                 clamp(21px, 4vw, 30px);
 
             background: var(--surface);
+
             box-shadow: var(--shadow);
 
             overflow: hidden;
@@ -654,14 +755,15 @@
             cursor: pointer;
 
             opacity: 0;
+
             transform:
                 translateY(28px)
                 scale(.985);
 
             transition:
-                transform .22s ease,
+                transform .3s var(--spring),
                 border-color .22s ease,
-                box-shadow .22s ease;
+                box-shadow .3s var(--spring);
         }
 
         .font-card.in-view {
@@ -675,6 +777,7 @@
         @keyframes cardCascade {
             from {
                 opacity: 0;
+
                 transform:
                     translateY(28px)
                     scale(.985);
@@ -682,6 +785,7 @@
 
             to {
                 opacity: 1;
+
                 transform:
                     translateY(0)
                     scale(1);
@@ -689,13 +793,19 @@
         }
 
         .font-card:hover {
-            transform: translateY(-3px);
+            transform:
+                translateY(-5px)
+                scale(1.008);
+
             border-color: var(--accent);
+
             box-shadow: var(--shadow-hover);
         }
 
         .font-card:active {
-            transform: scale(.992);
+            transform:
+                translateY(-1px)
+                scale(.975);
         }
 
         .font-card.loading .font-specimen {
@@ -716,6 +826,7 @@
                 clamp(1.05rem, 3.5vw, 1.35rem);
 
             font-weight: 700;
+
             letter-spacing: -.025em;
             line-height: 1.15;
         }
@@ -725,6 +836,7 @@
             min-height: 84px;
 
             margin-top: .75rem;
+
             padding: .2rem .1rem .65rem;
 
             overflow-x: auto;
@@ -748,6 +860,14 @@
             -moz-osx-font-smoothing: grayscale;
 
             scrollbar-width: thin;
+
+            transition:
+                transform .3s var(--spring),
+                color .2s ease;
+        }
+
+        .font-card:hover .font-specimen {
+            transform: translateY(-2px);
         }
 
         .font-specimen::-webkit-scrollbar {
@@ -794,11 +914,25 @@
 
             font-size: .7rem;
             font-weight: 600;
+
+            transition:
+                transform .25s var(--spring);
+        }
+
+        .font-card:hover .preview-label {
+            transform: translateX(2px);
         }
 
         .preview-label svg {
             width: 14px;
             height: 14px;
+
+            transition:
+                transform .3s var(--spring);
+        }
+
+        .font-card:hover .preview-label svg {
+            transform: translateX(3px);
         }
 
         /* =====================================================
@@ -814,6 +948,7 @@
             background: var(--border);
 
             border: 1px solid var(--border);
+
             border-radius: 22px;
 
             overflow: hidden;
@@ -838,14 +973,21 @@
 
             transition:
                 background .2s ease,
-                transform .2s ease;
+                transform .25s var(--spring);
         }
 
         .peeks .font-card:hover {
             transform: none;
+
             background: var(--surface-soft);
+
             border-color: transparent;
+
             box-shadow: none;
+        }
+
+        .peeks .font-card:active {
+            transform: scale(.965);
         }
 
         .peeks .font-name {
@@ -881,6 +1023,12 @@
             line-height: 1;
 
             letter-spacing: -.06em;
+        }
+
+        .peeks .font-card:hover .font-specimen {
+            transform:
+                translateY(-2px)
+                scale(1.025);
         }
 
         .peeks .font-card-bottom {
@@ -921,6 +1069,7 @@
             color: var(--muted);
 
             font-size: .72rem;
+
             text-align: center;
         }
 
@@ -953,36 +1102,189 @@
             color: var(--muted);
 
             font-size: .67rem;
+
             text-align: center;
         }
+
+        /* =====================================================
+           EMPTY STATE
+        ===================================================== */
 
         .empty {
             grid-column: 1 / -1;
 
-            padding: 4rem 1rem;
+            min-height: 300px;
+
+            display: flex;
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 3rem 1rem;
 
             color: var(--muted);
 
             text-align: center;
+
+            animation:
+                emptyIn .5s
+                var(--spring)
+                both;
         }
 
-        .empty-icon {
-            display: block;
+        @keyframes emptyIn {
+            from {
+                opacity: 0;
 
-            margin-bottom: .6rem;
+                transform:
+                    translateY(14px)
+                    scale(.97);
+            }
 
-            color: var(--accent);
+            to {
+                opacity: 1;
 
-            font-size: 2rem;
+                transform:
+                    translateY(0)
+                    scale(1);
+            }
+        }
+
+        .empty-doodle {
+            width: 120px;
+            height: 100px;
+
+            margin-bottom: .8rem;
+
+            overflow: visible;
+
+            color: var(--text);
+
+            transition:
+                transform .3s var(--spring);
+        }
+
+        .empty-doodle:hover {
+            animation:
+                doodleWobble .55s var(--spring);
+        }
+
+        @keyframes doodleWobble {
+            0% {
+                transform: rotate(0) scale(1);
+            }
+
+            35% {
+                transform:
+                    rotate(-4deg)
+                    scale(1.04);
+            }
+
+            70% {
+                transform:
+                    rotate(3deg)
+                    scale(1.02);
+            }
+
+            100% {
+                transform:
+                    rotate(0)
+                    scale(1);
+            }
+        }
+
+        .doodle-line {
+            fill: none;
+
+            stroke: currentColor;
+
+            stroke-width: 2.1;
+
+            stroke-linecap: round;
+            stroke-linejoin: round;
+
+            stroke-dasharray: 180;
+            stroke-dashoffset: 180;
+
+            animation:
+                doodleDraw .75s
+                cubic-bezier(.2, .8, .2, 1)
+                forwards;
+        }
+
+        .doodle-line:nth-child(2) {
+            animation-delay: .06s;
+        }
+
+        .doodle-line:nth-child(3) {
+            animation-delay: .12s;
+        }
+
+        .doodle-line:nth-child(4) {
+            animation-delay: .18s;
+        }
+
+        .doodle-line:nth-child(5) {
+            animation-delay: .24s;
+        }
+
+        .doodle-line:nth-child(6) {
+            animation-delay: .3s;
+        }
+
+        .doodle-line:nth-child(7) {
+            animation-delay: .36s;
+        }
+
+        .doodle-line:nth-child(8) {
+            animation-delay: .42s;
+        }
+
+        .doodle-line:nth-child(9) {
+            animation-delay: .48s;
+        }
+
+        .doodle-line:nth-child(10) {
+            animation-delay: .54s;
+        }
+
+        @keyframes doodleDraw {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .empty-title {
+            margin: 0 0 .25rem;
+
+            color: var(--text);
+
+            font-size: .95rem;
+            font-weight: 700;
+        }
+
+        .empty-copy {
+            max-width: 280px;
+
+            margin: 0;
+
+            color: var(--muted);
+
+            font-size: .7rem;
+
+            line-height: 1.5;
         }
 
         /* =====================================================
-           OVERLAY
+           OVERLAYS
         ===================================================== */
 
         .preview-overlay {
             position: fixed;
+
             inset: 0;
+
             z-index: 1000;
 
             background:
@@ -999,8 +1301,8 @@
             visibility: hidden;
 
             transition:
-                opacity .22s ease,
-                visibility .22s ease;
+                opacity .25s ease,
+                visibility .25s ease;
         }
 
         .preview-overlay.active {
@@ -1021,15 +1323,20 @@
 
             overflow-y: auto;
 
-            transform: translateY(24px);
+            overscroll-behavior: contain;
+
+            transform:
+                translateY(24px)
+                scale(.99);
 
             transition:
-                transform .28s
-                cubic-bezier(.2, .8, .2, 1);
+                transform .4s var(--spring);
         }
 
         .preview-overlay.active .preview-panel {
-            transform: translateY(0);
+            transform:
+                translateY(0)
+                scale(1);
         }
 
         .preview-header {
@@ -1059,9 +1366,26 @@
 
             font-size: .8rem;
 
-            cursor: pointer;
-
             box-shadow: var(--shadow);
+
+            transition:
+                transform .25s var(--spring),
+                border-color .18s ease,
+                box-shadow .25s ease;
+        }
+
+        .back-button:hover {
+            transform:
+                translateX(-2px)
+                translateY(-2px);
+
+            border-color: var(--accent);
+
+            box-shadow: var(--shadow-hover);
+        }
+
+        .back-button:active {
+            transform: scale(.93);
         }
 
         .back-button svg {
@@ -1075,7 +1399,9 @@
             flex: 1;
 
             overflow: hidden;
+
             text-overflow: ellipsis;
+
             white-space: nowrap;
 
             text-align: center;
@@ -1104,7 +1430,25 @@
             font-size: .75rem;
             font-weight: 600;
 
-            cursor: pointer;
+            box-shadow:
+                0 5px 18px var(--accent-soft);
+
+            transition:
+                transform .25s var(--spring),
+                box-shadow .25s ease;
+        }
+
+        .download-button:hover {
+            transform:
+                translateY(-2px)
+                scale(1.025);
+
+            box-shadow:
+                0 8px 25px var(--accent-soft);
+        }
+
+        .download-button:active {
+            transform: scale(.92);
         }
 
         .download-button svg {
@@ -1130,6 +1474,39 @@
             box-shadow: var(--shadow);
 
             overflow: hidden;
+        }
+
+        .preview-overlay.active .preview-hero {
+            animation:
+                previewBounce .55s
+                var(--spring)
+                both;
+        }
+
+        @keyframes previewBounce {
+            0% {
+                opacity: 0;
+
+                transform:
+                    translateY(18px)
+                    scale(.975);
+            }
+
+            65% {
+                opacity: 1;
+
+                transform:
+                    translateY(-3px)
+                    scale(1.005);
+            }
+
+            100% {
+                opacity: 1;
+
+                transform:
+                    translateY(0)
+                    scale(1);
+            }
         }
 
         .preview-name {
@@ -1164,23 +1541,33 @@
 
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+
+            transition:
+                font-size .22s var(--spring),
+                letter-spacing .22s ease,
+                line-height .22s ease;
         }
 
         .preview-characters {
             display: grid;
+
             gap: .7rem;
 
             margin-top: .8rem;
         }
 
         .character-line {
-            padding: .8rem .9rem 1rem;
+            padding:
+                .8rem .9rem 1rem;
 
-            border: 1px solid var(--preview-border);
+            border:
+                1px solid var(--preview-border);
 
             border-radius: 16px;
 
-            background: var(--preview-surface-soft);
+            background:
+                var(--preview-surface-soft);
+
             color: var(--preview-text);
 
             overflow-x: auto;
@@ -1193,10 +1580,20 @@
             line-height: 1.4;
 
             -webkit-font-smoothing: antialiased;
+
+            transition:
+                transform .25s var(--spring),
+                border-color .18s ease;
+        }
+
+        .character-line:hover {
+            transform: translateY(-2px);
+
+            border-color: var(--accent);
         }
 
         /* =====================================================
-           PREVIEW BACKGROUND
+           PREVIEW BACKGROUNDS
         ===================================================== */
 
         .preview-hero.preview-light {
@@ -1220,6 +1617,7 @@
         .preview-backgrounds {
             display: flex;
             align-items: center;
+
             gap: .3rem;
 
             margin-top: .9rem;
@@ -1230,7 +1628,9 @@
 
             padding: 0 .75rem;
 
-            border: 1px solid var(--border);
+            border:
+                1px solid var(--border);
+
             border-radius: 999px;
 
             background: var(--surface);
@@ -1238,7 +1638,19 @@
 
             font-size: .65rem;
 
-            cursor: pointer;
+            transition:
+                transform .2s var(--spring),
+                background .18s ease,
+                color .18s ease,
+                border-color .18s ease;
+        }
+
+        .background-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .background-button:active {
+            transform: scale(.91);
         }
 
         .background-button.active {
@@ -1246,6 +1658,9 @@
             color: #fff;
 
             border-color: var(--accent);
+
+            animation:
+                pillPop .3s var(--spring);
         }
 
         /* =====================================================
@@ -1254,6 +1669,7 @@
 
         .preview-controls {
             display: grid;
+
             gap: .7rem;
 
             margin-top: .8rem;
@@ -1267,14 +1683,33 @@
 
             min-height: 48px;
 
-            padding: .55rem .8rem;
+            padding:
+                .55rem .8rem;
 
-            border: 1px solid var(--preview-border);
+            border:
+                1px solid var(--preview-border);
 
             border-radius: 16px;
 
-            background: var(--preview-bg);
-            color: var(--preview-text);
+            background:
+                var(--preview-bg);
+
+            color:
+                var(--preview-text);
+
+            transition:
+                transform .25s var(--spring),
+                border-color .2s ease,
+                box-shadow .25s ease;
+        }
+
+        .control:focus-within {
+            transform: translateY(-2px);
+
+            border-color: var(--accent);
+
+            box-shadow:
+                0 5px 18px var(--accent-soft);
         }
 
         .control-label {
@@ -1291,6 +1726,26 @@
             min-width: 0;
 
             accent-color: var(--accent);
+
+            cursor: pointer;
+        }
+
+        .control input[type="range"]::-webkit-slider-thumb {
+            transition:
+                transform .18s var(--spring);
+        }
+
+        .control input[type="range"]:active::-webkit-slider-thumb {
+            transform: scale(1.3);
+        }
+
+        .control input[type="range"]::-moz-range-thumb {
+            transition:
+                transform .18s var(--spring);
+        }
+
+        .control input[type="range"]:active::-moz-range-thumb {
+            transform: scale(1.3);
         }
 
         .control-value {
@@ -1308,6 +1763,7 @@
             flex: 1;
 
             display: flex;
+
             flex-wrap: wrap;
 
             gap: .3rem;
@@ -1318,16 +1774,31 @@
 
             padding: 0 .6rem;
 
-            border: 1px solid var(--preview-border);
+            border:
+                1px solid var(--preview-border);
 
             border-radius: 999px;
 
-            background: var(--preview-surface-soft);
-            color: var(--preview-text);
+            background:
+                var(--preview-surface-soft);
+
+            color:
+                var(--preview-text);
 
             font-size: .68rem;
 
-            cursor: pointer;
+            transition:
+                transform .2s var(--spring),
+                background .18s ease,
+                border-color .18s ease;
+        }
+
+        .weight-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .weight-button:active {
+            transform: scale(.9);
         }
 
         .weight-button.active {
@@ -1335,10 +1806,14 @@
             color: #fff;
 
             border-color: var(--accent);
+
+            animation:
+                pillPop .3s var(--spring);
         }
 
         .preview-input {
             width: 100%;
+
             min-height: 92px;
 
             margin-top: .8rem;
@@ -1347,21 +1822,36 @@
 
             resize: vertical;
 
-            border: 1px solid var(--preview-border);
+            border:
+                1px solid var(--preview-border);
 
             border-radius: 18px;
 
             outline: none;
 
-            background: var(--preview-bg);
-            color: var(--preview-text);
+            background:
+                var(--preview-bg);
+
+            color:
+                var(--preview-text);
 
             font-size: .95rem;
+
             line-height: 1.5;
+
+            transition:
+                border-color .2s ease,
+                box-shadow .25s ease,
+                transform .25s var(--spring);
         }
 
         .preview-input:focus {
+            transform: translateY(-2px);
+
             border-color: var(--accent);
+
+            box-shadow:
+                0 5px 18px var(--accent-soft);
         }
 
         /* =====================================================
@@ -1370,21 +1860,37 @@
 
         .resource-grid {
             display: grid;
+
             gap: .8rem;
 
             margin-top: .8rem;
         }
 
         .resource-card {
-            border: 1px solid var(--border);
+            border:
+                1px solid var(--border);
 
             border-radius: 20px;
 
-            background: var(--surface);
+            background:
+                var(--surface);
 
-            box-shadow: var(--shadow);
+            box-shadow:
+                var(--shadow);
 
             overflow: hidden;
+
+            transition:
+                transform .28s var(--spring),
+                box-shadow .28s ease,
+                border-color .2s ease;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-3px);
+
+            box-shadow:
+                var(--shadow-hover);
         }
 
         .resource-header {
@@ -1396,7 +1902,8 @@
 
             padding: .85rem 1rem;
 
-            border-bottom: 1px solid var(--border);
+            border-bottom:
+                1px solid var(--border);
         }
 
         .resource-title {
@@ -1439,34 +1946,77 @@
                 monospace;
 
             font-size: .7rem;
+
             line-height: 1.65;
 
             overflow-x: auto;
 
             white-space: pre-wrap;
+
             overflow-wrap: anywhere;
         }
 
         .resource-copy {
             height: 32px;
 
+            margin-top: .7rem;
+
             padding: 0 .7rem;
 
-            border: 1px solid var(--border);
+            border:
+                1px solid var(--border);
 
             border-radius: 999px;
 
-            background: var(--surface-soft);
+            background:
+                var(--surface-soft);
+
             color: var(--text);
 
             font-size: .65rem;
 
-            cursor: pointer;
+            transition:
+                transform .2s var(--spring),
+                background .18s ease,
+                color .18s ease,
+                border-color .18s ease;
         }
 
         .resource-copy:hover {
+            transform: translateY(-2px);
+
             border-color: var(--accent);
+
             color: var(--accent);
+        }
+
+        .resource-copy:active {
+            transform: scale(.91);
+        }
+
+        .resource-copy.copied {
+            background: var(--accent);
+
+            border-color: var(--accent);
+
+            color: #fff;
+
+            animation:
+                copyPop .35s var(--spring);
+        }
+
+        @keyframes copyPop {
+            0% {
+                transform: scale(.88);
+            }
+
+            60% {
+                transform: scale(1.08);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         /* =====================================================
@@ -1477,11 +2027,13 @@
             color: var(--muted);
 
             font-size: .85rem;
+
             line-height: 1.65;
         }
 
         .social-links {
             display: grid;
+
             gap: .55rem;
 
             margin-top: 1rem;
@@ -1494,24 +2046,33 @@
 
             padding: .85rem 1rem;
 
-            border: 1px solid var(--border);
+            border:
+                1px solid var(--border);
 
             border-radius: 16px;
 
-            background: var(--surface);
+            background:
+                var(--surface);
 
             color: var(--text);
 
             text-decoration: none;
 
             transition:
-                border-color .18s ease,
-                transform .18s ease;
+                border-color .2s ease,
+                transform .25s var(--spring),
+                box-shadow .25s ease;
         }
 
         .social-link:hover {
             border-color: var(--accent);
-            transform: translateY(-1px);
+
+            transform:
+                translateY(-2px)
+                translateX(2px);
+
+            box-shadow:
+                var(--shadow);
         }
 
         .social-name {
@@ -1571,6 +2132,7 @@
 
             .font-card {
                 min-height: 230px;
+
                 padding: 1.4rem;
             }
         }
@@ -1662,7 +2224,20 @@
 
                 overflow-x: auto;
             }
+
+            .empty {
+                min-height: 260px;
+            }
+
+            .empty-doodle {
+                width: 105px;
+                height: 88px;
+            }
         }
+
+        /* =====================================================
+           REDUCED MOTION
+        ===================================================== */
 
         @media (prefers-reduced-motion: reduce) {
             *,
@@ -1673,6 +2248,9 @@
                 animation-duration:
                     .001ms !important;
 
+                animation-iteration-count:
+                    1 !important;
+
                 transition-duration:
                     .001ms !important;
             }
@@ -1682,7 +2260,7 @@
 
 <body>
 
-<main class="app">
+<div class="app">
 
     <!-- =====================================================
          HEADER
@@ -1818,6 +2396,7 @@
                         <path d="M8 6h13"/>
                         <path d="M8 12h13"/>
                         <path d="M8 18h13"/>
+
                         <path d="M3 6h.01"/>
                         <path d="M3 12h.01"/>
                         <path d="M3 18h.01"/>
@@ -1913,19 +2492,17 @@
         0 fonts
     </div>
 
-</main>
+</div>
+
 
 <!-- =========================================================
-     ABOUT
-========================================================= -->
+     ABOUT OVERLAY
+========================================================== -->
 
 <div
     class="preview-overlay"
     id="aboutOverlay"
-    role="dialog"
-    aria-modal="true"
     aria-hidden="true"
-    aria-labelledby="aboutTitle"
 >
 
     <div class="preview-panel">
@@ -1951,7 +2528,6 @@
 
             <div
                 class="preview-title"
-                id="aboutTitle"
             >
                 About Typace
             </div>
@@ -2017,17 +2593,15 @@
 
 </div>
 
+
 <!-- =========================================================
-     FONT PREVIEW
-========================================================= -->
+     FONT PREVIEW OVERLAY
+========================================================== -->
 
 <div
     class="preview-overlay"
     id="previewOverlay"
-    role="dialog"
-    aria-modal="true"
     aria-hidden="true"
-    aria-labelledby="previewTitle"
 >
 
     <div class="preview-panel">
@@ -2416,464 +2990,1765 @@
 
 </div>
 
+
 <script>
+/* ============================================================
+   TYPACE
+   ============================================================ */
+
 (() => {
     "use strict";
 
-    /* =========================================================
+    /* ========================================================
        CONFIG
-    ========================================================= */
+    ======================================================== */
 
-    const CONFIG = Object.freeze({
-        API_URL: "/api/fonts",
+    const API_URL = "/api/fonts";
 
-        CDN_BASE:
-            "https://cdn.jsdelivr.net/gh/aceyash-dev/Typace@main/fonts/",
+    const CDN_BASE =
+        "https://cdn.jsdelivr.net/gh/aceyash-dev/Typace@main/fonts/";
 
-        BATCH_SIZE: 20,
+    const BATCH_SIZE = 20;
 
-        SPECIMEN:
-            "The Quick Brown Fox Jumps Over The Lazy Dog",
-
-        FONT_EXTENSIONS:
-            /\.(woff2?|ttf|otf|eot)$/i,
-
-        TYPE_ALIASES: {
-            "font/woff2": "woff2",
-            "font/woff": "woff",
-            "font/ttf": "ttf",
-            "font/otf": "otf",
-            "truetype": "ttf",
-            "opentype": "otf",
-            "embedded-opentype": "eot"
-        },
-
-        FORMAT_MAP: {
-            woff2: "woff2",
-            woff: "woff",
-            ttf: "truetype",
-            otf: "opentype",
-            eot: "embedded-opentype"
-        }
-    });
-
-    /* =========================================================
-       DOM
-    ========================================================= */
-
-    const $ = id =>
-        document.getElementById(id);
-
-    const els = {
-        body: document.body,
-
-        fontList: $("fontList"),
-        search: $("searchInput"),
-        stats: $("stats"),
-        status: $("loadStatus"),
-
-        aboutButton: $("aboutButton"),
-        theme: $("themeButton"),
-
-        aboutOverlay: $("aboutOverlay"),
-        aboutBack: $("aboutBack"),
-
-        previewOverlay: $("previewOverlay"),
-        previewBack: $("previewBack"),
-
-        previewTitle: $("previewTitle"),
-        previewFontName: $("previewFontName"),
-        previewHero: $("previewHero"),
-        previewDisplay: $("previewDisplay"),
-
-        lowercase: $("lowercasePreview"),
-        uppercase: $("uppercasePreview"),
-        numbers: $("numbersPreview"),
-
-        previewInput: $("previewInput"),
-        download: $("previewDownload"),
-
-        size: $("sizeSlider"),
-        sizeValue: $("sizeValue"),
-
-        lineHeight: $("lineHeightSlider"),
-        lineHeightValue: $("lineHeightValue"),
-
-        spacing: $("letterSpacingSlider"),
-        spacingValue: $("letterSpacingValue"),
-
-        weights: $("weightOptions"),
-
-        backgrounds:
-            document.querySelector(
-                ".preview-backgrounds"
-            ),
-
-        cdn: $("cdnCode"),
-        cdnType: $("cdnType"),
-
-        usage: $("usageCode"),
-
-        copyCdn: $("copyCdn"),
-        copyUsage: $("copyUsage"),
-
-        sortToggle: $("sortToggle"),
-        sortChips: $("sortChips"),
-
-        viewButtons:
-            document.querySelectorAll(
-                ".view-button"
-            )
+    const FONT_FORMATS = {
+        woff2: "woff2",
+        woff: "woff",
+        ttf: "truetype",
+        otf: "opentype",
+        eot: "embedded-opentype"
     };
 
-    /* =========================================================
+    const FONT_MIME = {
+        woff2: "font/woff2",
+        woff: "font/woff",
+        ttf: "font/ttf",
+        otf: "font/otf",
+        eot: "application/vnd.ms-fontobject"
+    };
+
+    /* ========================================================
        STATE
-    ========================================================= */
+    ======================================================== */
 
     const state = {
         fonts: [],
         filtered: [],
 
-        current: null,
+        search: "",
 
         sort: "az",
+
         view: "cards",
 
-        visible: CONFIG.BATCH_SIZE,
+        rendered: 0,
 
-        loaded: new Set(),
-        loading: new Set(),
+        loading: false,
 
-        observer: null,
-        animationObserver: null,
+        previewFont: null,
 
-        searchTimer: null,
+        previewUrl: "",
 
-        dark: false,
-        previewBackground: "light",
-
-        previewRequest: 0,
-
-        lastFocus: null
+        previewFace: null
     };
 
-    /* =========================================================
-       STORAGE
-    ========================================================= */
+    /* ========================================================
+       ELEMENTS
+    ======================================================== */
 
-    function storageGet(key, fallback) {
-        try {
-            const value =
-                localStorage.getItem(
-                    `typace_${key}`
-                );
+    const $ = (selector, root = document) =>
+        root.querySelector(selector);
 
-            return value === null
-                ? fallback
-                : JSON.parse(value);
-        } catch {
-            return fallback;
+    const $$ = (selector, root = document) =>
+        [...root.querySelectorAll(selector)];
+
+    const fontList = $("#fontList");
+    const loadStatus = $("#loadStatus");
+    const stats = $("#stats");
+
+    const searchInput = $("#searchInput");
+
+    const sortToggle = $("#sortToggle");
+    const sortChips = $("#sortChips");
+
+    const themeButton = $("#themeButton");
+
+    const aboutButton = $("#aboutButton");
+    const aboutBack = $("#aboutBack");
+    const aboutOverlay = $("#aboutOverlay");
+
+    const previewOverlay = $("#previewOverlay");
+    const previewBack = $("#previewBack");
+
+    const previewTitle = $("#previewTitle");
+    const previewFontName = $("#previewFontName");
+
+    const previewHero = $("#previewHero");
+    const previewDisplay = $("#previewDisplay");
+
+    const lowercasePreview = $("#lowercasePreview");
+    const uppercasePreview = $("#uppercasePreview");
+    const numbersPreview = $("#numbersPreview");
+
+    const previewInput = $("#previewInput");
+
+    const sizeSlider = $("#sizeSlider");
+    const sizeValue = $("#sizeValue");
+
+    const lineHeightSlider = $("#lineHeightSlider");
+    const lineHeightValue = $("#lineHeightValue");
+
+    const letterSpacingSlider = $("#letterSpacingSlider");
+    const letterSpacingValue = $("#letterSpacingValue");
+
+    const weightOptions = $("#weightOptions");
+
+    const previewDownload = $("#previewDownload");
+
+    const cdnType = $("#cdnType");
+    const cdnCode = $("#cdnCode");
+
+    const usageCode = $("#usageCode");
+
+    const copyCdn = $("#copyCdn");
+    const copyUsage = $("#copyUsage");
+
+    /* ========================================================
+       ICONS
+    ======================================================== */
+
+    const ICON_SUN = `
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+        >
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2"/>
+            <path d="M12 20v2"/>
+            <path d="m4.93 4.93 1.41 1.41"/>
+            <path d="m17.66 17.66 1.41 1.41"/>
+            <path d="M2 12h2"/>
+            <path d="M20 12h2"/>
+            <path d="m6.34 17.66-1.41 1.41"/>
+            <path d="m19.07 4.93-1.41 1.41"/>
+        </svg>
+    `;
+
+    const ICON_MOON = `
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+        >
+            <path
+                d="M21 12.8A8.5 8.5 0 1 1
+                   11.2 3
+                   6.5 6.5 0 0 0
+                   21 12.8Z"
+            />
+        </svg>
+    `;
+
+    const ICON_ARROW = `
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <path d="M5 12h14"/>
+            <path d="m13 6 6 6-6 6"/>
+        </svg>
+    `;
+
+    /* ========================================================
+       THEME
+    ======================================================== */
+
+    function getPreferredTheme() {
+        const saved =
+            localStorage.getItem("typace-theme");
+
+        if (saved === "dark" || saved === "light") {
+            return saved;
         }
+
+        return window.matchMedia(
+            "(prefers-color-scheme: dark)"
+        ).matches
+            ? "dark"
+            : "light";
     }
 
-    function storageSet(key, value) {
-        try {
-            localStorage.setItem(
-                `typace_${key}`,
-                JSON.stringify(value)
-            );
-        } catch {}
+    function setTheme(theme) {
+        document.body.classList.toggle(
+            "dark",
+            theme === "dark"
+        );
+
+        localStorage.setItem(
+            "typace-theme",
+            theme
+        );
+
+        themeButton.innerHTML =
+            theme === "dark"
+                ? ICON_SUN
+                : ICON_MOON;
+
+        themeButton.setAttribute(
+            "aria-label",
+            theme === "dark"
+                ? "Switch to light mode"
+                : "Switch to dark mode"
+        );
     }
 
-    /* =========================================================
-       HELPERS
-    ========================================================= */
+    themeButton.addEventListener(
+        "click",
+        () => {
+            const next =
+                document.body.classList.contains("dark")
+                    ? "light"
+                    : "dark";
 
-    function escapeHTML(value) {
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
+            setTheme(next);
+        }
+    );
 
-    function stripExtension(value) {
-        return String(value || "")
-            .replace(
-                CONFIG.FONT_EXTENSIONS,
+    setTheme(getPreferredTheme());
+
+    /* ========================================================
+       FONT NORMALIZATION
+    ======================================================== */
+
+    function normalizeFont(raw) {
+        if (!raw || typeof raw !== "object") {
+            return null;
+        }
+
+        const file =
+            raw.file ||
+            raw.path ||
+            raw.filename ||
+            "";
+
+        const name =
+            raw.name ||
+            raw.family ||
+            file
+                .split("/")
+                .pop()
+                ?.replace(/\.[^.]+$/, "") ||
+            "Untitled";
+
+        const extension =
+            String(
+                raw.extension ||
+                file.split(".").pop() ||
                 ""
-            );
-    }
-
-    function filenameFromPath(value) {
-        return (
-            String(value || "")
-                .split("/")
-                .filter(Boolean)
-                .pop() || ""
-        );
-    }
-
-    function normalizeType(value) {
-        const raw =
-            String(value || "")
-                .trim()
+            )
                 .toLowerCase()
-                .replace(/^\./, "");
+                .replace(".", "");
 
-        return (
-            CONFIG.TYPE_ALIASES[raw] ||
-            raw
-        );
+        const format =
+            String(
+                raw.format ||
+                FONT_FORMATS[extension] ||
+                extension
+            ).toLowerCase();
+
+        const weight =
+            raw.weight ||
+            inferWeight(name);
+
+        const style =
+            raw.style ||
+            inferStyle(name);
+
+        const category =
+            raw.category ||
+            "Typeface";
+
+        return {
+            ...raw,
+
+            name: String(name),
+
+            file: String(file).replace(/^\/+/, ""),
+
+            extension,
+
+            format,
+
+            weight: String(weight),
+
+            style: String(style),
+
+            category: String(category)
+        };
     }
 
-    function extensionFromFile(file) {
-        const match =
-            String(file || "").match(
-                CONFIG.FONT_EXTENSIONS
-            );
+    function inferWeight(name) {
+        const value =
+            String(name).toLowerCase();
 
-        return match
-            ? match[0]
-                  .slice(1)
-                  .toLowerCase()
-            : "";
+        const weights = [
+            "100",
+            "200",
+            "300",
+            "400",
+            "500",
+            "600",
+            "700",
+            "800",
+            "900"
+        ];
+
+        for (const weight of weights) {
+            if (
+                value.includes(weight)
+            ) {
+                return weight;
+            }
+        }
+
+        const names = [
+            ["thin", "100"],
+            ["extralight", "200"],
+            ["extra light", "200"],
+            ["light", "300"],
+            ["regular", "400"],
+            ["normal", "400"],
+            ["medium", "500"],
+            ["semibold", "600"],
+            ["semi bold", "600"],
+            ["bold", "700"],
+            ["extrabold", "800"],
+            ["extra bold", "800"],
+            ["black", "900"]
+        ];
+
+        for (const [label, weight] of names) {
+            if (value.includes(label)) {
+                return weight;
+            }
+        }
+
+        return "400";
     }
 
-    function formatFromType(type) {
-        return (
-            CONFIG.FORMAT_MAP[type] ||
-            type ||
-            ""
-        );
+    function inferStyle(name) {
+        const value =
+            String(name).toLowerCase();
+
+        if (
+            value.includes("italic") ||
+            value.includes("oblique")
+        ) {
+            return "italic";
+        }
+
+        return "normal";
     }
 
-    function fontURL(file) {
+    /* ========================================================
+       FONT URL
+    ======================================================== */
+
+    function getFontUrl(font) {
+        if (!font?.file) {
+            return "";
+        }
+
         return (
-            CONFIG.CDN_BASE +
-            String(file)
+            CDN_BASE +
+            font.file
                 .split("/")
-                .filter(Boolean)
-                .map(encodeURIComponent)
+                .map(
+                    segment =>
+                        encodeURIComponent(segment)
+                )
                 .join("/")
         );
     }
 
-    function fontFamily(name) {
-        return `'${String(name)
-            .replace(/\\/g, "")
-            .replace(/'/g, "\\'")}', sans-serif`;
-    }
+    /* ========================================================
+       FONT FACE
+    ======================================================== */
 
-    function safeFilename(file) {
-        return filenameFromPath(file)
-            .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_");
-    }
+    const loadedFaces =
+        new Map();
 
-    /* =========================================================
-       API NORMALIZATION
-    ========================================================= */
+    async function loadFont(font) {
+        const url =
+            getFontUrl(font);
 
-    function normalizeFont(entry) {
-        if (typeof entry === "string") {
-            const file =
-                filenameFromPath(
-                    entry.trim()
-                );
-
-            if (!file) {
-                return null;
-            }
-
-            const type =
-                extensionFromFile(file) ||
-                "woff2";
-
-            return {
-                name: stripExtension(file),
-                file,
-                type,
-                format:
-                    formatFromType(type),
-                weight: 400,
-                style: "normal"
-            };
-        }
-
-        if (
-            !entry ||
-            typeof entry !== "object"
-        ) {
+        if (!url) {
             return null;
         }
 
-        let file =
-            entry.file ||
-            entry.filename ||
-            entry.path ||
-            "";
+        const family =
+            `Typace-${font.name.replace(
+                /[^a-zA-Z0-9_-]/g,
+                "-"
+            )}-${font.weight}-${font.style}`;
 
-        let name =
-            entry.name ||
-            entry.fontName ||
-            entry.family ||
-            "";
+        const key =
+            `${family}|${url}`;
 
-        /*
-         * Prefer the real filename extension.
-         * If there isn't one, use the API type.
-         */
-
-        let type =
-            extensionFromFile(file);
-
-        if (!type) {
-            type =
-                normalizeType(
-                    entry.type ||
-                    entry.format ||
-                    entry.extension
-                );
+        if (loadedFaces.has(key)) {
+            return loadedFaces.get(key);
         }
 
-        if (!file && name) {
-            file =
-                `${name}.${type || "woff2"}`;
-        }
-
-        if (!name && file) {
-            name =
-                stripExtension(
-                    filenameFromPath(file)
-                );
-        }
-
-        if (!file || !name) {
-            return null;
-        }
-
-        file =
-            filenameFromPath(file);
-
-        name =
-            stripExtension(
-                filenameFromPath(name)
-            );
-
-        type =
-            extensionFromFile(file) ||
-            type ||
+        const format =
+            FONT_FORMATS[
+                font.extension
+            ] ||
+            font.format ||
             "woff2";
 
-        return {
-            name,
-            file,
+        const face =
+            new FontFace(
+                family,
+                `url("${url}") format("${format}")`,
+                {
+                    weight:
+                        font.weight || "400",
 
-            type,
+                    style:
+                        font.style || "normal",
 
-            format:
-                formatFromType(type),
+                    display:
+                        "swap"
+                }
+            );
 
-            weight:
-                Number(entry.weight) || 400,
+        loadedFaces.set(
+            key,
+            face.load()
+                .then(loaded => {
+                    document.fonts.add(loaded);
 
-            style:
-                entry.style || "normal"
-        };
+                    return loaded;
+                })
+                .catch(error => {
+                    loadedFaces.delete(key);
+
+                    console.warn(
+                        `Typace: failed to load ${font.name}`,
+                        error
+                    );
+
+                    return null;
+                })
+        );
+
+        return loadedFaces.get(key);
     }
 
-    function normalizeFonts(data) {
-        const seen = new Set();
+    function getFamily(font) {
+        return `Typace-${font.name.replace(
+            /[^a-zA-Z0-9_-]/g,
+            "-"
+        )}-${font.weight}-${font.style}`;
+    }
 
-        return data
-            .map(normalizeFont)
-            .filter(Boolean)
-            .filter(font => {
-                const key =
-                    font.file.toLowerCase();
+    /* ========================================================
+       FONT DISPLAY
+    ======================================================== */
 
-                if (seen.has(key)) {
-                    return false;
+    function fontMeta(font) {
+        const parts = [];
+
+        if (font.category) {
+            parts.push(font.category);
+        }
+
+        if (font.weight) {
+            parts.push(`Weight ${font.weight}`);
+        }
+
+        if (font.style && font.style !== "normal") {
+            parts.push(font.style);
+        }
+
+        if (font.extension) {
+            parts.push(
+                font.extension.toUpperCase()
+            );
+        }
+
+        return parts.join(" · ");
+    }
+
+    function specimenFor(font) {
+        return (
+            font.preview ||
+            "Aa"
+        );
+    }
+
+    /* ========================================================
+       EMPTY STATE
+    ======================================================== */
+
+    function emptyState() {
+        return `
+            <div class="empty">
+
+                <svg
+                    class="empty-doodle"
+                    viewBox="0 0 120 100"
+                    aria-hidden="true"
+                >
+                    <path
+                        class="doodle-line"
+                        d="
+                            M39 40
+                            C35 31 39 21 48 18
+                            C58 14 70 18 74 27
+                            C78 37 72 47 62 50
+                            C51 53 43 49 39 40Z
+                        "
+                    />
+
+                    <path
+                        class="doodle-line"
+                        d="
+                            M48 32
+                            C49 30 51 30 52 32
+                        "
+                    />
+
+                    <path
+                        class="doodle-line"
+                        d="
+                            M62 32
+                            C63 30 65 30 66 32
+                        "
+                    />
+
+                    <path
+                        class="doodle-line"
+                        d="
+                            M54 40
+                            C57 38 60 38 62 40
+                        "
+                    />
+
+                    <path
+                        class="doodle-line"
+                        d="
+                            M45 53
+                            C42 62 42 73 43 83
+                        "
+                    />
+
+                    <path
+                        class="doodle-line"
+                        d="
+                            M69 53
+                            C74 61 77 72 78 82
+                        "
+                    />
+
+                    <path
+                        class="doodle-line"
+                        d="
+                            M44 61
+                            C35 60 29 64 25 70
+                        "
+                    />
+
+                    <path
+                        class="doodle-line"
+                        d="
+                            M70 61
+                            C79 59 87 62 94 68
+                        "
+                    />
+
+                    <path
+                        class="doodle-line"
+                        d="
+                            M20 35
+                            l-5 -3
+                        "
+                    />
+
+                    <path
+                        class="doodle-line"
+                        d="
+                            M91 31
+                            l5 -4
+                        "
+                    />
+
+                    <path
+                        class="doodle-line"
+                        d="
+                            M98 48
+                            h6
+                        "
+                    />
+                </svg>
+
+                <p class="empty-title">
+                    No fonts found
+                </p>
+
+                <p class="empty-copy">
+                    Nothing matched your search.
+                    Try another name or clear the search.
+                </p>
+
+            </div>
+        `;
+    }
+
+    /* ========================================================
+       CARD
+    ======================================================== */
+
+    function createCard(font, index) {
+        const card =
+            document.createElement("article");
+
+        card.className = "font-card";
+
+        card.tabIndex = 0;
+
+        card.setAttribute(
+            "role",
+            "button"
+        );
+
+        card.setAttribute(
+            "aria-label",
+            `Preview ${font.name}`
+        );
+
+        card.style.setProperty(
+            "--delay",
+            `${Math.min(index % BATCH_SIZE, 19) * 32}ms`
+        );
+
+        const family =
+            getFamily(font);
+
+        card.innerHTML = `
+            <div>
+                <div class="font-name">
+                    ${escapeHTML(font.name)}
+                </div>
+
+                <div
+                    class="font-specimen"
+                    style="
+                        font-family:
+                        ${escapeCSSFamily(family)};
+                    "
+                >
+                    ${escapeHTML(specimenFor(font))}
+                </div>
+            </div>
+
+            <div class="font-card-bottom">
+
+                <div class="font-meta">
+                    ${escapeHTML(fontMeta(font))}
+                </div>
+
+                <span class="preview-label">
+                    Preview
+                    ${ICON_ARROW}
+                </span>
+
+            </div>
+        `;
+
+        const specimen =
+            $(".font-specimen", card);
+
+        loadFont(font)
+            .then(face => {
+                if (!face) {
+                    card.classList.remove(
+                        "loading"
+                    );
+
+                    return;
                 }
 
-                seen.add(key);
+                specimen.style.fontFamily =
+                    `"${family}"`;
 
-                return true;
+                card.classList.remove(
+                    "loading"
+                );
+            });
+
+        card.addEventListener(
+            "click",
+            () => openPreview(font)
+        );
+
+        card.addEventListener(
+            "keydown",
+            event => {
+                if (
+                    event.key === "Enter" ||
+                    event.key === " "
+                ) {
+                    event.preventDefault();
+
+                    openPreview(font);
+                }
+            }
+        );
+
+        return card;
+    }
+
+    /* ========================================================
+       ESCAPING
+    ======================================================== */
+
+    function escapeHTML(value) {
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function escapeCSSFamily(value) {
+        return `"${String(value)
+            .replaceAll("\\", "\\\\")
+            .replaceAll('"', '\\"')}"`;
+    }
+
+    /* ========================================================
+       RENDER
+    ======================================================== */
+
+    function render(reset = true) {
+        if (reset) {
+            fontList.innerHTML = "";
+
+            state.rendered = 0;
+        }
+
+        const fonts =
+            getSortedFilteredFonts();
+
+        state.filtered = fonts;
+
+        stats.textContent =
+            `${fonts.length.toLocaleString()} ${
+                fonts.length === 1
+                    ? "font"
+                    : "fonts"
+            }`;
+
+        if (!fonts.length) {
+            loadStatus.textContent = "";
+
+            fontList.className =
+                `font-list ${
+                    state.view === "peeks"
+                        ? "peeks"
+                        : ""
+                }`;
+
+            fontList.innerHTML =
+                emptyState();
+
+            return;
+        }
+
+        fontList.className =
+            `font-list ${
+                state.view === "peeks"
+                    ? "peeks"
+                    : ""
+            }`;
+
+        renderNextBatch();
+    }
+
+    function renderNextBatch() {
+        const fonts =
+            state.filtered;
+
+        const start =
+            state.rendered;
+
+        const end =
+            Math.min(
+                start + BATCH_SIZE,
+                fonts.length
+            );
+
+        if (start >= end) {
+            updateLoadStatus();
+            return;
+        }
+
+        const fragment =
+            document.createDocumentFragment();
+
+        for (
+            let index = start;
+            index < end;
+            index++
+        ) {
+            fragment.appendChild(
+                createCard(
+                    fonts[index],
+                    index
+                )
+            );
+        }
+
+        fontList.appendChild(fragment);
+
+        state.rendered = end;
+
+        requestAnimationFrame(() => {
+            const cards =
+                $$(".font-card", fontList);
+
+            cards
+                .slice(start, end)
+                .forEach(card => {
+                    card.classList.add(
+                        "in-view"
+                    );
+                });
+        });
+
+        updateLoadStatus();
+    }
+
+    function updateLoadStatus() {
+        if (
+            state.rendered <
+            state.filtered.length
+        ) {
+            loadStatus.innerHTML = `
+                <span class="spinner"></span>
+                Loading more fonts…
+            `;
+        } else {
+            loadStatus.textContent = "";
+        }
+    }
+
+    /* ========================================================
+       FILTER / SORT
+    ======================================================== */
+
+    function getSortedFilteredFonts() {
+        const query =
+            state.search
+                .trim()
+                .toLowerCase();
+
+        let result =
+            state.fonts.filter(font => {
+                if (!query) {
+                    return true;
+                }
+
+                const haystack =
+                    [
+                        font.name,
+                        font.category,
+                        font.style,
+                        font.weight,
+                        font.extension,
+                        font.format
+                    ]
+                        .filter(Boolean)
+                        .join(" ")
+                        .toLowerCase();
+
+                return haystack.includes(query);
+            });
+
+        if (state.sort === "az") {
+            result.sort(
+                (a, b) =>
+                    a.name.localeCompare(
+                        b.name,
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    )
+            );
+        }
+
+        if (state.sort === "za") {
+            result.sort(
+                (a, b) =>
+                    b.name.localeCompare(
+                        a.name,
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    )
+            );
+        }
+
+        return result;
+    }
+
+    /* ========================================================
+       SEARCH
+    ======================================================== */
+
+    let searchTimer;
+
+    searchInput.addEventListener(
+        "input",
+        () => {
+            clearTimeout(searchTimer);
+
+            searchTimer =
+                setTimeout(() => {
+                    state.search =
+                        searchInput.value;
+
+                    render(true);
+                }, 90);
+        }
+    );
+
+    /* ========================================================
+       SORT
+    ======================================================== */
+
+    sortToggle.addEventListener(
+        "click",
+        event => {
+            event.stopPropagation();
+
+            const open =
+                sortChips.classList.toggle(
+                    "open"
+                );
+
+            sortToggle.classList.toggle(
+                "active",
+                open
+            );
+
+            sortToggle.setAttribute(
+                "aria-expanded",
+                String(open)
+            );
+        }
+    );
+
+    $$(".sort-chip").forEach(
+        button => {
+            button.addEventListener(
+                "click",
+                () => {
+                    state.sort =
+                        button.dataset.sort;
+
+                    $$(".sort-chip")
+                        .forEach(chip => {
+                            chip.classList.toggle(
+                                "active",
+                                chip === button
+                            );
+                        });
+
+                    sortChips.classList.remove(
+                        "open"
+                    );
+
+                    sortToggle.classList.remove(
+                        "active"
+                    );
+
+                    sortToggle.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                    render(true);
+                }
+            );
+        }
+    );
+
+    document.addEventListener(
+        "click",
+        event => {
+            if (
+                !event.target.closest(
+                    ".sort-area"
+                )
+            ) {
+                sortChips.classList.remove(
+                    "open"
+                );
+
+                sortToggle.classList.remove(
+                    "active"
+                );
+
+                sortToggle.setAttribute(
+                    "aria-expanded",
+                    "false"
+                );
+            }
+        }
+    );
+
+    /* ========================================================
+       VIEW
+    ======================================================== */
+
+    $$(".view-button").forEach(
+        button => {
+            button.addEventListener(
+                "click",
+                () => {
+                    state.view =
+                        button.dataset.view;
+
+                    $$(".view-button")
+                        .forEach(item => {
+                            item.classList.toggle(
+                                "active",
+                                item === button
+                            );
+                        });
+
+                    render(true);
+
+                    localStorage.setItem(
+                        "typace-view",
+                        state.view
+                    );
+                }
+            );
+        }
+    );
+
+    const savedView =
+        localStorage.getItem(
+            "typace-view"
+        );
+
+    if (
+        savedView === "cards" ||
+        savedView === "peeks"
+    ) {
+        state.view = savedView;
+
+        $$(".view-button")
+            .forEach(button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.view ===
+                        state.view
+                );
             });
     }
 
-    /* =========================================================
-       FONT LOADING
-    ========================================================= */
+    /* ========================================================
+       INFINITE LOADING
+    ======================================================== */
 
-    async function loadFont(font) {
-        if (!font?.file) {
-            return false;
-        }
+    const loadSentinel =
+        document.createElement("div");
+
+    loadSentinel.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+    loadSentinel.style.height = "1px";
+
+    document.body.appendChild(
+        loadSentinel
+    );
+
+    const loadObserver =
+        new IntersectionObserver(
+            entries => {
+                if (
+                    entries[0].isIntersecting &&
+                    state.rendered <
+                        state.filtered.length
+                ) {
+                    renderNextBatch();
+                }
+            },
+            {
+                rootMargin:
+                    "700px 0px"
+            }
+        );
+
+    loadObserver.observe(
+        loadSentinel
+    );
+
+    /* ========================================================
+       OVERLAY HELPERS
+    ======================================================== */
+
+    function openOverlay(overlay) {
+        overlay.classList.add(
+            "active"
+        );
+
+        overlay.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+        document.body.style.overflow =
+            "hidden";
+    }
+
+    function closeOverlay(overlay) {
+        overlay.classList.remove(
+            "active"
+        );
+
+        overlay.setAttribute(
+            "aria-hidden",
+            "true"
+        );
 
         if (
-            state.loaded.has(font.file)
+            !previewOverlay.classList.contains(
+                "active"
+            ) &&
+            !aboutOverlay.classList.contains(
+                "active"
+            )
         ) {
-            return true;
-        }
-
-        if (
-            state.loading.has(font.file)
-        ) {
-            return false;
-        }
-
-        state.loading.add(font.file);
-
-        try {
-            const face =
-                new FontFace(
-                    font.name,
-                    `url("${fontURL(font.file)}")`,
-                    {
-                        weight: String(
-                            font.weight || 400
-                        ),
-
-                        style:
-                            font.style ||
-                            "normal",
-
-                        display: "swap"
-                    }
-                );
-
-            await face.load();
-
-            document.fonts.add(face);
-
-            state.loaded.add(
-                font.file
-            );
-
-            return true;
-        } catch (error) {
-            console.warn(
-                "Typace: failed to load",
-                font.file,
-                error
-            );
-
-            return false;
-        } finally {
-            state.loading.delete(
-                font.file
-            );
+            document.body.style.overflow =
+                "";
         }
     }
 
-    /* =========================================================
-       SORTING
-    ========================================================= */
+    /* ========================================================
+       ABOUT
+    ======================================================== */
 
-    function randomSort(list) {
-        const result = [...list];
+    aboutButton.addEventListener(
+        "click",
+        () => {
+            openOverlay(
+                aboutOverlay
+            );
+        }
+    );
+
+    aboutBack.addEventListener(
+        "click",
+        () => {
+            closeOverlay(
+                aboutOverlay
+            );
+        }
+    );
+
+    aboutOverlay.addEventListener(
+        "click",
+        event => {
+            if (
+                event.target ===
+                aboutOverlay
+            ) {
+                closeOverlay(
+                    aboutOverlay
+                );
+            }
+        }
+    );
+
+    /* ========================================================
+       PREVIEW
+    ======================================================== */
+
+    async function openPreview(font) {
+        state.previewFont = font;
+
+        previewTitle.textContent =
+            font.name;
+
+        previewFontName.textContent =
+            font.name;
+
+        previewInput.value =
+            previewInput.value ||
+            "The Quick Brown Fox Jumps Over The Lazy Dog";
+
+        const url =
+            getFontUrl(font);
+
+        state.previewUrl = url;
+
+        previewHero.classList.remove(
+            "preview-dark"
+        );
+
+        previewHero.classList.add(
+            "preview-light"
+        );
+
+        $$(".background-button")
+            .forEach(button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.background ===
+                        "light"
+                );
+            });
+
+        resetPreviewControls();
+
+        openOverlay(
+            previewOverlay
+        );
+
+        await loadFont(font);
+
+        applyPreviewFont();
+
+        updateResources();
+    }
+
+    function applyPreviewFont() {
+        if (!state.previewFont) {
+            return;
+        }
+
+        const font =
+            state.previewFont;
+
+        const family =
+            getFamily(font);
+
+        const text =
+            previewInput.value ||
+            "The Quick Brown Fox Jumps Over The Lazy Dog";
+
+        previewDisplay.textContent =
+            text;
+
+        lowercasePreview.textContent =
+            "abcdefghijklmnopqrstuvwxyz";
+
+        uppercasePreview.textContent =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        numbersPreview.textContent =
+            "0123456789";
+
+        const style = {
+            fontFamily:
+                `"${family}"`,
+            fontWeight:
+                getCurrentWeight(),
+            fontStyle:
+                font.style || "normal"
+        };
+
+        Object.assign(
+            previewDisplay.style,
+            style
+        );
+
+        Object.assign(
+            lowercasePreview.style,
+            style
+        );
+
+        Object.assign(
+            uppercasePreview.style,
+            style
+        );
+
+        Object.assign(
+            numbersPreview.style,
+            style
+        );
+
+        updatePreviewStyles();
+    }
+
+    function getCurrentWeight() {
+        const active =
+            $(".weight-button.active");
+
+        return active?.dataset.weight ||
+            state.previewFont?.weight ||
+            "400";
+    }
+
+    function resetPreviewControls() {
+        sizeSlider.value = "52";
+
+        lineHeightSlider.value =
+            "1.3";
+
+        letterSpacingSlider.value =
+            "-.03";
+
+        $$(".weight-button")
+            .forEach(button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.weight ===
+                        "400"
+                );
+            });
+
+        sizeValue.textContent =
+            "52px";
+
+        lineHeightValue.textContent =
+            "1.30";
+
+        letterSpacingValue.textContent =
+            "-.03em";
+    }
+
+    function updatePreviewStyles() {
+        const size =
+            `${sizeSlider.value}px`;
+
+        const line =
+            lineHeightSlider.value;
+
+        const spacing =
+            `${letterSpacingSlider.value}em`;
+
+        previewDisplay.style.fontSize =
+            size;
+
+        previewDisplay.style.lineHeight =
+            line;
+
+        previewDisplay.style.letterSpacing =
+            spacing;
+
+        lowercasePreview.style.lineHeight =
+            line;
+
+        uppercasePreview.style.lineHeight =
+            line;
+
+        numbersPreview.style.lineHeight =
+            line;
+    }
+
+    /* ========================================================
+       PREVIEW CONTROLS
+    ======================================================== */
+
+    sizeSlider.addEventListener(
+        "input",
+        () => {
+            sizeValue.textContent =
+                `${sizeSlider.value}px`;
+
+            updatePreviewStyles();
+        }
+    );
+
+    lineHeightSlider.addEventListener(
+        "input",
+        () => {
+            lineHeightValue.textContent =
+                Number(
+                    lineHeightSlider.value
+                ).toFixed(2);
+
+            updatePreviewStyles();
+        }
+    );
+
+    letterSpacingSlider.addEventListener(
+        "input",
+        () => {
+            const value =
+                Number(
+                    letterSpacingSlider.value
+                );
+
+            letterSpacingValue.textContent =
+                `${value.toFixed(2)}em`;
+
+            updatePreviewStyles();
+        }
+    );
+
+    weightOptions.addEventListener(
+        "click",
+        event => {
+            const button =
+                event.target.closest(
+                    ".weight-button"
+                );
+
+            if (!button) {
+                return;
+            }
+
+            $$(".weight-button")
+                .forEach(item => {
+                    item.classList.toggle(
+                        "active",
+                        item === button
+                    );
+                });
+
+            applyPreviewFont();
+        }
+    );
+
+    previewInput.addEventListener(
+        "input",
+        () => {
+            applyPreviewFont();
+        }
+    );
+
+    $$(".background-button")
+        .forEach(button => {
+            button.addEventListener(
+                "click",
+                () => {
+                    const dark =
+                        button.dataset.background ===
+                        "dark";
+
+                    previewHero.classList.toggle(
+                        "preview-dark",
+                        dark
+                    );
+
+                    previewHero.classList.toggle(
+                        "preview-light",
+                        !dark
+                    );
+
+                    $$(".background-button")
+                        .forEach(item => {
+                            item.classList.toggle(
+                                "active",
+                                item === button
+                            );
+                        });
+                }
+            );
+        });
+
+    /* ========================================================
+       CDN / USAGE
+    ======================================================== */
+
+    function updateResources() {
+        const font =
+            state.previewFont;
+
+        if (!font) {
+            return;
+        }
+
+        const url =
+            getFontUrl(font);
+
+        const extension =
+            (
+                font.extension ||
+                "woff2"
+            ).toUpperCase();
+
+        cdnType.textContent =
+            extension;
+
+        cdnCode.textContent =
+            url;
+
+        const family =
+            getFamily(font);
+
+        const weight =
+            getCurrentWeight();
+
+        const style =
+            font.style ||
+            "normal";
+
+        usageCode.textContent =
+`@font-face {
+    font-family: "${font.name}";
+    src: url("${url}") format("${FONT_FORMATS[
+        font.extension
+    ] || font.format || "woff2"}");
+    font-weight: ${weight};
+    font-style: ${style};
+    font-display: swap;
+}
+
+.your-element {
+    font-family: "${font.name}", sans-serif;
+    font-weight: ${weight};
+}`;
+
+        void family;
+    }
+
+    /* Update usage when weight changes */
+
+    weightOptions.addEventListener(
+        "click",
+        () => {
+            updateResources();
+        }
+    );
+
+    /* ========================================================
+       COPY
+    ======================================================== */
+
+    async function copyText(
+        text,
+        button,
+        original
+    ) {
+        try {
+            await navigator.clipboard.writeText(
+                text
+            );
+
+            button.textContent =
+                "Copied";
+
+            button.classList.add(
+                "copied"
+            );
+
+            setTimeout(() => {
+                button.textContent =
+                    original;
+
+                button.classList.remove(
+                    "copied"
+                );
+            }, 1200);
+        } catch {
+            fallbackCopy(text);
+
+            button.textContent =
+                "Copied";
+
+            button.classList.add(
+                "copied"
+            );
+
+            setTimeout(() => {
+                button.textContent =
+                    original;
+
+                button.classList.remove(
+                    "copied"
+                );
+            }, 1200);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const textarea =
+            document.createElement(
+                "textarea"
+            );
+
+        textarea.value = text;
+
+        textarea.style.position =
+            "fixed";
+
+        textarea.style.opacity =
+            "0";
+
+        document.body.appendChild(
+            textarea
+        );
+
+        textarea.select();
+
+        try {
+            document.execCommand(
+                "copy"
+            );
+        } finally {
+            textarea.remove();
+        }
+    }
+
+    copyCdn.addEventListener(
+        "click",
+        () => {
+            copyText(
+                cdnCode.textContent,
+                copyCdn,
+                "Copy CDN"
+            );
+        }
+    );
+
+    copyUsage.addEventListener(
+        "click",
+        () => {
+            copyText(
+                usageCode.textContent,
+                copyUsage,
+                "Copy Usage"
+            );
+        }
+    );
+
+    /* ========================================================
+       DOWNLOAD
+    ======================================================== */
+
+    previewDownload.addEventListener(
+        "click",
+        () => {
+            if (
+                !state.previewFont ||
+                !state.previewUrl
+            ) {
+                return;
+            }
+
+            const link =
+                document.createElement(
+                    "a"
+                );
+
+            link.href =
+                state.previewUrl;
+
+            link.download =
+                state.previewFont.file
+                    ?.split("/")
+                    .pop() ||
+                `${state.previewFont.name}.${state.previewFont.extension || "woff2"}`;
+
+            link.target = "_blank";
+
+            link.rel =
+                "noopener noreferrer";
+
+            document.body.appendChild(
+                link
+            );
+
+            link.click();
+
+            link.remove();
+        }
+    );
+
+    /* ========================================================
+       CLOSE PREVIEW
+    ======================================================== */
+
+    previewBack.addEventListener(
+        "click",
+        () => {
+            closeOverlay(
+                previewOverlay
+            );
+        }
+    );
+
+    previewOverlay.addEventListener(
+        "click",
+        event => {
+            if (
+                event.target ===
+                previewOverlay
+            ) {
+                closeOverlay(
+                    previewOverlay
+                );
+            }
+        }
+    );
+
+    /* ========================================================
+       KEYBOARD
+    ======================================================== */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+            if (
+                event.key !== "Escape"
+            ) {
+                return;
+            }
+
+            if (
+                previewOverlay.classList.contains(
+                    "active"
+                )
+            ) {
+                closeOverlay(
+                    previewOverlay
+                );
+
+                return;
+            }
+
+            if (
+                aboutOverlay.classList.contains(
+                    "active"
+                )
+            ) {
+                closeOverlay(
+                    aboutOverlay
+                );
+            }
+        }
+    );
+
+    /* ========================================================
+       RANDOM SORT
+    ======================================================== */
+
+    function shuffle(array) {
+        const result =
+            [...array];
 
         for (
             let i = result.length - 1;
@@ -2882,7 +4757,8 @@
         ) {
             const j =
                 Math.floor(
-                    Math.random() * (i + 1)
+                    Math.random() *
+                    (i + 1)
                 );
 
             [
@@ -2897,1646 +4773,45 @@
         return result;
     }
 
-    function sortFonts(fonts) {
-        switch (state.sort) {
-            case "za":
-                return [...fonts].sort(
-                    (a, b) =>
-                        b.name.localeCompare(
-                            a.name,
-                            undefined,
-                            {
-                                sensitivity:
-                                    "base"
-                            }
-                        )
-                );
+    const originalGetSorted =
+        getSortedFilteredFonts;
 
-            case "random":
-                return randomSort(fonts);
+    /* ========================================================
+       RANDOM OVERRIDE
+    ======================================================== */
 
-            case "az":
-            default:
-                return [...fonts].sort(
-                    (a, b) =>
-                        a.name.localeCompare(
-                            b.name,
-                            undefined,
-                            {
-                                sensitivity:
-                                    "base"
-                            }
-                        )
-                );
-        }
-    }
-
-    /* =========================================================
-       SEARCH
-    ========================================================= */
-
-    function matchScore(name, query) {
-        const value =
-            name.toLowerCase();
-
-        if (!query) {
-            return 1000;
-        }
-
-        if (value === query) {
-            return 100;
-        }
-
-        if (
-            value.startsWith(query)
-        ) {
-            return 90;
-        }
-
-        if (
-            value.includes(query)
-        ) {
-            return 70;
-        }
-
-        let position = 0;
-
-        for (
-            let i = 0;
-            i < value.length &&
-            position < query.length;
-            i++
-        ) {
-            if (
-                value[i] ===
-                query[position]
-            ) {
-                position++;
-            }
-        }
-
-        return position === query.length
-            ? 50
-            : 0;
-    }
-
-    function filterFonts() {
-        const query =
-            els.search.value
-                .trim()
-                .toLowerCase();
-
-        if (!query) {
+    window.addEventListener(
+        "typace:random-sort",
+        () => {
             state.filtered =
-                sortFonts(
-                    state.fonts
-                );
-        } else {
-            state.filtered =
-                state.fonts
-                    .map(font => ({
-                        font,
-                        score:
-                            matchScore(
-                                font.name,
-                                query
-                            )
-                    }))
-                    .filter(
-                        item =>
-                            item.score > 0
-                    )
-                    .sort(
-                        (a, b) =>
-                            b.score -
-                            a.score
-                    )
-                    .map(
-                        item =>
-                            item.font
-                    );
-        }
-
-        state.visible =
-            Math.min(
-                CONFIG.BATCH_SIZE,
-                state.filtered.length
-            );
-
-        render();
-    }
-
-    /* =========================================================
-       CARDS
-    ========================================================= */
-
-    function createCard(font, index) {
-        const loaded =
-            state.loaded.has(
-                font.file
-            );
-
-        const card =
-            document.createElement(
-                "article"
-            );
-
-        const isPeek =
-            state.view === "peeks";
-
-        /*
-         * Cards:
-         * every card cascades.
-         *
-         * Peeks:
-         * every visual row cascades.
-         */
-
-        const cascadeIndex =
-            isPeek
-                ? Math.floor(index / 2)
-                : index;
-
-        card.style.setProperty(
-            "--delay",
-            `${Math.min(
-                cascadeIndex * 55,
-                500
-            )}ms`
-        );
-
-        card.className =
-            `font-card${
-                loaded
-                    ? ""
-                    : " loading"
-            }`;
-
-        card.dataset.index =
-            String(index);
-
-        card.dataset.file =
-            font.file;
-
-        card.tabIndex = 0;
-
-        card.setAttribute(
-            "role",
-            "button"
-        );
-
-        card.setAttribute(
-            "aria-label",
-            `Preview ${font.name}`
-        );
-
-        const styleLabel =
-            font.style === "italic"
-                ? "Italic"
-                : "Regular";
-
-        card.innerHTML = `
-            <div
-                class="font-name"
-                title="${escapeHTML(font.name)}"
-            >
-                ${escapeHTML(font.name)}
-            </div>
-
-            <div class="font-specimen">
-                ${
-                    loaded
-                        ? isPeek
-                            ? "Aa"
-                            : CONFIG.SPECIMEN
-                        : "Loading…"
-                }
-            </div>
-
-            <div class="font-card-bottom">
-
-                <span
-                    class="font-meta"
-                    title="${escapeHTML(font.file)}"
-                >
-                    ${escapeHTML(
-                        String(
-                            font.weight || 400
-                        )
-                    )}
-                    ·
-                    ${escapeHTML(styleLabel)}
-                    ·
-                    ${escapeHTML(
-                        (
-                            font.type ||
-                            "font"
-                        ).toUpperCase()
-                    )}
-                </span>
-
-                <span class="preview-label">
-
-                    Preview
-
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <path d="M5 12h14"/>
-                        <path
-                            d="m13 6 6 6-6 6"
-                        />
-                    </svg>
-
-                </span>
-
-            </div>
-        `;
-
-        if (loaded) {
-            applyCardFont(
-                card,
-                font
-            );
-        }
-
-        return card;
-    }
-
-    function applyCardFont(card, font) {
-        const specimen =
-            card.querySelector(
-                ".font-specimen"
-            );
-
-        if (!specimen) {
-            return;
-        }
-
-        specimen.textContent =
-            state.view === "peeks"
-                ? "Aa"
-                : CONFIG.SPECIMEN;
-
-        specimen.style.fontFamily =
-            fontFamily(
-                font.name
-            );
-
-        specimen.style.fontWeight =
-            String(
-                font.weight || 400
-            );
-
-        specimen.style.fontStyle =
-            font.style ||
-            "normal";
-
-        card.classList.remove(
-            "loading"
-        );
-    }
-
-    /* =========================================================
-       CASCADE OBSERVER
-    ========================================================= */
-
-    function setupAnimationObserver() {
-        if (state.animationObserver) {
-            state.animationObserver.disconnect();
-        }
-
-        const cards =
-            els.fontList.querySelectorAll(
-                ".font-card"
-            );
-
-        if (
-            !cards.length ||
-            !("IntersectionObserver" in window)
-        ) {
-            cards.forEach(card =>
-                card.classList.add(
-                    "in-view"
-                )
-            );
-
-            return;
-        }
-
-        state.animationObserver =
-            new IntersectionObserver(
-                entries => {
-                    entries.forEach(
-                        entry => {
-                            if (
-                                entry.isIntersecting
-                            ) {
-                                entry.target.classList.add(
-                                    "in-view"
-                                );
-
-                                state.animationObserver.unobserve(
-                                    entry.target
-                                );
-                            }
-                        }
-                    );
-                },
-                {
-                    rootMargin:
-                        "80px 0px"
-                }
-            );
-
-        cards.forEach(card =>
-            state.animationObserver.observe(
-                card
-            )
-        );
-    }
-
-    /* =========================================================
-       RENDER
-    ========================================================= */
-
-    function render() {
-        if (state.observer) {
-            state.observer.disconnect();
-        }
-
-        if (
-            state.animationObserver
-        ) {
-            state.animationObserver.disconnect();
-        }
-
-        els.fontList.classList.toggle(
-            "peeks",
-            state.view === "peeks"
-        );
-
-        const fragment =
-            document.createDocumentFragment();
-
-        if (
-            !state.filtered.length
-        ) {
-            const empty =
-                document.createElement(
-                    "div"
-                );
-
-            empty.className =
-                "empty";
-
-            empty.innerHTML = `
-                <span class="empty-icon">
-                    𝘼
-                </span>
-
-                No fonts found.
-            `;
-
-            fragment.appendChild(
-                empty
-            );
-        } else {
-            state.filtered
-                .slice(
-                    0,
-                    state.visible
-                )
-                .forEach(
-                    (font, index) => {
-                        fragment.appendChild(
-                            createCard(
-                                font,
-                                index
-                            )
-                        );
-                    }
+                shuffle(
+                    state.filtered
                 );
         }
+    );
 
-        els.fontList.replaceChildren(
-            fragment
-        );
+    /* ========================================================
+       API
+    ======================================================== */
 
-        updateStats();
-        updateStatus();
+    async function loadFonts() {
+        state.loading = true;
 
-        observeLastCard();
-        setupAnimationObserver();
-
-        if (
-            state.filtered.length
-        ) {
-            loadVisibleFonts();
-        }
-    }
-
-    async function loadVisibleFonts() {
-        const cards =
-            els.fontList.querySelectorAll(
-                ".font-card"
-            );
-
-        await Promise.allSettled(
-            [
-                ...cards
-            ].map(
-                async card => {
-                    const index =
-                        Number(
-                            card.dataset.index
-                        );
-
-                    const font =
-                        state.filtered[
-                            index
-                        ];
-
-                    if (!font) {
-                        return;
-                    }
-
-                    const success =
-                        await loadFont(
-                            font
-                        );
-
-                    if (
-                        success &&
-                        card.isConnected
-                    ) {
-                        applyCardFont(
-                            card,
-                            font
-                        );
-                    }
-                }
-            )
-        );
-    }
-
-    /* =========================================================
-       INFINITE LIST
-    ========================================================= */
-
-    function observeLastCard() {
-        if (
-            state.visible >=
-            state.filtered.length
-        ) {
-            return;
-        }
-
-        const last =
-            els.fontList.lastElementChild;
-
-        if (!last) {
-            return;
-        }
-
-        if (
-            !("IntersectionObserver" in window)
-        ) {
-            return;
-        }
-
-        state.observer =
-            new IntersectionObserver(
-                entries => {
-                    if (
-                        !entries.some(
-                            entry =>
-                                entry.isIntersecting
-                        )
-                    ) {
-                        return;
-                    }
-
-                    state.observer.disconnect();
-
-                    state.visible =
-                        Math.min(
-                            state.visible +
-                                CONFIG.BATCH_SIZE,
-                            state.filtered.length
-                        );
-
-                    render();
-                },
-                {
-                    rootMargin:
-                        "500px 0px"
-                }
-            );
-
-        state.observer.observe(
-            last
-        );
-    }
-
-    function updateStatus() {
-        if (
-            !state.filtered.length ||
-            state.visible >=
-                state.filtered.length
-        ) {
-            els.status.textContent = "";
-            return;
-        }
-
-        const remaining =
-            state.filtered.length -
-            state.visible;
-
-        els.status.innerHTML = `
+        loadStatus.innerHTML = `
             <span class="spinner"></span>
-            Loading next
-            ${Math.min(
-                CONFIG.BATCH_SIZE,
-                remaining
-            )}
-            fonts
-        `;
-    }
-
-    function updateStats() {
-        const count =
-            state.filtered.length;
-
-        let text =
-            `${count} font${
-                count === 1
-                    ? ""
-                    : "s"
-            }`;
-
-        const query =
-            els.search.value.trim();
-
-        if (query) {
-            text +=
-                ` · matching "${query}"`;
-        }
-
-        els.stats.textContent =
-            text;
-    }
-
-    /* =========================================================
-       PREVIEW
-    ========================================================= */
-
-    async function openPreview(font) {
-        state.current = font;
-
-        state.weight =
-            Number(
-                font.weight
-            ) || 400;
-
-        state.previewRequest++;
-
-        const request =
-            state.previewRequest;
-
-        state.lastFocus =
-            document.activeElement;
-
-        els.previewTitle.textContent =
-            font.name;
-
-        els.previewFontName.textContent =
-            `${font.name} · ${
-                (
-                    font.type ||
-                    "font"
-                ).toUpperCase()
-            }`;
-
-        els.previewDisplay.textContent =
-            "Loading…";
-
-        setPreviewBackground(
-            state.previewBackground
-        );
-
-        showOverlay(
-            els.previewOverlay
-        );
-
-        const success =
-            await loadFont(font);
-
-        /*
-         * Ignore stale async loads.
-         */
-
-        if (
-            state.current !== font ||
-            request !==
-                state.previewRequest
-        ) {
-            return;
-        }
-
-        const family =
-            fontFamily(
-                font.name
-            );
-
-        [
-            els.previewDisplay,
-            els.lowercase,
-            els.uppercase,
-            els.numbers,
-            els.previewInput
-        ].forEach(element => {
-            element.style.fontFamily =
-                family;
-
-            element.style.fontStyle =
-                font.style ||
-                "normal";
-        });
-
-        els.previewDisplay.textContent =
-            success
-                ? CONFIG.SPECIMEN
-                : "Unable to load font.";
-
-        els.lowercase.textContent =
-            "abcdefghijklmnopqrstuvwxyz";
-
-        els.uppercase.textContent =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-        els.numbers.textContent =
-            "0123456789";
-
-        els.previewInput.value =
-            CONFIG.SPECIMEN;
-
-        els.size.value = 52;
-        els.lineHeight.value = 1.3;
-        els.spacing.value = -.03;
-
-        updateWeightButtons();
-        updatePreview();
-        updateResources();
-    }
-
-    function closePreview() {
-        state.previewRequest++;
-
-        hideOverlay(
-            els.previewOverlay
-        );
-
-        state.current = null;
-
-        restoreFocus();
-    }
-
-    function updatePreview() {
-        if (!state.current) {
-            return;
-        }
-
-        const text =
-            els.previewInput.value ||
-            " ";
-
-        const size =
-            Number(
-                els.size.value
-            );
-
-        const lineHeight =
-            Number(
-                els.lineHeight.value
-            );
-
-        const spacing =
-            Number(
-                els.spacing.value
-            );
-
-        els.previewDisplay.textContent =
-            text;
-
-        els.previewDisplay.style.fontWeight =
-            String(
-                state.weight
-            );
-
-        els.previewDisplay.style.fontSize =
-            `${size}px`;
-
-        els.previewDisplay.style.lineHeight =
-            String(
-                lineHeight
-            );
-
-        els.previewDisplay.style.letterSpacing =
-            `${spacing}em`;
-
-        els.sizeValue.textContent =
-            `${size}px`;
-
-        els.lineHeightValue.textContent =
-            lineHeight.toFixed(2);
-
-        els.spacingValue.textContent =
-            `${spacing.toFixed(2)}em`;
-    }
-
-    function updateWeightButtons() {
-        els.weights
-            .querySelectorAll(
-                ".weight-button"
-            )
-            .forEach(
-                button => {
-                    button.classList.toggle(
-                        "active",
-                        Number(
-                            button.dataset
-                                .weight
-                        ) ===
-                            state.weight
-                    );
-                }
-            );
-    }
-
-    /* =========================================================
-       PREVIEW BACKGROUND
-    ========================================================= */
-
-    function setPreviewBackground(
-        background
-    ) {
-        state.previewBackground =
-            background === "dark"
-                ? "dark"
-                : "light";
-
-        els.previewHero.classList.toggle(
-            "preview-dark",
-            state.previewBackground ===
-                "dark"
-        );
-
-        els.previewHero.classList.toggle(
-            "preview-light",
-            state.previewBackground ===
-                "light"
-        );
-
-        els.backgrounds
-            .querySelectorAll(
-                ".background-button"
-            )
-            .forEach(button => {
-                button.classList.toggle(
-                    "active",
-                    button.dataset
-                        .background ===
-                        state.previewBackground
-                );
-            });
-
-        storageSet(
-            "previewBackground",
-            state.previewBackground
-        );
-    }
-
-    /* =========================================================
-       RESOURCES
-    ========================================================= */
-
-    function generateCDN(font) {
-        return fontURL(
-            font.file
-        );
-    }
-
-    function generateUsage(font) {
-        const family =
-            String(font.name)
-                .replace(
-                    /\\/g,
-                    "\\\\"
-                )
-                .replace(
-                    /'/g,
-                    "\\'"
-                );
-
-        const url =
-            generateCDN(font);
-
-        const format =
-            font.format ||
-            formatFromType(
-                font.type
-            ) ||
-            "woff2";
-
-        const weight =
-            Number(
-                font.weight
-            ) || 400;
-
-        const style =
-            font.style ||
-            "normal";
-
-        return `@font-face {
-    font-family: '${family}';
-    src: url('${url}') format('${format}');
-    font-style: ${style};
-    font-weight: ${weight};
-    font-display: swap;
-}
-
-.my-text {
-    font-family: '${family}', sans-serif;
-}`;
-    }
-
-    function updateResources() {
-        const font =
-            state.current;
-
-        if (!font) {
-            els.cdn.textContent = "";
-            els.usage.textContent = "";
-            els.cdnType.textContent = "";
-            return;
-        }
-
-        els.cdn.textContent =
-            generateCDN(font);
-
-        els.cdnType.textContent =
-            (
-                font.type ||
-                "font"
-            ).toUpperCase();
-
-        els.usage.textContent =
-            generateUsage(font);
-    }
-
-    /* =========================================================
-       DOWNLOAD
-    ========================================================= */
-
-    async function downloadFont(font) {
-        if (!font?.file) {
-            return;
-        }
-
-        const url =
-            fontURL(
-                font.file
-            );
-
-        /*
-         * Try an actual browser download first.
-         * Fall back to opening jsDelivr directly.
-         */
-
-        const original =
-            els.download.innerHTML;
-
-        els.download.innerHTML =
-            "Downloading…";
-
-        try {
-            const response =
-                await fetch(
-                    url,
-                    {
-                        mode: "cors"
-                    }
-                );
-
-            if (!response.ok) {
-                throw new Error(
-                    `HTTP ${response.status}`
-                );
-            }
-
-            const blob =
-                await response.blob();
-
-            const objectURL =
-                URL.createObjectURL(
-                    blob
-                );
-
-            const anchor =
-                document.createElement(
-                    "a"
-                );
-
-            anchor.href =
-                objectURL;
-
-            anchor.download =
-                safeFilename(
-                    font.file
-                );
-
-            document.body.appendChild(
-                anchor
-            );
-
-            anchor.click();
-
-            anchor.remove();
-
-            setTimeout(
-                () =>
-                    URL.revokeObjectURL(
-                        objectURL
-                    ),
-                1000
-            );
-        } catch {
-            window.open(
-                url,
-                "_blank",
-                "noopener,noreferrer"
-            );
-        } finally {
-            els.download.innerHTML =
-                original;
-        }
-    }
-
-    /* =========================================================
-       CLIPBOARD
-    ========================================================= */
-
-    async function copyText(
-        text,
-        button,
-        original
-    ) {
-        try {
-            await navigator.clipboard.writeText(
-                text
-            );
-        } catch {
-            const textarea =
-                document.createElement(
-                    "textarea"
-                );
-
-            textarea.value = text;
-
-            textarea.style.position =
-                "fixed";
-
-            textarea.style.opacity =
-                "0";
-
-            document.body.appendChild(
-                textarea
-            );
-
-            textarea.select();
-
-            try {
-                document.execCommand(
-                    "copy"
-                );
-            } catch {}
-
-            textarea.remove();
-        }
-
-        button.textContent =
-            "Copied";
-
-        setTimeout(() => {
-            button.textContent =
-                original;
-        }, 1200);
-    }
-
-    /* =========================================================
-       OVERLAYS
-    ========================================================= */
-
-    function syncBodyLock() {
-        document.body.style.overflow =
-            document.querySelector(
-                ".preview-overlay.active"
-            )
-                ? "hidden"
-                : "";
-    }
-
-    function showOverlay(overlay) {
-        overlay.classList.add(
-            "active"
-        );
-
-        overlay.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-
-        syncBodyLock();
-
-        requestAnimationFrame(() => {
-            overlay
-                .querySelector(
-                    "button"
-                )
-                ?.focus();
-        });
-    }
-
-    function hideOverlay(overlay) {
-        overlay.classList.remove(
-            "active"
-        );
-
-        overlay.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-
-        syncBodyLock();
-    }
-
-    function restoreFocus() {
-        if (
-            state.lastFocus &&
-            document.contains(
-                state.lastFocus
-            )
-        ) {
-            state.lastFocus.focus();
-        }
-
-        state.lastFocus = null;
-    }
-
-    /* =========================================================
-       ABOUT
-    ========================================================= */
-
-    function openAbout() {
-        state.lastFocus =
-            document.activeElement;
-
-        showOverlay(
-            els.aboutOverlay
-        );
-    }
-
-    function closeAbout() {
-        hideOverlay(
-            els.aboutOverlay
-        );
-
-        restoreFocus();
-    }
-
-    /* =========================================================
-       THEME
-    ========================================================= */
-
-    function themeIcon() {
-        if (state.dark) {
-            return `
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                >
-                    <circle
-                        cx="12"
-                        cy="12"
-                        r="5"
-                    />
-
-                    <path d="M12 1v2"/>
-                    <path d="M12 21v2"/>
-                    <path d="M4.22 4.22l1.42 1.42"/>
-                    <path d="M18.36 18.36l1.42 1.42"/>
-                    <path d="M1 12h2"/>
-                    <path d="M21 12h2"/>
-                    <path d="M4.22 19.78l1.42-1.42"/>
-                    <path d="M18.36 5.64l1.42-1.42"/>
-                </svg>
-            `;
-        }
-
-        return `
-            <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-            >
-                <path
-                    d="M21 12.79A9 9 0 1 1
-                       11.21 3
-                       7 7 0 0 0
-                       21 12.79z"
-                />
-            </svg>
-        `;
-    }
-
-    function applyTheme() {
-        els.body.classList.toggle(
-            "dark",
-            state.dark
-        );
-
-        els.theme.innerHTML =
-            themeIcon();
-
-        els.theme.setAttribute(
-            "aria-label",
-            state.dark
-                ? "Switch to light mode"
-                : "Switch to dark mode"
-        );
-
-        storageSet(
-            "dark",
-            state.dark
-        );
-    }
-
-    /* =========================================================
-       VIEW
-    ========================================================= */
-
-    function setView(view) {
-        state.view =
-            view === "peeks"
-                ? "peeks"
-                : "cards";
-
-        els.viewButtons.forEach(
-            button => {
-                button.classList.toggle(
-                    "active",
-                    button.dataset.view ===
-                        state.view
-                );
-            }
-        );
-
-        storageSet(
-            "view",
-            state.view
-        );
-
-        render();
-    }
-
-    /* =========================================================
-       SORT
-    ========================================================= */
-
-    function setSort(sort) {
-        state.sort =
-            [
-                "az",
-                "za",
-                "random"
-            ].includes(sort)
-                ? sort
-                : "az";
-
-        els.sortChips
-            .querySelectorAll(
-                ".sort-chip"
-            )
-            .forEach(button => {
-                button.classList.toggle(
-                    "active",
-                    button.dataset.sort ===
-                        state.sort
-                );
-            });
-
-        storageSet(
-            "sort",
-            state.sort
-        );
-
-        filterFonts();
-    }
-
-    function toggleSort() {
-        const open =
-            els.sortChips.classList.toggle(
-                "open"
-            );
-
-        els.sortToggle.classList.toggle(
-            "active",
-            open
-        );
-
-        els.sortToggle.setAttribute(
-            "aria-expanded",
-            String(open)
-        );
-    }
-
-    function closeSort() {
-        els.sortChips.classList.remove(
-            "open"
-        );
-
-        els.sortToggle.classList.remove(
-            "active"
-        );
-
-        els.sortToggle.setAttribute(
-            "aria-expanded",
-            "false"
-        );
-    }
-
-    /* =========================================================
-       EVENT DELEGATION
-    ========================================================= */
-
-    els.fontList.addEventListener(
-        "click",
-        event => {
-            const card =
-                event.target.closest(
-                    ".font-card"
-                );
-
-            if (!card) {
-                return;
-            }
-
-            const font =
-                state.filtered[
-                    Number(
-                        card.dataset.index
-                    )
-                ];
-
-            if (font) {
-                openPreview(font);
-            }
-        }
-    );
-
-    els.fontList.addEventListener(
-        "keydown",
-        event => {
-            const card =
-                event.target.closest(
-                    ".font-card"
-                );
-
-            if (!card) {
-                return;
-            }
-
-            if (
-                event.key === "Enter" ||
-                event.key === " "
-            ) {
-                event.preventDefault();
-
-                const font =
-                    state.filtered[
-                        Number(
-                            card.dataset.index
-                        )
-                    ];
-
-                if (font) {
-                    openPreview(font);
-                }
-            }
-        }
-    );
-
-    /* =========================================================
-       EVENTS
-    ========================================================= */
-
-    els.aboutButton.addEventListener(
-        "click",
-        openAbout
-    );
-
-    els.aboutBack.addEventListener(
-        "click",
-        closeAbout
-    );
-
-    els.previewBack.addEventListener(
-        "click",
-        closePreview
-    );
-
-    els.aboutOverlay.addEventListener(
-        "click",
-        event => {
-            if (
-                event.target ===
-                els.aboutOverlay
-            ) {
-                closeAbout();
-            }
-        }
-    );
-
-    els.previewOverlay.addEventListener(
-        "click",
-        event => {
-            if (
-                event.target ===
-                els.previewOverlay
-            ) {
-                closePreview();
-            }
-        }
-    );
-
-    els.theme.addEventListener(
-        "click",
-        () => {
-            state.dark =
-                !state.dark;
-
-            applyTheme();
-        }
-    );
-
-    els.previewInput.addEventListener(
-        "input",
-        updatePreview
-    );
-
-    els.size.addEventListener(
-        "input",
-        updatePreview
-    );
-
-    els.lineHeight.addEventListener(
-        "input",
-        updatePreview
-    );
-
-    els.spacing.addEventListener(
-        "input",
-        updatePreview
-    );
-
-    els.download.addEventListener(
-        "click",
-        () =>
-            downloadFont(
-                state.current
-            )
-    );
-
-    els.copyCdn.addEventListener(
-        "click",
-        () => {
-            if (!state.current) {
-                return;
-            }
-
-            copyText(
-                generateCDN(
-                    state.current
-                ),
-                els.copyCdn,
-                "Copy CDN"
-            );
-        }
-    );
-
-    els.copyUsage.addEventListener(
-        "click",
-        () => {
-            if (!state.current) {
-                return;
-            }
-
-            copyText(
-                generateUsage(
-                    state.current
-                ),
-                els.copyUsage,
-                "Copy Usage"
-            );
-        }
-    );
-
-    els.backgrounds.addEventListener(
-        "click",
-        event => {
-            const button =
-                event.target.closest(
-                    ".background-button"
-                );
-
-            if (!button) {
-                return;
-            }
-
-            setPreviewBackground(
-                button.dataset
-                    .background
-            );
-        }
-    );
-
-    els.weights.addEventListener(
-        "click",
-        event => {
-            const button =
-                event.target.closest(
-                    ".weight-button"
-                );
-
-            if (!button) {
-                return;
-            }
-
-            state.weight =
-                Number(
-                    button.dataset.weight
-                );
-
-            updateWeightButtons();
-            updatePreview();
-            updateResources();
-        }
-    );
-
-    els.search.addEventListener(
-        "input",
-        () => {
-            clearTimeout(
-                state.searchTimer
-            );
-
-            state.searchTimer =
-                setTimeout(
-                    filterFonts,
-                    100
-                );
-        }
-    );
-
-    els.sortToggle.addEventListener(
-        "click",
-        toggleSort
-    );
-
-    els.sortChips.addEventListener(
-        "click",
-        event => {
-            const chip =
-                event.target.closest(
-                    ".sort-chip"
-                );
-
-            if (!chip) {
-                return;
-            }
-
-            setSort(
-                chip.dataset.sort
-            );
-
-            closeSort();
-        }
-    );
-
-    els.viewButtons.forEach(
-        button => {
-            button.addEventListener(
-                "click",
-                () =>
-                    setView(
-                        button.dataset
-                            .view
-                    )
-            );
-        }
-    );
-
-    document.addEventListener(
-        "click",
-        event => {
-            if (
-                !event.target.closest(
-                    ".sort-area"
-                )
-            ) {
-                closeSort();
-            }
-        }
-    );
-
-    document.addEventListener(
-        "keydown",
-        event => {
-            if (
-                event.key === "Escape"
-            ) {
-                if (
-                    els.previewOverlay.classList.contains(
-                        "active"
-                    )
-                ) {
-                    closePreview();
-
-                    return;
-                }
-
-                if (
-                    els.aboutOverlay.classList.contains(
-                        "active"
-                    )
-                ) {
-                    closeAbout();
-
-                    return;
-                }
-
-                closeSort();
-
-                return;
-            }
-
-            if (
-                event.key === "/" &&
-                ![
-                    "INPUT",
-                    "TEXTAREA"
-                ].includes(
-                    document.activeElement
-                        ?.tagName
-                )
-            ) {
-                event.preventDefault();
-
-                els.search.focus();
-                els.search.select();
-            }
-        }
-    );
-
-    /* =========================================================
-       FONT API
-    ========================================================= */
-
-    async function fetchFonts() {
-        els.status.innerHTML = `
-            <span class="spinner"></span>
-            Scanning fonts…
+            Loading fonts…
         `;
 
         try {
             const response =
                 await fetch(
-                    CONFIG.API_URL,
+                    API_URL,
                     {
-                        cache: "no-store",
                         headers: {
                             Accept:
                                 "application/json"
-                        }
+                        },
+                        cache: "no-store"
                     }
                 );
 
@@ -4546,157 +4821,347 @@
                 );
             }
 
-            const payload =
+            const data =
                 await response.json();
 
-            const data =
-                Array.isArray(payload)
-                    ? payload
-                    : payload?.fonts;
-
-            if (
-                !Array.isArray(data)
-            ) {
-                throw new Error(
-                    "Invalid font API response."
-                );
-            }
+            const rawFonts =
+                Array.isArray(data)
+                    ? data
+                    : Array.isArray(
+                        data.fonts
+                    )
+                        ? data.fonts
+                        : Array.isArray(
+                            data.data
+                        )
+                            ? data.data
+                            : [];
 
             state.fonts =
-                normalizeFonts(data);
+                rawFonts
+                    .map(normalizeFont)
+                    .filter(
+                        font =>
+                            font &&
+                            font.file
+                    );
 
-            storageSet(
-                "fontsData",
-                state.fonts
-            );
+            state.loading = false;
 
-            filterFonts();
+            render(true);
 
         } catch (error) {
             console.error(
-                "Typace:",
+                "Typace font API error:",
                 error
             );
 
-            const cached =
-                storageGet(
-                    "fontsData",
-                    []
-                );
+            state.loading = false;
 
-            const fonts =
-                Array.isArray(cached)
-                    ? normalizeFonts(
-                          cached
-                      )
-                    : [];
-
-            if (fonts.length) {
-                state.fonts =
-                    fonts;
-
-                filterFonts();
-
-                els.status.textContent =
-                    "Using cached font library";
-
-                return;
-            }
-
-            els.fontList.innerHTML = `
+            fontList.innerHTML = `
                 <div class="empty">
 
-                    <span class="empty-icon">
-                        ⚠
-                    </span>
+                    <svg
+                        class="empty-doodle"
+                        viewBox="0 0 120 100"
+                        aria-hidden="true"
+                    >
+                        <path
+                            class="doodle-line"
+                            d="
+                                M39 40
+                                C35 31 39 21 48 18
+                                C58 14 70 18 74 27
+                                C78 37 72 47 62 50
+                                C51 53 43 49 39 40Z
+                            "
+                        />
 
-                    Unable to scan fonts.
+                        <path
+                            class="doodle-line"
+                            d="
+                                M48 32
+                                C49 30 51 30 52 32
+                            "
+                        />
 
-                    <br>
+                        <path
+                            class="doodle-line"
+                            d="
+                                M62 32
+                                C63 30 65 30 66 32
+                            "
+                        />
 
-                    <small>
-                        ${escapeHTML(
-                            error.message
-                        )}
-                    </small>
+                        <path
+                            class="doodle-line"
+                            d="
+                                M54 40
+                                C57 38 60 38 62 40
+                            "
+                        />
+
+                        <path
+                            class="doodle-line"
+                            d="
+                                M45 53
+                                C42 62 42 73 43 83
+                            "
+                        />
+
+                        <path
+                            class="doodle-line"
+                            d="
+                                M69 53
+                                C74 61 77 72 78 82
+                            "
+                        />
+
+                        <path
+                            class="doodle-line"
+                            d="
+                                M44 61
+                                C35 60 29 64 25 70
+                            "
+                        />
+
+                        <path
+                            class="doodle-line"
+                            d="
+                                M70 61
+                                C79 59 87 62 94 68
+                            "
+                        />
+
+                    </svg>
+
+                    <p class="empty-title">
+                        Fonts couldn't load
+                    </p>
+
+                    <p class="empty-copy">
+                        The font index didn't respond.
+                        Check the API and try again.
+                    </p>
 
                 </div>
             `;
 
-            els.status.textContent =
-                "";
+            stats.textContent =
+                "Unable to load fonts";
+
+            loadStatus.textContent = "";
+
+        } finally {
+            state.loading = false;
         }
     }
 
-    /* =========================================================
-       INITIALIZE
-    ========================================================= */
+    /* ========================================================
+       RANDOM SORT FIX
+    ======================================================== */
 
-    state.dark =
-        storageGet(
-            "dark",
-            false
-        );
+    function getCurrentFonts() {
+        let result =
+            state.fonts.filter(font => {
+                const query =
+                    state.search
+                        .trim()
+                        .toLowerCase();
 
-    state.sort =
-        storageGet(
-            "sort",
-            "az"
-        );
+                if (!query) {
+                    return true;
+                }
 
-    state.view =
-        storageGet(
-            "view",
-            "cards"
-        );
+                return [
+                    font.name,
+                    font.category,
+                    font.style,
+                    font.weight,
+                    font.extension,
+                    font.format
+                ]
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(query);
+            });
 
-    state.previewBackground =
-        storageGet(
-            "previewBackground",
-            "light"
-        );
+        if (state.sort === "az") {
+            result.sort(
+                (a, b) =>
+                    a.name.localeCompare(
+                        b.name,
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    )
+            );
+        }
 
-    applyTheme();
+        if (state.sort === "za") {
+            result.sort(
+                (a, b) =>
+                    b.name.localeCompare(
+                        a.name,
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    )
+            );
+        }
 
-    setView(
-        state.view
+        if (state.sort === "random") {
+            result =
+                shuffle(result);
+        }
+
+        return result;
+    }
+
+    /* Replace normal getter with random-aware version */
+
+    function renderWithSort(reset = true) {
+        if (reset) {
+            fontList.innerHTML = "";
+
+            state.rendered = 0;
+        }
+
+        state.filtered =
+            getCurrentFonts();
+
+        stats.textContent =
+            `${state.filtered.length.toLocaleString()} ${
+                state.filtered.length === 1
+                    ? "font"
+                    : "fonts"
+            }`;
+
+        if (!state.filtered.length) {
+            loadStatus.textContent = "";
+
+            fontList.className =
+                `font-list ${
+                    state.view === "peeks"
+                        ? "peeks"
+                        : ""
+                }`;
+
+            fontList.innerHTML =
+                emptyState();
+
+            return;
+        }
+
+        fontList.className =
+            `font-list ${
+                state.view === "peeks"
+                    ? "peeks"
+                    : ""
+                }`;
+
+        renderNextBatch();
+    }
+
+    /* ========================================================
+       PATCH RENDER
+    ======================================================== */
+
+    window.renderTypace =
+        renderWithSort;
+
+    /* ========================================================
+       REBIND SEARCH/SORT RENDERING
+    ======================================================== */
+
+    searchInput.addEventListener(
+        "input",
+        () => {
+            clearTimeout(searchTimer);
+
+            searchTimer =
+                setTimeout(() => {
+                    state.search =
+                        searchInput.value;
+
+                    renderWithSort(true);
+                }, 90);
+        }
     );
 
-    setSort(
-        state.sort
+    $$(".sort-chip").forEach(
+        button => {
+            button.addEventListener(
+                "click",
+                () => {
+                    state.sort =
+                        button.dataset.sort;
+
+                    $$(".sort-chip")
+                        .forEach(chip => {
+                            chip.classList.toggle(
+                                "active",
+                                chip === button
+                            );
+                        });
+
+                    sortChips.classList.remove(
+                        "open"
+                    );
+
+                    sortToggle.classList.remove(
+                        "active"
+                    );
+
+                    sortToggle.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                    renderWithSort(true);
+                }
+            );
+        }
     );
 
-    setPreviewBackground(
-        state.previewBackground
+    $$(".view-button").forEach(
+        button => {
+            button.addEventListener(
+                "click",
+                () => {
+                    state.view =
+                        button.dataset.view;
+
+                    $$(".view-button")
+                        .forEach(item => {
+                            item.classList.toggle(
+                                "active",
+                                item === button
+                            );
+                        });
+
+                    localStorage.setItem(
+                        "typace-view",
+                        state.view
+                    );
+
+                    renderWithSort(true);
+                }
+            );
+        }
     );
 
-    fetchFonts();
+    /* ========================================================
+       START
+    ======================================================== */
 
-    /* =========================================================
-       DEBUG
-    ========================================================= */
+    loadFonts();
 
-    window.__typace = {
-        all: () => [
-            ...state.fonts
-        ],
-
-        filtered: () => [
-            ...state.filtered
-        ],
-
-        loaded: () => [
-            ...state.loaded
-        ],
-
-        current: () =>
-            state.current,
-
-        cdn: file =>
-            fontURL(file),
-
-        reload: fetchFonts
-    };
 })();
 </script>
 
