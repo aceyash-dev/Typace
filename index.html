@@ -8,11 +8,11 @@
         content="width=device-width, initial-scale=1, viewport-fit=cover"
     >
 
-    <title>Typace · Font Library</title>
+    <title>Typace</title>
 
     <meta
         name="description"
-        content="Typace is a quiet font library for discovering, previewing, and using typefaces."
+        content="Typace is a curated font library for discovering, previewing, and using typefaces on the web."
     >
 
     <meta
@@ -27,7 +27,11 @@
         content="index, follow, max-image-preview:large"
     >
 
-    <meta name="theme-color" content="#f2ead4">
+    <meta
+        name="theme-color"
+        content="#f3f3e8"
+    >
+
     <meta name="color-scheme" content="light dark">
 
     <link
@@ -35,28 +39,63 @@
         href="https://typace.ace-base.cc/"
     >
 
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" type="image/png" href="/icon.png">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <link
+        rel="icon"
+        href="/favicon.ico"
+        sizes="any"
+    >
 
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Typace">
-    <meta property="og:title" content="Typace · Font Library">
+    <link
+        rel="icon"
+        type="image/png"
+        href="/icon.png"
+    >
+
+    <link
+        rel="apple-touch-icon"
+        href="/icon.png"
+    >
+
+    <meta
+        property="og:type"
+        content="website"
+    >
+
+    <meta
+        property="og:site_name"
+        content="Typace"
+    >
+
+    <meta
+        property="og:title"
+        content="Typace"
+    >
+
     <meta
         property="og:description"
         content="Discover, preview, and use beautiful typefaces with Typace."
     >
+
     <meta
         property="og:url"
         content="https://typace.ace-base.cc/"
     >
+
     <meta
         property="og:image"
         content="https://typace.ace-base.cc/og-image.png"
     >
-    <meta property="og:image:alt" content="Typace">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <meta
+        property="og:image:alt"
+        content="Typace Font Library"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
     <link
         rel="preconnect"
         href="https://fonts.gstatic.com"
@@ -69,69 +108,14 @@
     >
 
     <style>
+        /* =====================================================
+           RESET
+        ===================================================== */
+
         *,
         *::before,
         *::after {
             box-sizing: border-box;
-        }
-
-        :root {
-            --bg: #f2ead4;
-            --surface: #fffdf9;
-            --surface-soft: #f8f3e8;
-
-            --text: #29251f;
-            --muted: #756d61;
-
-            --border: #ddd4c5;
-
-            --accent: #bd743c;
-            --accent-dark: #99572b;
-            --accent-soft: rgba(189, 116, 60, .13);
-
-            --shadow:
-                0 2px 8px rgba(43, 34, 25, .05),
-                0 12px 34px rgba(43, 34, 25, .045);
-
-            --shadow-hover:
-                0 6px 14px rgba(43, 34, 25, .07),
-                0 20px 48px rgba(43, 34, 25, .09);
-
-            --radius: 26px;
-
-            --ui-font:
-                "Grandstander",
-                system-ui,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                sans-serif;
-
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-        }
-
-        body.dark {
-            --bg: #1d1915;
-            --surface: #28231e;
-            --surface-soft: #302a24;
-
-            --text: #f5eee5;
-            --muted: #aaa093;
-
-            --border: #40372e;
-
-            --accent: #d18a50;
-            --accent-dark: #e1a16e;
-            --accent-soft: rgba(209, 138, 80, .15);
-
-            --shadow:
-                0 2px 8px rgba(0, 0, 0, .2),
-                0 14px 40px rgba(0, 0, 0, .15);
-
-            --shadow-hover:
-                0 8px 18px rgba(0, 0, 0, .28),
-                0 24px 52px rgba(0, 0, 0, .2);
         }
 
         html {
@@ -143,11 +127,10 @@
         body {
             min-height: 100vh;
             margin: 0;
-
             padding:
-                calc(.85rem + var(--safe-top))
-                max(.8rem, 3vw)
-                calc(1rem + var(--safe-bottom));
+                calc(.8rem + env(safe-area-inset-top, 0px))
+                max(.75rem, 3vw)
+                calc(1rem + env(safe-area-inset-bottom, 0px));
 
             overflow-x: hidden;
 
@@ -156,15 +139,11 @@
 
             font-family: var(--ui-font);
 
+            -webkit-tap-highlight-color: transparent;
+
             transition:
                 background .25s ease,
                 color .25s ease;
-
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body.modal-open {
-            overflow: hidden;
         }
 
         button,
@@ -180,35 +159,96 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        button,
-        .font-card,
-        .brand,
-        .preview-title,
-        .preview-name,
-        .control-label,
-        .control-value,
-        .snippet-title,
-        .sort-toggle,
-        .sort-chip,
-        .display-toggle,
-        .display-button {
-            user-select: none;
-            -webkit-user-select: none;
+        img {
+            max-width: 100%;
         }
 
         ::selection {
-            background: var(--accent-soft);
+            background: transparent;
             color: inherit;
         }
 
         ::-moz-selection {
-            background: var(--accent-soft);
+            background: transparent;
             color: inherit;
         }
 
-        img {
-            max-width: 100%;
+        input::selection,
+        textarea::selection,
+        code::selection {
+            background: var(--accent-soft);
         }
+
+        /* =====================================================
+           THEME
+        ===================================================== */
+
+        :root {
+            --bg: #f3ead5;
+            --surface: #f9f2e5;
+            --surface-soft: #fff6c0;
+
+            --text: #29251f;
+            --muted: #766e62;
+
+            --border: #ded6c9;
+
+            /* Matched closely to the orange icon */
+            --accent: #ee6716;
+            --accent-dark: #c9520d;
+            --accent-soft: rgba(238, 103, 22, .14);
+
+            --preview-light: #fdfdf1;
+            --preview-dark: #171513;
+
+            --shadow:
+                0 2px 8px rgba(54, 39, 24, .055),
+                0 12px 32px rgba(54, 39, 24, .05);
+
+            --shadow-hover:
+                0 5px 14px rgba(54, 39, 24, .08),
+                0 20px 48px rgba(54, 39, 24, .1);
+
+            --radius: 24px;
+
+            --ui-font:
+                "Grandstander",
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        body.dark {
+            --bg: #211a17;
+            --surface: #2a221e;
+            --surface-soft: #332a24;
+
+            --text: #f6eee4;
+            --muted: #aea196;
+
+            --border: #453a32;
+
+            --accent: #ee6716;
+            --accent-dark: #ff8a48;
+            --accent-soft: rgba(238, 103, 22, .18);
+
+            --preview-light: #fdfdf1;
+            --preview-dark: #11100f;
+
+            --shadow:
+                0 3px 10px rgba(0, 0, 0, .24),
+                0 16px 42px rgba(0, 0, 0, .18);
+
+            --shadow-hover:
+                0 7px 18px rgba(0, 0, 0, .3),
+                0 24px 55px rgba(0, 0, 0, .24);
+        }
+
+        /* =====================================================
+           APP
+        ===================================================== */
 
         .app {
             width: min(100%, 920px);
@@ -225,42 +265,54 @@
             justify-content: space-between;
 
             gap: 1rem;
-            min-height: 58px;
+
+            min-height: 64px;
             margin-bottom: 1rem;
         }
 
         .brand {
             display: inline-flex;
             align-items: center;
+
             gap: .7rem;
 
             min-width: 0;
+
+            user-select: none;
+            -webkit-user-select: none;
         }
 
+        /*
+         * Important:
+         * No background.
+         * No clipping.
+         * No rounded wrapper.
+         */
         .brand-logo {
             width: 48px;
-            height: 48px;
+            height: 54px;
 
             flex: 0 0 auto;
 
+            display: block;
+
             object-fit: contain;
+            object-position: center;
 
-            /*
-             * No background.
-             * No wrapper.
-             * No clipping.
-             */
-            border: 0;
             border-radius: 0;
-            box-shadow: none;
 
-            transform: scale(1.12);
+            box-shadow: none;
 
             -webkit-user-drag: none;
         }
 
         .brand-name {
-            font-size: clamp(1.35rem, 4vw, 1.7rem);
+            font-size: clamp(
+                1.4rem,
+                4vw,
+                1.75rem
+            );
+
             font-weight: 700;
             letter-spacing: -.045em;
             line-height: 1;
@@ -271,7 +323,7 @@
 
             color: var(--muted);
 
-            font-size: .68rem;
+            font-size: .67rem;
             line-height: 1;
         }
 
@@ -319,19 +371,6 @@
             height: 19px;
         }
 
-        .icon-button:focus-visible,
-        .back-button:focus-visible,
-        .download-button:focus-visible,
-        .weight-button:focus-visible,
-        .snippet-copy:focus-visible,
-        .font-card:focus-visible,
-        .sort-toggle:focus-visible,
-        .sort-chip:focus-visible,
-        .display-button:focus-visible {
-            outline: 3px solid var(--accent-soft);
-            outline-offset: 3px;
-        }
-
         /* =====================================================
            SEARCH
         ===================================================== */
@@ -341,7 +380,7 @@
             top: 0;
             z-index: 50;
 
-            padding: .25rem 0 .75rem;
+            padding: .2rem 0 .8rem;
 
             background:
                 linear-gradient(
@@ -357,9 +396,10 @@
 
         .search input {
             width: 100%;
-            height: clamp(50px, 7vw, 56px);
+            height: clamp(50px, 7vw, 58px);
 
-            padding: 0 1rem 0 3.1rem;
+            padding:
+                0 1rem 0 3.1rem;
 
             border: 1px solid var(--border);
             border-radius: 999px;
@@ -369,7 +409,11 @@
             background: var(--surface);
             color: var(--text);
 
-            font-size: clamp(.9rem, 2.8vw, 1rem);
+            font-size: clamp(
+                .9rem,
+                2.8vw,
+                1rem
+            );
 
             box-shadow: var(--shadow);
 
@@ -392,6 +436,7 @@
 
         .search-icon {
             position: absolute;
+
             left: 1rem;
             top: 50%;
 
@@ -401,166 +446,205 @@
             color: var(--muted);
 
             transform: translateY(-50%);
+
             pointer-events: none;
         }
 
         .search-icon svg {
-            width: 20px;
-            height: 20px;
+            width: 21px;
+            height: 21px;
         }
 
         /* =====================================================
-           FILTER BAR
+           SEARCH CONTROLS
         ===================================================== */
 
-        .filter-bar {
+        .display-tools {
             display: flex;
-            align-items: center;
-            gap: .45rem;
+            align-items: flex-start;
+            justify-content: space-between;
 
-            min-height: 34px;
-            margin-top: .45rem;
+            gap: .65rem;
+
+            margin-top: .65rem;
+        }
+
+        .sort-area {
+            position: relative;
         }
 
         .sort-toggle {
+            min-height: 42px;
+
             display: inline-flex;
             align-items: center;
-            gap: .35rem;
+            gap: .4rem;
 
-            height: 30px;
-            padding: 0 .65rem;
+            padding: .35rem .8rem;
 
             border: 1px solid var(--border);
             border-radius: 999px;
 
             background: var(--surface);
-            color: var(--muted);
+            color: var(--text);
 
-            font-size: .64rem;
+            box-shadow: var(--shadow);
+
+            font-size: .72rem;
             cursor: pointer;
-
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .025);
-
-            transition:
-                color .18s ease,
-                border-color .18s ease,
-                background .18s ease;
-        }
-
-        .sort-toggle:hover,
-        .sort-toggle.active {
-            color: var(--accent);
-            border-color: var(--accent);
-            background: var(--accent-soft);
         }
 
         .sort-toggle svg {
-            width: 13px;
-            height: 13px;
+            width: 17px;
+            height: 17px;
         }
 
-        .filter-options {
+        .sort-toggle.active {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sort-chips {
+            position: absolute;
+
+            left: 0;
+            top: calc(100% + .45rem);
+
+            z-index: 20;
+
             display: flex;
             align-items: center;
-            gap: .35rem;
+            gap: .3rem;
 
-            overflow: hidden;
-
-            max-width: 0;
-            opacity: 0;
-
-            transform: translateX(-5px);
-
-            transition:
-                max-width .25s ease,
-                opacity .2s ease,
-                transform .2s ease;
-        }
-
-        .filter-options.open {
-            max-width: 420px;
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .sort-chip,
-        .display-button {
-            height: 30px;
-            padding: 0 .65rem;
+            padding: .3rem;
 
             border: 1px solid var(--border);
             border-radius: 999px;
 
             background: var(--surface);
+
+            box-shadow: var(--shadow-hover);
+
+            opacity: 0;
+            visibility: hidden;
+
+            transform:
+                translateY(-5px)
+                scale(.98);
+
+            transform-origin: top left;
+
+            transition:
+                opacity .16s ease,
+                visibility .16s ease,
+                transform .16s ease;
+        }
+
+        .sort-chips.open {
+            opacity: 1;
+            visibility: visible;
+            transform: none;
+        }
+
+        .sort-chip {
+            min-height: 34px;
+
+            padding: 0 .7rem;
+
+            border-radius: 999px;
+
+            background: transparent;
             color: var(--muted);
 
-            font-size: .64rem;
+            font-size: .67rem;
+
             white-space: nowrap;
+
+            cursor: pointer;
+        }
+
+        .sort-chip:hover,
+        .sort-chip.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* =====================================================
+           DISPLAY MODE
+        ===================================================== */
+
+        .view-switch {
+            display: inline-flex;
+
+            padding: .25rem;
+
+            border: 1px solid var(--border);
+            border-radius: 999px;
+
+            background: var(--surface);
+
+            box-shadow: var(--shadow);
+        }
+
+        .view-button {
+            min-height: 34px;
+
+            padding: 0 .8rem;
+
+            border-radius: 999px;
+
+            background: transparent;
+            color: var(--muted);
+
+            font-size: .7rem;
 
             cursor: pointer;
 
             transition:
                 background .18s ease,
-                color .18s ease,
-                border-color .18s ease;
+                color .18s ease;
         }
 
-        .sort-chip:hover,
-        .sort-chip.active,
-        .display-button:hover,
-        .display-button.active {
+        .view-button.active {
             background: var(--accent);
-            border-color: var(--accent);
             color: #fff;
         }
 
-        .display-toggle {
-            display: flex;
-            align-items: center;
-            gap: .25rem;
-
-            margin-left: auto;
-            padding: .15rem;
-
-            border: 1px solid var(--border);
-            border-radius: 999px;
-
-            background: var(--surface);
-        }
-
-        .display-button {
-            border-color: transparent;
-            background: transparent;
-        }
-
-        .display-button.active {
-            background: var(--accent);
-        }
-
         /* =====================================================
-           FONT GRID
+           FONT LIST
         ===================================================== */
 
         .font-list {
             display: grid;
             grid-template-columns: 1fr;
+
             gap: .8rem;
+
+            margin-top: .25rem;
         }
 
+        /*
+         * Cards view
+         */
+
         .font-card {
+            --delay: 0ms;
+
             position: relative;
 
             min-width: 0;
-            min-height: 180px;
+            min-height: 205px;
 
             display: flex;
             flex-direction: column;
             justify-content: space-between;
 
-            padding: clamp(1rem, 3vw, 1.35rem);
+            padding:
+                clamp(1rem, 3vw, 1.35rem);
 
             border: 1px solid var(--border);
-            border-radius: clamp(20px, 4vw, 30px);
+            border-radius:
+                clamp(21px, 4vw, 30px);
 
             background: var(--surface);
             box-shadow: var(--shadow);
@@ -571,18 +655,37 @@
 
             opacity: 0;
             transform:
-                translateY(18px)
+                translateY(28px)
                 scale(.985);
 
-            animation:
-                card-in .55s
-                cubic-bezier(.2, .8, .2, 1)
-                forwards;
-
             transition:
-                transform .2s ease,
-                border-color .2s ease,
-                box-shadow .2s ease;
+                transform .22s ease,
+                border-color .22s ease,
+                box-shadow .22s ease;
+        }
+
+        .font-card.in-view {
+            animation:
+                cardCascade .58s
+                cubic-bezier(.2, .8, .2, 1)
+                var(--delay)
+                both;
+        }
+
+        @keyframes cardCascade {
+            from {
+                opacity: 0;
+                transform:
+                    translateY(28px)
+                    scale(.985);
+            }
+
+            to {
+                opacity: 1;
+                transform:
+                    translateY(0)
+                    scale(1);
+            }
         }
 
         .font-card:hover {
@@ -593,13 +696,6 @@
 
         .font-card:active {
             transform: scale(.992);
-        }
-
-        @keyframes card-in {
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
         }
 
         .font-card.loading .font-specimen {
@@ -616,19 +712,20 @@
 
             color: var(--text);
 
-            font-size: clamp(1.05rem, 3.5vw, 1.35rem);
-            font-weight: 700;
+            font-size:
+                clamp(1.05rem, 3.5vw, 1.35rem);
 
+            font-weight: 700;
             letter-spacing: -.025em;
             line-height: 1.15;
         }
 
         .font-specimen {
             width: 100%;
-            min-height: 78px;
+            min-height: 84px;
 
-            margin-top: .8rem;
-            padding: .25rem .1rem .7rem;
+            margin-top: .75rem;
+            padding: .2rem .1rem .65rem;
 
             overflow-x: auto;
             overflow-y: hidden;
@@ -637,8 +734,10 @@
 
             color: var(--text);
 
-            font-size: clamp(2rem, 7vw, 3.4rem);
-            font-weight: 600;
+            font-size:
+                clamp(2.1rem, 7vw, 3.5rem);
+
+            font-weight: 400;
 
             letter-spacing: -.035em;
             line-height: 1.35;
@@ -652,7 +751,7 @@
         }
 
         .font-specimen::-webkit-scrollbar {
-            height: 4px;
+            height: 3px;
         }
 
         .font-specimen::-webkit-scrollbar-thumb {
@@ -666,7 +765,8 @@
             justify-content: space-between;
 
             gap: .6rem;
-            margin-top: .7rem;
+
+            margin-top: .55rem;
         }
 
         .font-meta {
@@ -678,13 +778,14 @@
 
             color: var(--muted);
 
-            font-size: .68rem;
+            font-size: .67rem;
             line-height: 1.2;
         }
 
         .preview-label {
             display: inline-flex;
             align-items: center;
+
             gap: .3rem;
 
             flex: 0 0 auto;
@@ -701,55 +802,109 @@
         }
 
         /* =====================================================
-           PEEK MODE
+           PEEK VIEW
         ===================================================== */
 
         .font-list.peeks {
-            grid-template-columns: 1fr;
-            gap: .5rem;
-        }
-
-        .font-list.peeks .font-card {
-            min-height: 0;
-
-            display: grid;
             grid-template-columns:
-                minmax(100px, .35fr)
-                minmax(0, 1fr)
-                auto;
+                repeat(2, minmax(0, 1fr));
 
+            gap: 1px;
+
+            background: var(--border);
+
+            border: 1px solid var(--border);
+            border-radius: 22px;
+
+            overflow: hidden;
+        }
+
+        .peeks .font-card {
+            min-height: 190px;
+
+            padding:
+                clamp(.8rem, 3vw, 1.15rem);
+
+            border: 0;
+            border-radius: 0;
+
+            box-shadow: none;
+
+            background: var(--surface);
+
+            text-align: center;
+
+            justify-content: center;
+
+            transition:
+                background .2s ease,
+                transform .2s ease;
+        }
+
+        .peeks .font-card:hover {
+            transform: none;
+            background: var(--surface-soft);
+            border-color: transparent;
+            box-shadow: none;
+        }
+
+        .peeks .font-name {
+            order: 2;
+
+            margin-top: .4rem;
+
+            font-size:
+                clamp(.8rem, 3vw, 1rem);
+
+            font-weight: 500;
+
+            letter-spacing: -.025em;
+        }
+
+        .peeks .font-specimen {
+            order: 1;
+
+            display: flex;
             align-items: center;
+            justify-content: center;
 
-            gap: 1rem;
+            min-height: 105px;
 
-            padding: .75rem 1rem;
-
-            border-radius: 18px;
-        }
-
-        .font-list.peeks .font-name {
-            font-size: .8rem;
-        }
-
-        .font-list.peeks .font-specimen {
-            min-height: 50px;
             margin: 0;
-            padding: .1rem 0;
+            padding: 0;
 
-            font-size: clamp(1.6rem, 5vw, 2.5rem);
+            overflow: hidden;
+
+            font-size:
+                clamp(3.3rem, 13vw, 5.8rem);
+
+            line-height: 1;
+
+            letter-spacing: -.06em;
         }
 
-        .font-list.peeks .font-card-bottom {
-            margin: 0;
-            display: block;
+        .peeks .font-card-bottom {
+            order: 3;
+
+            justify-content: center;
+
+            margin-top: .65rem;
         }
 
-        .font-list.peeks .font-meta {
+        .peeks .font-meta {
             display: none;
         }
 
-        .font-list.peeks .preview-label {
-            font-size: .65rem;
+        .peeks .preview-label {
+            color: var(--muted);
+
+            font-size: .6rem;
+            font-weight: 500;
+        }
+
+        .peeks .preview-label svg {
+            width: 12px;
+            height: 12px;
         }
 
         /* =====================================================
@@ -765,13 +920,13 @@
 
             color: var(--muted);
 
-            font-size: .75rem;
+            font-size: .72rem;
             text-align: center;
         }
 
         .spinner {
-            width: 18px;
-            height: 18px;
+            width: 17px;
+            height: 17px;
 
             margin-right: .5rem;
 
@@ -780,7 +935,8 @@
 
             border-radius: 50%;
 
-            animation: spin .7s linear infinite;
+            animation:
+                spin .7s linear infinite;
         }
 
         @keyframes spin {
@@ -796,7 +952,7 @@
 
             color: var(--muted);
 
-            font-size: .68rem;
+            font-size: .67rem;
             text-align: center;
         }
 
@@ -806,6 +962,7 @@
             padding: 4rem 1rem;
 
             color: var(--muted);
+
             text-align: center;
         }
 
@@ -820,7 +977,7 @@
         }
 
         /* =====================================================
-           OVERLAYS
+           OVERLAY
         ===================================================== */
 
         .preview-overlay {
@@ -858,13 +1015,13 @@
             margin-inline: auto;
 
             padding:
-                calc(.85rem + var(--safe-top))
+                calc(.8rem + env(safe-area-inset-top, 0px))
                 max(.8rem, 3vw)
-                calc(1.1rem + var(--safe-bottom));
+                calc(1rem + env(safe-area-inset-bottom, 0px));
 
             overflow-y: auto;
 
-            transform: translateY(25px);
+            transform: translateY(24px);
 
             transition:
                 transform .28s
@@ -880,15 +1037,18 @@
             align-items: center;
 
             gap: .6rem;
+
             margin-bottom: 1rem;
         }
 
         .back-button {
             display: inline-flex;
             align-items: center;
+
             gap: .25rem;
 
             min-height: 42px;
+
             padding: .3rem .8rem;
 
             border: 1px solid var(--border);
@@ -898,6 +1058,7 @@
             color: var(--text);
 
             font-size: .8rem;
+
             cursor: pointer;
 
             box-shadow: var(--shadow);
@@ -910,6 +1071,7 @@
 
         .preview-title {
             min-width: 0;
+
             flex: 1;
 
             overflow: hidden;
@@ -918,16 +1080,20 @@
 
             text-align: center;
 
-            font-size: clamp(1.1rem, 4vw, 1.45rem);
+            font-size:
+                clamp(1.05rem, 4vw, 1.45rem);
+
             font-weight: 700;
         }
 
         .download-button {
             display: inline-flex;
             align-items: center;
+
             gap: .3rem;
 
             min-height: 42px;
+
             padding: .3rem .9rem;
 
             border-radius: 999px;
@@ -947,48 +1113,29 @@
         }
 
         /* =====================================================
-           PREVIEW BACKGROUND
+           PREVIEW HERO
         ===================================================== */
 
         .preview-hero {
-            --preview-bg: var(--surface);
-            --preview-text: var(--text);
-
-            padding: clamp(1rem, 4vw, 1.8rem);
+            padding:
+                clamp(1rem, 4vw, 1.8rem);
 
             border: 1px solid var(--border);
-            border-radius: clamp(22px, 5vw, 34px);
 
-            background: var(--preview-bg);
-            color: var(--preview-text);
+            border-radius:
+                clamp(22px, 5vw, 34px);
+
+            background: var(--surface);
 
             box-shadow: var(--shadow);
 
             overflow: hidden;
-
-            transition:
-                background .25s ease,
-                color .25s ease;
-        }
-
-        .preview-hero.preview-light {
-            --preview-bg: #fffdf9;
-            --preview-text: #29251f;
-        }
-
-        .preview-hero.preview-dark {
-            --preview-bg: #1d1915;
-            --preview-text: #f5eee5;
         }
 
         .preview-name {
             margin-bottom: .6rem;
 
-            color: color-mix(
-                in srgb,
-                var(--preview-text) 55%,
-                transparent
-            );
+            color: var(--muted);
 
             font-size: .72rem;
         }
@@ -999,7 +1146,8 @@
             display: flex;
             align-items: center;
 
-            padding: 1rem .1rem 1.25rem;
+            padding:
+                1rem .1rem 1.25rem;
 
             overflow-x: auto;
 
@@ -1007,9 +1155,11 @@
 
             color: var(--preview-text);
 
-            font-size: clamp(2.4rem, 9vw, 6rem);
+            font-size:
+                clamp(2.4rem, 9vw, 6rem);
 
             letter-spacing: -.045em;
+
             line-height: 1.3;
 
             -webkit-font-smoothing: antialiased;
@@ -1019,52 +1169,66 @@
         .preview-characters {
             display: grid;
             gap: .7rem;
+
             margin-top: .8rem;
         }
 
         .character-line {
             padding: .8rem .9rem 1rem;
 
-            border: 1px solid color-mix(
-                in srgb,
-                var(--preview-text) 15%,
-                transparent
-            );
+            border: 1px solid var(--preview-border);
 
             border-radius: 16px;
 
-            background: color-mix(
-                in srgb,
-                var(--preview-text) 5%,
-                transparent
-            );
-
+            background: var(--preview-surface-soft);
             color: var(--preview-text);
 
             overflow-x: auto;
+
             white-space: nowrap;
 
-            font-size: clamp(1.2rem, 4vw, 1.7rem);
+            font-size:
+                clamp(1.2rem, 4vw, 1.7rem);
+
             line-height: 1.4;
 
             -webkit-font-smoothing: antialiased;
         }
 
         /* =====================================================
-           PREVIEW BACKGROUND OPTIONS
+           PREVIEW BACKGROUND
         ===================================================== */
+
+        .preview-hero.preview-light {
+            --preview-bg: var(--preview-light);
+            --preview-text: #24211e;
+            --preview-border: #ded8cf;
+            --preview-surface-soft: #f6f1e8;
+        }
+
+        .preview-hero.preview-dark {
+            --preview-bg: var(--preview-dark);
+            --preview-text: #f7f2ea;
+            --preview-border: #3c3732;
+            --preview-surface-soft: #211f1c;
+        }
+
+        .preview-hero {
+            background: var(--preview-bg, var(--surface));
+        }
 
         .preview-backgrounds {
             display: flex;
             align-items: center;
-            gap: .35rem;
+            gap: .3rem;
 
-            margin-top: .8rem;
+            margin-top: .9rem;
         }
 
         .background-button {
-            height: 30px;
-            padding: 0 .65rem;
+            min-height: 32px;
+
+            padding: 0 .75rem;
 
             border: 1px solid var(--border);
             border-radius: 999px;
@@ -1072,15 +1236,16 @@
             background: var(--surface);
             color: var(--muted);
 
-            font-size: .64rem;
+            font-size: .65rem;
 
             cursor: pointer;
         }
 
         .background-button.active {
             background: var(--accent);
-            border-color: var(--accent);
             color: #fff;
+
+            border-color: var(--accent);
         }
 
         /* =====================================================
@@ -1090,21 +1255,26 @@
         .preview-controls {
             display: grid;
             gap: .7rem;
+
             margin-top: .8rem;
         }
 
         .control {
             display: flex;
             align-items: center;
+
             gap: .8rem;
 
             min-height: 48px;
+
             padding: .55rem .8rem;
 
-            border: 1px solid var(--border);
+            border: 1px solid var(--preview-border);
+
             border-radius: 16px;
 
-            background: var(--surface);
+            background: var(--preview-bg);
+            color: var(--preview-text);
         }
 
         .control-label {
@@ -1117,6 +1287,7 @@
 
         .control input[type="range"] {
             flex: 1;
+
             min-width: 0;
 
             accent-color: var(--accent);
@@ -1125,7 +1296,7 @@
         .control-value {
             min-width: 48px;
 
-            color: var(--text);
+            color: var(--preview-text);
 
             font-size: .7rem;
             font-weight: 600;
@@ -1138,20 +1309,24 @@
 
             display: flex;
             flex-wrap: wrap;
+
             gap: .3rem;
         }
 
         .weight-button {
             height: 30px;
+
             padding: 0 .6rem;
 
-            border: 1px solid var(--border);
+            border: 1px solid var(--preview-border);
+
             border-radius: 999px;
 
-            background: var(--surface-soft);
-            color: var(--text);
+            background: var(--preview-surface-soft);
+            color: var(--preview-text);
 
             font-size: .68rem;
+
             cursor: pointer;
         }
 
@@ -1167,17 +1342,19 @@
             min-height: 92px;
 
             margin-top: .8rem;
+
             padding: .9rem;
 
             resize: vertical;
 
-            border: 1px solid var(--border);
+            border: 1px solid var(--preview-border);
+
             border-radius: 18px;
 
             outline: none;
 
-            background: var(--surface);
-            color: var(--text);
+            background: var(--preview-bg);
+            color: var(--preview-text);
 
             font-size: .95rem;
             line-height: 1.5;
@@ -1188,22 +1365,29 @@
         }
 
         /* =====================================================
-           SNIPPET
+           CDN / USAGE
         ===================================================== */
 
-        .snippet-section {
-            margin-top: .8rem;
+        .resource-grid {
+            display: grid;
+            gap: .8rem;
 
+            margin-top: .8rem;
+        }
+
+        .resource-card {
             border: 1px solid var(--border);
+
             border-radius: 20px;
 
             background: var(--surface);
+
             box-shadow: var(--shadow);
 
             overflow: hidden;
         }
 
-        .snippet-header {
+        .resource-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -1215,33 +1399,27 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .snippet-title {
+        .resource-title {
             font-size: .82rem;
             font-weight: 700;
         }
 
-        .snippet-copy {
-            height: 32px;
-            padding: 0 .7rem;
+        .resource-label {
+            color: var(--muted);
 
-            border: 1px solid var(--border);
-            border-radius: 999px;
-
-            background: var(--surface-soft);
-            color: var(--text);
-
-            font-size: .65rem;
-
-            cursor: pointer;
+            font-size: .62rem;
         }
 
-        .snippet-code {
+        .resource-body {
+            padding: 1rem;
+        }
+
+        .resource-code {
             display: block;
 
-            max-height: 280px;
-            padding: 1rem;
+            padding: .85rem;
 
-            overflow: auto;
+            border-radius: 14px;
 
             background:
                 color-mix(
@@ -1260,103 +1438,108 @@
                 Consolas,
                 monospace;
 
-            font-size: .72rem;
+            font-size: .7rem;
             line-height: 1.65;
 
-            white-space: pre;
+            overflow-x: auto;
+
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .resource-copy {
+            height: 32px;
+
+            padding: 0 .7rem;
+
+            border: 1px solid var(--border);
+
+            border-radius: 999px;
+
+            background: var(--surface-soft);
+            color: var(--text);
+
+            font-size: .65rem;
+
+            cursor: pointer;
+        }
+
+        .resource-copy:hover {
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
         /* =====================================================
            ABOUT
         ===================================================== */
 
-        .about-grid {
-            display: grid;
-            gap: .8rem;
-            margin-top: .8rem;
-        }
-
-        .about-section {
-            padding: 1rem;
-
-            border: 1px solid var(--border);
-            border-radius: 18px;
-
-            background: var(--surface-soft);
-        }
-
-        .about-section-title {
-            margin-bottom: .5rem;
-
-            font-size: .75rem;
-            font-weight: 700;
-        }
-
-        .about-section p {
-            margin: 0;
-
+        .about-copy {
             color: var(--muted);
 
-            font-size: .82rem;
-            line-height: 1.6;
-        }
-
-        .about-code {
-            display: block;
-
-            margin-top: .65rem;
-            padding: .8rem;
-
-            overflow-x: auto;
-
-            border-radius: 13px;
-
-            background: var(--surface);
-            color: var(--text);
-
-            font-family:
-                ui-monospace,
-                SFMono-Regular,
-                Menlo,
-                monospace;
-
-            font-size: .68rem;
-            line-height: 1.55;
-
-            white-space: pre-wrap;
-            word-break: break-word;
+            font-size: .85rem;
+            line-height: 1.65;
         }
 
         .social-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: .5rem;
+            display: grid;
+            gap: .55rem;
 
-            margin-top: .8rem;
+            margin-top: 1rem;
         }
 
         .social-link {
-            display: inline-flex;
+            display: flex;
             align-items: center;
+            justify-content: space-between;
 
-            min-height: 34px;
-            padding: 0 .75rem;
+            padding: .85rem 1rem;
 
             border: 1px solid var(--border);
-            border-radius: 999px;
+
+            border-radius: 16px;
 
             background: var(--surface);
+
             color: var(--text);
 
-            font-size: .68rem;
-            font-weight: 600;
-
             text-decoration: none;
+
+            transition:
+                border-color .18s ease,
+                transform .18s ease;
         }
 
         .social-link:hover {
             border-color: var(--accent);
-            color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .social-name {
+            font-size: .75rem;
+            font-weight: 600;
+        }
+
+        .social-handle {
+            color: var(--muted);
+
+            font-size: .7rem;
+        }
+
+        /* =====================================================
+           FOCUS
+        ===================================================== */
+
+        :where(
+            button,
+            input,
+            textarea,
+            .font-card,
+            .social-link
+        ):focus-visible {
+            outline:
+                3px solid var(--accent-soft);
+
+            outline-offset: 3px;
         }
 
         /* =====================================================
@@ -1364,17 +1547,16 @@
         ===================================================== */
 
         @media (min-width: 640px) {
-            .font-list {
-                grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
-            }
-
             .font-card {
-                min-height: 210px;
+                min-height: 220px;
             }
 
             .preview-display {
                 min-height: 270px;
+            }
+
+            .peeks .font-card {
+                min-height: 220px;
             }
         }
 
@@ -1388,20 +1570,8 @@
             }
 
             .font-card {
-                min-height: 225px;
+                min-height: 230px;
                 padding: 1.4rem;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .font-list.peeks .font-card {
-                grid-template-columns:
-                    minmax(80px, .32fr)
-                    minmax(0, 1fr);
-            }
-
-            .font-list.peeks .preview-label {
-                display: none;
             }
         }
 
@@ -1412,7 +1582,7 @@
 
             .brand-logo {
                 width: 44px;
-                height: 44px;
+                height: 50px;
             }
 
             .icon-button {
@@ -1420,13 +1590,34 @@
                 height: 40px;
             }
 
+            .display-tools {
+                gap: .45rem;
+            }
+
+            .view-button {
+                padding-inline: .7rem;
+            }
+
             .font-card {
-                min-height: 170px;
+                min-height: 190px;
             }
 
             .font-specimen {
                 min-height: 72px;
-                font-size: clamp(1.8rem, 9vw, 2.8rem);
+
+                font-size:
+                    clamp(1.8rem, 9vw, 2.8rem);
+            }
+
+            .peeks .font-card {
+                min-height: 175px;
+            }
+
+            .peeks .font-specimen {
+                min-height: 85px;
+
+                font-size:
+                    clamp(3rem, 15vw, 4.7rem);
             }
 
             .preview-header {
@@ -1447,7 +1638,9 @@
 
             .preview-display {
                 min-height: 170px;
-                font-size: clamp(2.2rem, 12vw, 4rem);
+
+                font-size:
+                    clamp(2.2rem, 12vw, 4rem);
             }
 
             .control {
@@ -1459,19 +1652,15 @@
             }
 
             .weight-options {
-                flex-basis: calc(100% - 75px);
+                flex-basis:
+                    calc(100% - 75px);
             }
 
-            .filter-options.open {
-                max-width: 270px;
-            }
+            .sort-chips {
+                max-width:
+                    calc(100vw - 2rem);
 
-            .display-toggle {
-                gap: 0;
-            }
-
-            .display-button {
-                padding-inline: .5rem;
+                overflow-x: auto;
             }
         }
 
@@ -1480,14 +1669,12 @@
             *::before,
             *::after {
                 scroll-behavior: auto !important;
-                animation-duration: .001ms !important;
-                transition-duration: .001ms !important;
-            }
 
-            .font-card {
-                opacity: 1;
-                transform: none;
-                animation: none;
+                animation-duration:
+                    .001ms !important;
+
+                transition-duration:
+                    .001ms !important;
             }
         }
     </style>
@@ -1497,7 +1684,9 @@
 
 <main class="app">
 
-    <!-- HEADER -->
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
     <header class="header">
 
@@ -1508,13 +1697,18 @@
                 src="/icon.png"
                 alt="Typace"
                 width="48"
-                height="48"
+                height="54"
                 draggable="false"
             >
 
             <div>
-                <div class="brand-name">Typace</div>
-                <div class="brand-subtitle">Font Library</div>
+                <div class="brand-name">
+                    Typace
+                </div>
+
+                <div class="brand-subtitle">
+                    Font Library
+                </div>
             </div>
 
         </div>
@@ -1533,7 +1727,12 @@
                     stroke="currentColor"
                     stroke-width="2"
                 >
-                    <circle cx="12" cy="12" r="10"/>
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                    />
+
                     <path d="M12 16v-4"/>
                     <path d="M12 8h.01"/>
                 </svg>
@@ -1543,20 +1742,25 @@
                 class="icon-button"
                 id="themeButton"
                 type="button"
-                aria-label="Switch to dark mode"
+                aria-label="Toggle dark mode"
             ></button>
 
         </div>
 
     </header>
 
-    <!-- SEARCH -->
+    <!-- =====================================================
+         SEARCH
+    ====================================================== -->
 
     <section class="sticky-tools">
 
         <div class="search">
 
-            <span class="search-icon" aria-hidden="true">
+            <span
+                class="search-icon"
+                aria-hidden="true"
+            >
                 <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -1565,7 +1769,12 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                 >
-                    <circle cx="11" cy="11" r="7"/>
+                    <circle
+                        cx="11"
+                        cy="11"
+                        r="7"
+                    />
+
                     <line
                         x1="16.65"
                         y1="16.65"
@@ -1586,81 +1795,90 @@
 
         </div>
 
-        <!-- COLLAPSED FILTERS -->
+        <div class="display-tools">
 
-        <div class="filter-bar">
+            <!-- SORT -->
 
-            <button
-                class="sort-toggle"
-                id="sortToggle"
-                type="button"
-                aria-expanded="false"
-            >
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                >
-                    <path d="M8 6h13"/>
-                    <path d="M8 12h10"/>
-                    <path d="M8 18h7"/>
-                    <path d="M3 6h.01"/>
-                    <path d="M3 12h.01"/>
-                    <path d="M3 18h.01"/>
-                </svg>
-
-                Sort
-            </button>
-
-            <div
-                class="filter-options"
-                id="filterOptions"
-            >
+            <div class="sort-area">
 
                 <button
-                    class="sort-chip active"
-                    data-sort="az"
+                    class="sort-toggle"
+                    id="sortToggle"
                     type="button"
+                    aria-expanded="false"
+                    aria-controls="sortChips"
                 >
-                    A–Z
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                    >
+                        <path d="M8 6h13"/>
+                        <path d="M8 12h13"/>
+                        <path d="M8 18h13"/>
+                        <path d="M3 6h.01"/>
+                        <path d="M3 12h.01"/>
+                        <path d="M3 18h.01"/>
+                    </svg>
+
+                    Sort
                 </button>
 
-                <button
-                    class="sort-chip"
-                    data-sort="za"
-                    type="button"
+                <div
+                    class="sort-chips"
+                    id="sortChips"
+                    aria-label="Sort fonts"
                 >
-                    Z–A
-                </button>
 
-                <button
-                    class="sort-chip"
-                    data-sort="random"
-                    type="button"
-                >
-                    Random
-                </button>
+                    <button
+                        class="sort-chip active"
+                        data-sort="az"
+                        type="button"
+                    >
+                        A–Z
+                    </button>
+
+                    <button
+                        class="sort-chip"
+                        data-sort="za"
+                        type="button"
+                    >
+                        Z–A
+                    </button>
+
+                    <button
+                        class="sort-chip"
+                        data-sort="random"
+                        type="button"
+                    >
+                        Random
+                    </button>
+
+                </div>
 
             </div>
 
+            <!-- DISPLAY -->
+
             <div
-                class="display-toggle"
-                aria-label="Display style"
+                class="view-switch"
+                role="group"
+                aria-label="Font display style"
             >
 
                 <button
-                    class="display-button active"
-                    data-display="cards"
+                    class="view-button active"
+                    data-view="cards"
                     type="button"
                 >
                     Cards
                 </button>
 
                 <button
-                    class="display-button"
-                    data-display="peeks"
+                    class="view-button"
+                    data-view="peeks"
                     type="button"
                 >
                     Peeks
@@ -1672,7 +1890,9 @@
 
     </section>
 
-    <!-- FONT LIST -->
+    <!-- =====================================================
+         FONT LIST
+    ====================================================== -->
 
     <section
         class="font-list"
@@ -1695,7 +1915,6 @@
 
 </main>
 
-
 <!-- =========================================================
      ABOUT
 ========================================================= -->
@@ -1703,9 +1922,9 @@
 <div
     class="preview-overlay"
     id="aboutOverlay"
-    aria-hidden="true"
     role="dialog"
     aria-modal="true"
+    aria-hidden="true"
     aria-labelledby="aboutTitle"
 >
 
@@ -1752,96 +1971,43 @@
                 Typace
             </div>
 
-            <div class="about-grid">
+            <p class="about-copy">
+                A lightweight font library for
+                discovering, previewing, and using
+                typefaces on the web.
+            </p>
 
-                <!-- ABOUT -->
+            <div class="social-links">
 
-                <section class="about-section">
+                <a
+                    class="social-link"
+                    href="https://github.com/The-Ace-Base"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <span class="social-name">
+                        GitHub
+                    </span>
 
-                    <div class="about-section-title">
-                        A quiet font library
-                    </div>
+                    <span class="social-handle">
+                        @The-Ace-Base ↗
+                    </span>
+                </a>
 
-                    <p>
-                        Typace is a lightweight place
-                        for discovering, previewing,
-                        and using typefaces.
-                    </p>
+                <a
+                    class="social-link"
+                    href="https://instagram.com/tab.gl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <span class="social-name">
+                        Instagram
+                    </span>
 
-                </section>
-
-                <!-- CDN -->
-
-                <section class="about-section">
-
-                    <div class="about-section-title">
-                        CDN
-                    </div>
-
-                    <p>
-                        Fonts are served through
-                        jsDelivr from the Typace
-                        GitHub repository.
-                    </p>
-
-                    <code class="about-code">https://cdn.jsdelivr.net/gh/aceyash-dev/Typace@main/fonts/&lt;filename&gt;</code>
-
-                </section>
-
-                <!-- USAGE -->
-
-                <section class="about-section">
-
-                    <div class="about-section-title">
-                        Usage
-                    </div>
-
-                    <p>
-                        Add the generated
-                        <code>@font-face</code>
-                        declaration to your stylesheet,
-                        then use the font normally.
-                    </p>
-
-                    <code class="about-code">@font-face {
-    font-family: 'Your Font';
-    src: url('CDN_URL') format('woff2');
-    font-display: swap;
-}</code>
-
-                </section>
-
-                <!-- LINKS -->
-
-                <section class="about-section">
-
-                    <div class="about-section-title">
-                        Find Typace
-                    </div>
-
-                    <div class="social-links">
-
-                        <a
-                            class="social-link"
-                            href="https://github.com/The-Ace-Base"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            GitHub · @The-Ace-Base
-                        </a>
-
-                        <a
-                            class="social-link"
-                            href="https://instagram.com/tab.gl"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Instagram · @tab.gl
-                        </a>
-
-                    </div>
-
-                </section>
+                    <span class="social-handle">
+                        @tab.gl ↗
+                    </span>
+                </a>
 
             </div>
 
@@ -1851,7 +2017,6 @@
 
 </div>
 
-
 <!-- =========================================================
      FONT PREVIEW
 ========================================================= -->
@@ -1859,9 +2024,9 @@
 <div
     class="preview-overlay"
     id="previewOverlay"
-    aria-hidden="true"
     role="dialog"
     aria-modal="true"
+    aria-hidden="true"
     aria-labelledby="previewTitle"
 >
 
@@ -1908,7 +2073,11 @@
                         d="M21 15v4a2 2 0 0 1-2 2H5
                            a2 2 0 0 1-2-2v-4"
                     />
-                    <polyline points="7 10 12 15 17 10"/>
+
+                    <polyline
+                        points="7 10 12 15 17 10"
+                    />
+
                     <line
                         x1="12"
                         y1="15"
@@ -1917,13 +2086,15 @@
                     />
                 </svg>
 
-                <span>Download</span>
+                <span>
+                    Download
+                </span>
             </button>
 
         </div>
 
         <section
-            class="preview-hero"
+            class="preview-hero preview-light"
             id="previewHero"
         >
 
@@ -1968,18 +2139,14 @@
 
             <!-- BACKGROUND -->
 
-            <div class="preview-backgrounds">
+            <div
+                class="preview-backgrounds"
+                role="group"
+                aria-label="Preview background"
+            >
 
                 <button
                     class="background-button active"
-                    data-background="system"
-                    type="button"
-                >
-                    System
-                </button>
-
-                <button
-                    class="background-button"
                     data-background="light"
                     type="button"
                 >
@@ -2038,55 +2205,73 @@
                             class="weight-button"
                             data-weight="100"
                             type="button"
-                        >100</button>
+                        >
+                            100
+                        </button>
 
                         <button
                             class="weight-button"
                             data-weight="200"
                             type="button"
-                        >200</button>
+                        >
+                            200
+                        </button>
 
                         <button
                             class="weight-button"
                             data-weight="300"
                             type="button"
-                        >300</button>
+                        >
+                            300
+                        </button>
 
                         <button
                             class="weight-button active"
                             data-weight="400"
                             type="button"
-                        >400</button>
+                        >
+                            400
+                        </button>
 
                         <button
                             class="weight-button"
                             data-weight="500"
                             type="button"
-                        >500</button>
+                        >
+                            500
+                        </button>
 
                         <button
                             class="weight-button"
                             data-weight="600"
                             type="button"
-                        >600</button>
+                        >
+                            600
+                        </button>
 
                         <button
                             class="weight-button"
                             data-weight="700"
                             type="button"
-                        >700</button>
+                        >
+                            700
+                        </button>
 
                         <button
                             class="weight-button"
                             data-weight="800"
                             type="button"
-                        >800</button>
+                        >
+                            800
+                        </button>
 
                         <button
                             class="weight-button"
                             data-weight="900"
                             type="button"
-                        >900</button>
+                        >
+                            900
+                        </button>
 
                     </div>
 
@@ -2150,37 +2335,86 @@
 
         </section>
 
-        <!-- CSS -->
+        <!-- =================================================
+             CDN + USAGE
+        ================================================== -->
 
-        <section class="snippet-section">
+        <div class="resource-grid">
 
-            <div class="snippet-header">
+            <!-- CDN -->
 
-                <div class="snippet-title">
-                    CSS snippet
+            <section class="resource-card">
+
+                <div class="resource-header">
+
+                    <div class="resource-title">
+                        CDN
+                    </div>
+
+                    <div
+                        class="resource-label"
+                        id="cdnType"
+                    >
+                        WOFF2
+                    </div>
+
                 </div>
 
-                <button
-                    class="snippet-copy"
-                    id="copySnippet"
-                    type="button"
-                >
-                    Copy
-                </button>
+                <div class="resource-body">
 
-            </div>
+                    <code
+                        class="resource-code"
+                        id="cdnCode"
+                    ></code>
 
-            <code
-                class="snippet-code"
-                id="snippetCode"
-            ></code>
+                    <button
+                        class="resource-copy"
+                        id="copyCdn"
+                        type="button"
+                    >
+                        Copy CDN
+                    </button>
 
-        </section>
+                </div>
+
+            </section>
+
+            <!-- USAGE -->
+
+            <section class="resource-card">
+
+                <div class="resource-header">
+
+                    <div class="resource-title">
+                        Usage
+                    </div>
+
+                    <button
+                        class="resource-copy"
+                        id="copyUsage"
+                        type="button"
+                    >
+                        Copy Usage
+                    </button>
+
+                </div>
+
+                <div class="resource-body">
+
+                    <code
+                        class="resource-code"
+                        id="usageCode"
+                    ></code>
+
+                </div>
+
+            </section>
+
+        </div>
 
     </div>
 
 </div>
-
 
 <script>
 (() => {
@@ -2190,39 +2424,37 @@
        CONFIG
     ========================================================= */
 
-    const API_URL = "/api/fonts";
+    const CONFIG = Object.freeze({
+        API_URL: "/api/fonts",
 
-    const CDN_BASE =
-        "https://cdn.jsdelivr.net/gh/aceyash-dev/Typace@main/fonts/";
+        CDN_BASE:
+            "https://cdn.jsdelivr.net/gh/aceyash-dev/Typace@main/fonts/",
 
-    const BATCH_SIZE = 20;
+        BATCH_SIZE: 20,
 
-    const SPECIMEN =
-        "The Quick Brown Fox Jumps Over The Lazy Dog";
+        SPECIMEN:
+            "The Quick Brown Fox Jumps Over The Lazy Dog",
 
-    const FONT_EXTENSION =
-        /\.(woff2?|ttf|otf|eot)$/i;
+        FONT_EXTENSIONS:
+            /\.(woff2?|ttf|otf|eot)$/i,
 
-    const FORMAT_MAP = Object.freeze({
-        woff2: "woff2",
-        woff: "woff",
-        ttf: "truetype",
-        otf: "opentype",
-        eot: "embedded-opentype"
-    });
+        TYPE_ALIASES: {
+            "font/woff2": "woff2",
+            "font/woff": "woff",
+            "font/ttf": "ttf",
+            "font/otf": "otf",
+            "truetype": "ttf",
+            "opentype": "otf",
+            "embedded-opentype": "eot"
+        },
 
-    const TYPE_ALIASES = Object.freeze({
-        "font/woff2": "woff2",
-        "font/woff": "woff",
-        "font/ttf": "ttf",
-        "font/otf": "otf",
-        "application/font-woff": "woff",
-        "application/font-sfnt": "ttf",
-        "application/vnd.ms-fontobject": "eot",
-        truetype: "ttf",
-        opentype: "otf",
-        "true-type": "ttf",
-        "open-type": "otf"
+        FORMAT_MAP: {
+            woff2: "woff2",
+            woff: "woff",
+            ttf: "truetype",
+            otf: "opentype",
+            eot: "embedded-opentype"
+        }
     });
 
     /* =========================================================
@@ -2240,11 +2472,8 @@
         stats: $("stats"),
         status: $("loadStatus"),
 
-        theme: $("themeButton"),
         aboutButton: $("aboutButton"),
-
-        sortToggle: $("sortToggle"),
-        filterOptions: $("filterOptions"),
+        theme: $("themeButton"),
 
         aboutOverlay: $("aboutOverlay"),
         aboutBack: $("aboutBack"),
@@ -2252,9 +2481,9 @@
         previewOverlay: $("previewOverlay"),
         previewBack: $("previewBack"),
 
-        previewHero: $("previewHero"),
         previewTitle: $("previewTitle"),
         previewFontName: $("previewFontName"),
+        previewHero: $("previewHero"),
         previewDisplay: $("previewDisplay"),
 
         lowercase: $("lowercasePreview"),
@@ -2275,8 +2504,26 @@
 
         weights: $("weightOptions"),
 
-        snippet: $("snippetCode"),
-        copySnippet: $("copySnippet")
+        backgrounds:
+            document.querySelector(
+                ".preview-backgrounds"
+            ),
+
+        cdn: $("cdnCode"),
+        cdnType: $("cdnType"),
+
+        usage: $("usageCode"),
+
+        copyCdn: $("copyCdn"),
+        copyUsage: $("copyUsage"),
+
+        sortToggle: $("sortToggle"),
+        sortChips: $("sortChips"),
+
+        viewButtons:
+            document.querySelectorAll(
+                ".view-button"
+            )
     };
 
     /* =========================================================
@@ -2289,24 +2536,25 @@
 
         current: null,
 
-        weight: 400,
+        sort: "az",
+        view: "cards",
 
-        visible: BATCH_SIZE,
+        visible: CONFIG.BATCH_SIZE,
 
         loaded: new Set(),
         loading: new Set(),
 
-        sort: "az",
-        display: "cards",
-
-        background: "system",
-
-        dark: false,
-
         observer: null,
+        animationObserver: null,
+
         searchTimer: null,
 
-        previewRequest: 0
+        dark: false,
+        previewBackground: "light",
+
+        previewRequest: 0,
+
+        lastFocus: null
     };
 
     /* =========================================================
@@ -2323,7 +2571,6 @@
             return value === null
                 ? fallback
                 : JSON.parse(value);
-
         } catch {
             return fallback;
         }
@@ -2339,70 +2586,7 @@
     }
 
     /* =========================================================
-       FONT TYPE
-    ========================================================= */
-
-    function normalizeType(value) {
-        if (!value) return "";
-
-        let type =
-            String(value)
-                .trim()
-                .toLowerCase()
-                .replace(/^\./, "");
-
-        return TYPE_ALIASES[type] || type;
-    }
-
-    function getExtension(file) {
-        const match =
-            String(file || "").match(
-                FONT_EXTENSION
-            );
-
-        return match
-            ? match[0]
-                .slice(1)
-                .toLowerCase()
-            : "";
-    }
-
-    function getFormat(file, type = "") {
-        const extension =
-            getExtension(file);
-
-        const detected =
-            extension ||
-            normalizeType(type);
-
-        return FORMAT_MAP[detected] || detected;
-    }
-
-    function getFileType(entry, file) {
-        /*
-         * Exact file extension wins because
-         * the actual file is the source of truth.
-         */
-
-        const extension =
-            getExtension(file);
-
-        if (extension) {
-            return extension;
-        }
-
-        return normalizeType(
-            entry?.type ||
-            entry?.format ||
-            entry?.extension ||
-            entry?.mime ||
-            entry?.mimeType ||
-            entry?.fileType
-        );
-    }
-
-    /* =========================================================
-       GENERAL HELPERS
+       HELPERS
     ========================================================= */
 
     function escapeHTML(value) {
@@ -2416,18 +2600,58 @@
 
     function stripExtension(value) {
         return String(value || "")
-            .replace(FONT_EXTENSION, "");
+            .replace(
+                CONFIG.FONT_EXTENSIONS,
+                ""
+            );
     }
 
-    function getFilename(value) {
-        return String(value || "")
-            .split("/")
-            .pop() || "";
+    function filenameFromPath(value) {
+        return (
+            String(value || "")
+                .split("/")
+                .filter(Boolean)
+                .pop() || ""
+        );
+    }
+
+    function normalizeType(value) {
+        const raw =
+            String(value || "")
+                .trim()
+                .toLowerCase()
+                .replace(/^\./, "");
+
+        return (
+            CONFIG.TYPE_ALIASES[raw] ||
+            raw
+        );
+    }
+
+    function extensionFromFile(file) {
+        const match =
+            String(file || "").match(
+                CONFIG.FONT_EXTENSIONS
+            );
+
+        return match
+            ? match[0]
+                  .slice(1)
+                  .toLowerCase()
+            : "";
+    }
+
+    function formatFromType(type) {
+        return (
+            CONFIG.FORMAT_MAP[type] ||
+            type ||
+            ""
+        );
     }
 
     function fontURL(file) {
         return (
-            CDN_BASE +
+            CONFIG.CDN_BASE +
             String(file)
                 .split("/")
                 .filter(Boolean)
@@ -2442,14 +2666,9 @@
             .replace(/'/g, "\\'")}', sans-serif`;
     }
 
-    function sortFontsAZ(a, b) {
-        return a.name.localeCompare(
-            b.name,
-            undefined,
-            {
-                sensitivity: "base"
-            }
-        );
+    function safeFilename(file) {
+        return filenameFromPath(file)
+            .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_");
     }
 
     /* =========================================================
@@ -2457,40 +2676,35 @@
     ========================================================= */
 
     function normalizeFont(entry) {
-
         if (typeof entry === "string") {
+            const file =
+                filenameFromPath(
+                    entry.trim()
+                );
 
-            const raw =
-                entry.trim();
-
-            if (!raw) {
+            if (!file) {
                 return null;
             }
 
-            const file =
-                getFilename(raw);
-
             const type =
-                getExtension(file);
+                extensionFromFile(file) ||
+                "woff2";
 
             return {
-                name:
-                    stripExtension(file),
-
+                name: stripExtension(file),
                 file,
-
                 type,
-
                 format:
-                    getFormat(file, type),
-
+                    formatFromType(type),
                 weight: 400,
-
                 style: "normal"
             };
         }
 
-        if (!entry || typeof entry !== "object") {
+        if (
+            !entry ||
+            typeof entry !== "object"
+        ) {
             return null;
         }
 
@@ -2507,37 +2721,31 @@
             "";
 
         /*
-         * API can return:
-         *
-         * {
-         *   name: "Satoshi",
-         *   type: "woff2"
-         * }
+         * Prefer the real filename extension.
+         * If there isn't one, use the API type.
          */
 
-        const metadataType =
-            normalizeType(
-                entry.type ||
-                entry.format ||
-                entry.extension ||
-                entry.mime ||
-                entry.mimeType ||
-                entry.fileType
-            );
+        let type =
+            extensionFromFile(file);
+
+        if (!type) {
+            type =
+                normalizeType(
+                    entry.type ||
+                    entry.format ||
+                    entry.extension
+                );
+        }
 
         if (!file && name) {
-
-            const extension =
-                metadataType || "woff2";
-
             file =
-                `${name}.${extension}`;
+                `${name}.${type || "woff2"}`;
         }
 
         if (!name && file) {
             name =
                 stripExtension(
-                    getFilename(file)
+                    filenameFromPath(file)
                 );
         }
 
@@ -2546,24 +2754,17 @@
         }
 
         file =
-            getFilename(file);
+            filenameFromPath(file);
 
         name =
             stripExtension(
-                getFilename(name)
+                filenameFromPath(name)
             );
 
-        const type =
-            getFileType(
-                entry,
-                file
-            );
-
-        const weight =
-            Number(entry.weight) || 400;
-
-        const style =
-            entry.style || "normal";
+        type =
+            extensionFromFile(file) ||
+            type ||
+            "woff2";
 
         return {
             name,
@@ -2572,11 +2773,13 @@
             type,
 
             format:
-                getFormat(file, type),
+                formatFromType(type),
 
-            weight,
+            weight:
+                Number(entry.weight) || 400,
 
-            style
+            style:
+                entry.style || "normal"
         };
     }
 
@@ -2587,7 +2790,6 @@
             .map(normalizeFont)
             .filter(Boolean)
             .filter(font => {
-
                 const key =
                     font.file.toLowerCase();
 
@@ -2598,8 +2800,7 @@
                 seen.add(key);
 
                 return true;
-            })
-            .sort(sortFontsAZ);
+            });
     }
 
     /* =========================================================
@@ -2607,32 +2808,33 @@
     ========================================================= */
 
     async function loadFont(font) {
-
         if (!font?.file) {
             return false;
         }
 
-        if (state.loaded.has(font.file)) {
+        if (
+            state.loaded.has(font.file)
+        ) {
             return true;
         }
 
-        if (state.loading.has(font.file)) {
+        if (
+            state.loading.has(font.file)
+        ) {
             return false;
         }
 
         state.loading.add(font.file);
 
         try {
-
             const face =
                 new FontFace(
                     font.name,
                     `url("${fontURL(font.file)}")`,
                     {
-                        weight:
-                            String(
-                                font.weight || 400
-                            ),
+                        weight: String(
+                            font.weight || 400
+                        ),
 
                         style:
                             font.style ||
@@ -2651,9 +2853,7 @@
             );
 
             return true;
-
         } catch (error) {
-
             console.warn(
                 "Typace: failed to load",
                 font.file,
@@ -2661,12 +2861,73 @@
             );
 
             return false;
-
         } finally {
-
             state.loading.delete(
                 font.file
             );
+        }
+    }
+
+    /* =========================================================
+       SORTING
+    ========================================================= */
+
+    function randomSort(list) {
+        const result = [...list];
+
+        for (
+            let i = result.length - 1;
+            i > 0;
+            i--
+        ) {
+            const j =
+                Math.floor(
+                    Math.random() * (i + 1)
+                );
+
+            [
+                result[i],
+                result[j]
+            ] = [
+                result[j],
+                result[i]
+            ];
+        }
+
+        return result;
+    }
+
+    function sortFonts(fonts) {
+        switch (state.sort) {
+            case "za":
+                return [...fonts].sort(
+                    (a, b) =>
+                        b.name.localeCompare(
+                            a.name,
+                            undefined,
+                            {
+                                sensitivity:
+                                    "base"
+                            }
+                        )
+                );
+
+            case "random":
+                return randomSort(fonts);
+
+            case "az":
+            default:
+                return [...fonts].sort(
+                    (a, b) =>
+                        a.name.localeCompare(
+                            b.name,
+                            undefined,
+                            {
+                                sensitivity:
+                                    "base"
+                            }
+                        )
+                );
         }
     }
 
@@ -2675,7 +2936,6 @@
     ========================================================= */
 
     function matchScore(name, query) {
-
         const value =
             name.toLowerCase();
 
@@ -2687,11 +2947,15 @@
             return 100;
         }
 
-        if (value.startsWith(query)) {
+        if (
+            value.startsWith(query)
+        ) {
             return 90;
         }
 
-        if (value.includes(query)) {
+        if (
+            value.includes(query)
+        ) {
             return 70;
         }
 
@@ -2716,51 +2980,19 @@
             : 0;
     }
 
-    function getSortedFonts(fonts) {
-
-        const list =
-            [...fonts];
-
-        switch (state.sort) {
-
-            case "za":
-                return list.sort(
-                    (a, b) =>
-                        sortFontsAZ(b, a)
-                );
-
-            case "random":
-                return list.sort(
-                    () => Math.random() - .5
-                );
-
-            case "az":
-            default:
-                return list.sort(
-                    sortFontsAZ
-                );
-        }
-    }
-
     function filterFonts() {
-
         const query =
             els.search.value
                 .trim()
                 .toLowerCase();
 
-        let result;
-
         if (!query) {
-
-            result =
-                getSortedFonts(
+            state.filtered =
+                sortFonts(
                     state.fonts
                 );
-
         } else {
-
-            result =
+            state.filtered =
                 state.fonts
                     .map(font => ({
                         font,
@@ -2783,32 +3015,22 @@
                         item =>
                             item.font
                     );
-
-            /*
-             * Search results should remain
-             * relevance-first rather than being
-             * destroyed by sorting.
-             */
         }
-
-        state.filtered =
-            result;
 
         state.visible =
             Math.min(
-                BATCH_SIZE,
-                result.length
+                CONFIG.BATCH_SIZE,
+                state.filtered.length
             );
 
         render();
     }
 
     /* =========================================================
-       CARD
+       CARDS
     ========================================================= */
 
     function createCard(font, index) {
-
         const loaded =
             state.loaded.has(
                 font.file
@@ -2819,6 +3041,30 @@
                 "article"
             );
 
+        const isPeek =
+            state.view === "peeks";
+
+        /*
+         * Cards:
+         * every card cascades.
+         *
+         * Peeks:
+         * every visual row cascades.
+         */
+
+        const cascadeIndex =
+            isPeek
+                ? Math.floor(index / 2)
+                : index;
+
+        card.style.setProperty(
+            "--delay",
+            `${Math.min(
+                cascadeIndex * 55,
+                500
+            )}ms`
+        );
+
         card.className =
             `font-card${
                 loaded
@@ -2828,6 +3074,9 @@
 
         card.dataset.index =
             String(index);
+
+        card.dataset.file =
+            font.file;
 
         card.tabIndex = 0;
 
@@ -2841,21 +3090,10 @@
             `Preview ${font.name}`
         );
 
-        card.style.animationDelay =
-            `${Math.min(index * 35, 420)}ms`;
-
-        const weight =
-            font.weight || 400;
-
-        const style =
+        const styleLabel =
             font.style === "italic"
                 ? "Italic"
                 : "Regular";
-
-        const type =
-            font.type ||
-            getExtension(font.file) ||
-            "font";
 
         card.innerHTML = `
             <div
@@ -2868,7 +3106,9 @@
             <div class="font-specimen">
                 ${
                     loaded
-                        ? SPECIMEN
+                        ? isPeek
+                            ? "Aa"
+                            : CONFIG.SPECIMEN
                         : "Loading…"
                 }
             </div>
@@ -2879,9 +3119,20 @@
                     class="font-meta"
                     title="${escapeHTML(font.file)}"
                 >
-                    ${weight}
-                    · ${style}
-                    · ${escapeHTML(type.toUpperCase())}
+                    ${escapeHTML(
+                        String(
+                            font.weight || 400
+                        )
+                    )}
+                    ·
+                    ${escapeHTML(styleLabel)}
+                    ·
+                    ${escapeHTML(
+                        (
+                            font.type ||
+                            "font"
+                        ).toUpperCase()
+                    )}
                 </span>
 
                 <span class="preview-label">
@@ -2895,7 +3146,9 @@
                         stroke-width="2"
                     >
                         <path d="M5 12h14"/>
-                        <path d="m13 6 6 6-6 6"/>
+                        <path
+                            d="m13 6 6 6-6 6"
+                        />
                     </svg>
 
                 </span>
@@ -2914,7 +3167,6 @@
     }
 
     function applyCardFont(card, font) {
-
         const specimen =
             card.querySelector(
                 ".font-specimen"
@@ -2925,10 +3177,14 @@
         }
 
         specimen.textContent =
-            SPECIMEN;
+            state.view === "peeks"
+                ? "Aa"
+                : CONFIG.SPECIMEN;
 
         specimen.style.fontFamily =
-            fontFamily(font.name);
+            fontFamily(
+                font.name
+            );
 
         specimen.style.fontWeight =
             String(
@@ -2936,10 +3192,70 @@
             );
 
         specimen.style.fontStyle =
-            font.style || "normal";
+            font.style ||
+            "normal";
 
         card.classList.remove(
             "loading"
+        );
+    }
+
+    /* =========================================================
+       CASCADE OBSERVER
+    ========================================================= */
+
+    function setupAnimationObserver() {
+        if (state.animationObserver) {
+            state.animationObserver.disconnect();
+        }
+
+        const cards =
+            els.fontList.querySelectorAll(
+                ".font-card"
+            );
+
+        if (
+            !cards.length ||
+            !("IntersectionObserver" in window)
+        ) {
+            cards.forEach(card =>
+                card.classList.add(
+                    "in-view"
+                )
+            );
+
+            return;
+        }
+
+        state.animationObserver =
+            new IntersectionObserver(
+                entries => {
+                    entries.forEach(
+                        entry => {
+                            if (
+                                entry.isIntersecting
+                            ) {
+                                entry.target.classList.add(
+                                    "in-view"
+                                );
+
+                                state.animationObserver.unobserve(
+                                    entry.target
+                                );
+                            }
+                        }
+                    );
+                },
+                {
+                    rootMargin:
+                        "80px 0px"
+                }
+            );
+
+        cards.forEach(card =>
+            state.animationObserver.observe(
+                card
+            )
         );
     }
 
@@ -2948,22 +3264,27 @@
     ========================================================= */
 
     function render() {
-
         if (state.observer) {
             state.observer.disconnect();
-            state.observer = null;
+        }
+
+        if (
+            state.animationObserver
+        ) {
+            state.animationObserver.disconnect();
         }
 
         els.fontList.classList.toggle(
             "peeks",
-            state.display === "peeks"
+            state.view === "peeks"
         );
 
         const fragment =
             document.createDocumentFragment();
 
-        if (!state.filtered.length) {
-
+        if (
+            !state.filtered.length
+        ) {
             const empty =
                 document.createElement(
                     "div"
@@ -2976,15 +3297,14 @@
                 <span class="empty-icon">
                     𝘼
                 </span>
+
                 No fonts found.
             `;
 
             fragment.appendChild(
                 empty
             );
-
         } else {
-
             state.filtered
                 .slice(
                     0,
@@ -2992,14 +3312,12 @@
                 )
                 .forEach(
                     (font, index) => {
-
                         fragment.appendChild(
                             createCard(
                                 font,
                                 index
                             )
                         );
-
                     }
                 );
         }
@@ -3012,23 +3330,26 @@
         updateStatus();
 
         observeLastCard();
+        setupAnimationObserver();
 
-        if (state.filtered.length) {
+        if (
+            state.filtered.length
+        ) {
             loadVisibleFonts();
         }
     }
 
     async function loadVisibleFonts() {
-
         const cards =
             els.fontList.querySelectorAll(
                 ".font-card"
             );
 
         await Promise.allSettled(
-            [...cards].map(
+            [
+                ...cards
+            ].map(
                 async card => {
-
                     const index =
                         Number(
                             card.dataset.index
@@ -3048,7 +3369,10 @@
                             font
                         );
 
-                    if (success) {
+                    if (
+                        success &&
+                        card.isConnected
+                    ) {
                         applyCardFont(
                             card,
                             font
@@ -3060,11 +3384,10 @@
     }
 
     /* =========================================================
-       INFINITE SCROLL
+       INFINITE LIST
     ========================================================= */
 
     function observeLastCard() {
-
         if (
             state.visible >=
             state.filtered.length
@@ -3079,10 +3402,15 @@
             return;
         }
 
+        if (
+            !("IntersectionObserver" in window)
+        ) {
+            return;
+        }
+
         state.observer =
             new IntersectionObserver(
                 entries => {
-
                     if (
                         !entries.some(
                             entry =>
@@ -3097,7 +3425,7 @@
                     state.visible =
                         Math.min(
                             state.visible +
-                                BATCH_SIZE,
+                                CONFIG.BATCH_SIZE,
                             state.filtered.length
                         );
 
@@ -3115,7 +3443,6 @@
     }
 
     function updateStatus() {
-
         if (
             !state.filtered.length ||
             state.visible >=
@@ -3131,15 +3458,16 @@
 
         els.status.innerHTML = `
             <span class="spinner"></span>
-            Loading next ${Math.min(
-                BATCH_SIZE,
+            Loading next
+            ${Math.min(
+                CONFIG.BATCH_SIZE,
                 remaining
-            )} fonts
+            )}
+            fonts
         `;
     }
 
     function updateStats() {
-
         const count =
             state.filtered.length;
 
@@ -3167,17 +3495,20 @@
     ========================================================= */
 
     async function openPreview(font) {
-
-        const request =
-            ++state.previewRequest;
-
-        state.current =
-            font;
+        state.current = font;
 
         state.weight =
             Number(
                 font.weight
             ) || 400;
+
+        state.previewRequest++;
+
+        const request =
+            state.previewRequest;
+
+        state.lastFocus =
+            document.activeElement;
 
         els.previewTitle.textContent =
             font.name;
@@ -3193,6 +3524,10 @@
         els.previewDisplay.textContent =
             "Loading…";
 
+        setPreviewBackground(
+            state.previewBackground
+        );
+
         showOverlay(
             els.previewOverlay
         );
@@ -3201,19 +3536,21 @@
             await loadFont(font);
 
         /*
-         * Ignore stale async font loads.
+         * Ignore stale async loads.
          */
 
         if (
+            state.current !== font ||
             request !==
-            state.previewRequest ||
-            state.current !== font
+                state.previewRequest
         ) {
             return;
         }
 
         const family =
-            fontFamily(font.name);
+            fontFamily(
+                font.name
+            );
 
         [
             els.previewDisplay,
@@ -3221,21 +3558,18 @@
             els.uppercase,
             els.numbers,
             els.previewInput
-        ].forEach(
-            element => {
+        ].forEach(element => {
+            element.style.fontFamily =
+                family;
 
-                element.style.fontFamily =
-                    family;
-
-                element.style.fontStyle =
-                    font.style ||
-                    "normal";
-            }
-        );
+            element.style.fontStyle =
+                font.style ||
+                "normal";
+        });
 
         els.previewDisplay.textContent =
             success
-                ? SPECIMEN
+                ? CONFIG.SPECIMEN
                 : "Unable to load font.";
 
         els.lowercase.textContent =
@@ -3248,31 +3582,30 @@
             "0123456789";
 
         els.previewInput.value =
-            SPECIMEN;
+            CONFIG.SPECIMEN;
 
         els.size.value = 52;
         els.lineHeight.value = 1.3;
         els.spacing.value = -.03;
 
         updateWeightButtons();
-        updatePreviewBackground();
         updatePreview();
-        updateSnippet();
+        updateResources();
     }
 
     function closePreview() {
-
-        ++state.previewRequest;
-
-        state.current = null;
+        state.previewRequest++;
 
         hideOverlay(
             els.previewOverlay
         );
+
+        state.current = null;
+
+        restoreFocus();
     }
 
     function updatePreview() {
-
         if (!state.current) {
             return;
         }
@@ -3326,20 +3659,19 @@
     }
 
     function updateWeightButtons() {
-
         els.weights
             .querySelectorAll(
                 ".weight-button"
             )
             .forEach(
                 button => {
-
                     button.classList.toggle(
                         "active",
                         Number(
-                            button.dataset.weight
+                            button.dataset
+                                .weight
                         ) ===
-                        state.weight
+                            state.weight
                     );
                 }
             );
@@ -3349,105 +3681,121 @@
        PREVIEW BACKGROUND
     ========================================================= */
 
-    function getSystemBackground() {
-
-        return state.dark
-            ? "dark"
-            : "light";
-    }
-
-    function updatePreviewBackground() {
-
-        let mode =
-            state.background;
-
-        if (mode === "system") {
-            mode =
-                getSystemBackground();
-        }
-
-        els.previewHero.classList.toggle(
-            "preview-light",
-            mode === "light"
-        );
+    function setPreviewBackground(
+        background
+    ) {
+        state.previewBackground =
+            background === "dark"
+                ? "dark"
+                : "light";
 
         els.previewHero.classList.toggle(
             "preview-dark",
-            mode === "dark"
+            state.previewBackground ===
+                "dark"
         );
 
-        document
+        els.previewHero.classList.toggle(
+            "preview-light",
+            state.previewBackground ===
+                "light"
+        );
+
+        els.backgrounds
             .querySelectorAll(
                 ".background-button"
             )
-            .forEach(
-                button => {
+            .forEach(button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset
+                        .background ===
+                        state.previewBackground
+                );
+            });
 
-                    button.classList.toggle(
-                        "active",
-                        button.dataset.background ===
-                            state.background
-                    );
-                }
-            );
+        storageSet(
+            "previewBackground",
+            state.previewBackground
+        );
     }
 
     /* =========================================================
-       OVERLAYS
+       RESOURCES
     ========================================================= */
 
-    function showOverlay(overlay) {
-
-        overlay.classList.add(
-            "active"
-        );
-
-        overlay.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-
-        els.body.classList.add(
-            "modal-open"
+    function generateCDN(font) {
+        return fontURL(
+            font.file
         );
     }
 
-    function hideOverlay(overlay) {
+    function generateUsage(font) {
+        const family =
+            String(font.name)
+                .replace(
+                    /\\/g,
+                    "\\\\"
+                )
+                .replace(
+                    /'/g,
+                    "\\'"
+                );
 
-        overlay.classList.remove(
-            "active"
-        );
+        const url =
+            generateCDN(font);
 
-        overlay.setAttribute(
-            "aria-hidden",
-            "true"
-        );
+        const format =
+            font.format ||
+            formatFromType(
+                font.type
+            ) ||
+            "woff2";
 
-        if (
-            !document.querySelector(
-                ".preview-overlay.active"
-            )
-        ) {
-            els.body.classList.remove(
-                "modal-open"
-            );
+        const weight =
+            Number(
+                font.weight
+            ) || 400;
+
+        const style =
+            font.style ||
+            "normal";
+
+        return `@font-face {
+    font-family: '${family}';
+    src: url('${url}') format('${format}');
+    font-style: ${style};
+    font-weight: ${weight};
+    font-display: swap;
+}
+
+.my-text {
+    font-family: '${family}', sans-serif;
+}`;
+    }
+
+    function updateResources() {
+        const font =
+            state.current;
+
+        if (!font) {
+            els.cdn.textContent = "";
+            els.usage.textContent = "";
+            els.cdnType.textContent = "";
+            return;
         }
-    }
 
-    /* =========================================================
-       ABOUT
-    ========================================================= */
+        els.cdn.textContent =
+            generateCDN(font);
 
-    function openAbout() {
-        showOverlay(
-            els.aboutOverlay
-        );
-    }
+        els.cdnType.textContent =
+            (
+                font.type ||
+                "font"
+            ).toUpperCase();
 
-    function closeAbout() {
-        hideOverlay(
-            els.aboutOverlay
-        );
+        els.usage.textContent =
+            generateUsage(font);
     }
 
     /* =========================================================
@@ -3455,7 +3803,6 @@
     ========================================================= */
 
     async function downloadFont(font) {
-
         if (!font?.file) {
             return;
         }
@@ -3465,6 +3812,11 @@
                 font.file
             );
 
+        /*
+         * Try an actual browser download first.
+         * Fall back to opening jsDelivr directly.
+         */
+
         const original =
             els.download.innerHTML;
 
@@ -3472,7 +3824,6 @@
             "Downloading…";
 
         try {
-
             const response =
                 await fetch(
                     url,
@@ -3495,144 +3846,66 @@
                     blob
                 );
 
-            const link =
+            const anchor =
                 document.createElement(
                     "a"
                 );
 
-            link.href =
+            anchor.href =
                 objectURL;
 
-            link.download =
-                font.file;
+            anchor.download =
+                safeFilename(
+                    font.file
+                );
 
             document.body.appendChild(
-                link
+                anchor
             );
 
-            link.click();
-            link.remove();
+            anchor.click();
 
-            URL.revokeObjectURL(
-                objectURL
+            anchor.remove();
+
+            setTimeout(
+                () =>
+                    URL.revokeObjectURL(
+                        objectURL
+                    ),
+                1000
             );
-
         } catch {
-
-            /*
-             * Fallback for browsers that
-             * block cross-origin blob downloads.
-             */
-
             window.open(
                 url,
                 "_blank",
                 "noopener,noreferrer"
             );
-        }
-
-        setTimeout(() => {
+        } finally {
             els.download.innerHTML =
                 original;
-        }, 500);
-    }
-
-    /* =========================================================
-       CSS SNIPPET
-    ========================================================= */
-
-    function generateSnippet(font) {
-
-        const family =
-            String(font.name)
-                .replace(
-                    /\\/g,
-                    "\\\\"
-                )
-                .replace(
-                    /'/g,
-                    "\\'"
-                );
-
-        const url =
-            fontURL(
-                font.file
-            );
-
-        const format =
-            font.format ||
-            getFormat(
-                font.file,
-                font.type
-            ) ||
-            "woff2";
-
-        const weight =
-            Number(
-                font.weight
-            ) || 400;
-
-        const style =
-            font.style ||
-            "normal";
-
-        return `/* ${font.name} */
-
-@font-face {
-    font-family: '${family}';
-    src: url('${url}') format('${format}');
-    font-style: ${style};
-    font-weight: ${weight};
-    font-display: swap;
-}
-
-.my-text {
-    font-family: '${family}', sans-serif;
-    font-style: ${style};
-    font-weight: ${weight};
-}`;
-    }
-
-    function updateSnippet() {
-
-        els.snippet.textContent =
-            state.current
-                ? generateSnippet(
-                    state.current
-                )
-                : "";
-    }
-
-    /* =========================================================
-       COPY
-    ========================================================= */
-
-    async function copySnippet() {
-
-        if (!state.current) {
-            return;
         }
+    }
 
-        const text =
-            generateSnippet(
-                state.current
-            );
+    /* =========================================================
+       CLIPBOARD
+    ========================================================= */
 
+    async function copyText(
+        text,
+        button,
+        original
+    ) {
         try {
-
             await navigator.clipboard.writeText(
                 text
             );
-
         } catch {
-
             const textarea =
                 document.createElement(
                     "textarea"
                 );
 
-            textarea.value =
-                text;
+            textarea.value = text;
 
             textarea.style.position =
                 "fixed";
@@ -3655,13 +3928,94 @@
             textarea.remove();
         }
 
-        els.copySnippet.textContent =
+        button.textContent =
             "Copied";
 
         setTimeout(() => {
-            els.copySnippet.textContent =
-                "Copy";
+            button.textContent =
+                original;
         }, 1200);
+    }
+
+    /* =========================================================
+       OVERLAYS
+    ========================================================= */
+
+    function syncBodyLock() {
+        document.body.style.overflow =
+            document.querySelector(
+                ".preview-overlay.active"
+            )
+                ? "hidden"
+                : "";
+    }
+
+    function showOverlay(overlay) {
+        overlay.classList.add(
+            "active"
+        );
+
+        overlay.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+        syncBodyLock();
+
+        requestAnimationFrame(() => {
+            overlay
+                .querySelector(
+                    "button"
+                )
+                ?.focus();
+        });
+    }
+
+    function hideOverlay(overlay) {
+        overlay.classList.remove(
+            "active"
+        );
+
+        overlay.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+        syncBodyLock();
+    }
+
+    function restoreFocus() {
+        if (
+            state.lastFocus &&
+            document.contains(
+                state.lastFocus
+            )
+        ) {
+            state.lastFocus.focus();
+        }
+
+        state.lastFocus = null;
+    }
+
+    /* =========================================================
+       ABOUT
+    ========================================================= */
+
+    function openAbout() {
+        state.lastFocus =
+            document.activeElement;
+
+        showOverlay(
+            els.aboutOverlay
+        );
+    }
+
+    function closeAbout() {
+        hideOverlay(
+            els.aboutOverlay
+        );
+
+        restoreFocus();
     }
 
     /* =========================================================
@@ -3669,9 +4023,7 @@
     ========================================================= */
 
     function themeIcon() {
-
         if (state.dark) {
-
             return `
                 <svg
                     viewBox="0 0 24 24"
@@ -3696,7 +4048,6 @@
                     <path d="M18.36 5.64l1.42-1.42"/>
                 </svg>
             `;
-
         }
 
         return `
@@ -3705,6 +4056,7 @@
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
+                stroke-linecap="round"
             >
                 <path
                     d="M21 12.79A9 9 0 1 1
@@ -3717,7 +4069,6 @@
     }
 
     function applyTheme() {
-
         els.body.classList.toggle(
             "dark",
             state.dark
@@ -3737,91 +4088,451 @@
             "dark",
             state.dark
         );
-
-        if (state.current) {
-            updatePreviewBackground();
-        }
     }
 
     /* =========================================================
-       SORT / DISPLAY
+       VIEW
     ========================================================= */
 
-    function setSort(sort) {
+    function setView(view) {
+        state.view =
+            view === "peeks"
+                ? "peeks"
+                : "cards";
 
-        state.sort =
-            sort;
-
-        document
-            .querySelectorAll(
-                ".sort-chip"
-            )
-            .forEach(
-                button => {
-
-                    button.classList.toggle(
-                        "active",
-                        button.dataset.sort ===
-                            sort
-                    );
-                }
-            );
-
-        storageSet(
-            "sort",
-            sort
+        els.viewButtons.forEach(
+            button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.view ===
+                        state.view
+                );
+            }
         );
 
-        filterFonts();
-    }
-
-    function setDisplay(display) {
-
-        state.display =
-            display;
-
-        document
-            .querySelectorAll(
-                ".display-button"
-            )
-            .forEach(
-                button => {
-
-                    button.classList.toggle(
-                        "active",
-                        button.dataset.display ===
-                            display
-                    );
-                }
-            );
-
         storageSet(
-            "display",
-            display
+            "view",
+            state.view
         );
 
         render();
     }
 
     /* =========================================================
+       SORT
+    ========================================================= */
+
+    function setSort(sort) {
+        state.sort =
+            [
+                "az",
+                "za",
+                "random"
+            ].includes(sort)
+                ? sort
+                : "az";
+
+        els.sortChips
+            .querySelectorAll(
+                ".sort-chip"
+            )
+            .forEach(button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.sort ===
+                        state.sort
+                );
+            });
+
+        storageSet(
+            "sort",
+            state.sort
+        );
+
+        filterFonts();
+    }
+
+    function toggleSort() {
+        const open =
+            els.sortChips.classList.toggle(
+                "open"
+            );
+
+        els.sortToggle.classList.toggle(
+            "active",
+            open
+        );
+
+        els.sortToggle.setAttribute(
+            "aria-expanded",
+            String(open)
+        );
+    }
+
+    function closeSort() {
+        els.sortChips.classList.remove(
+            "open"
+        );
+
+        els.sortToggle.classList.remove(
+            "active"
+        );
+
+        els.sortToggle.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+    }
+
+    /* =========================================================
+       EVENT DELEGATION
+    ========================================================= */
+
+    els.fontList.addEventListener(
+        "click",
+        event => {
+            const card =
+                event.target.closest(
+                    ".font-card"
+                );
+
+            if (!card) {
+                return;
+            }
+
+            const font =
+                state.filtered[
+                    Number(
+                        card.dataset.index
+                    )
+                ];
+
+            if (font) {
+                openPreview(font);
+            }
+        }
+    );
+
+    els.fontList.addEventListener(
+        "keydown",
+        event => {
+            const card =
+                event.target.closest(
+                    ".font-card"
+                );
+
+            if (!card) {
+                return;
+            }
+
+            if (
+                event.key === "Enter" ||
+                event.key === " "
+            ) {
+                event.preventDefault();
+
+                const font =
+                    state.filtered[
+                        Number(
+                            card.dataset.index
+                        )
+                    ];
+
+                if (font) {
+                    openPreview(font);
+                }
+            }
+        }
+    );
+
+    /* =========================================================
+       EVENTS
+    ========================================================= */
+
+    els.aboutButton.addEventListener(
+        "click",
+        openAbout
+    );
+
+    els.aboutBack.addEventListener(
+        "click",
+        closeAbout
+    );
+
+    els.previewBack.addEventListener(
+        "click",
+        closePreview
+    );
+
+    els.aboutOverlay.addEventListener(
+        "click",
+        event => {
+            if (
+                event.target ===
+                els.aboutOverlay
+            ) {
+                closeAbout();
+            }
+        }
+    );
+
+    els.previewOverlay.addEventListener(
+        "click",
+        event => {
+            if (
+                event.target ===
+                els.previewOverlay
+            ) {
+                closePreview();
+            }
+        }
+    );
+
+    els.theme.addEventListener(
+        "click",
+        () => {
+            state.dark =
+                !state.dark;
+
+            applyTheme();
+        }
+    );
+
+    els.previewInput.addEventListener(
+        "input",
+        updatePreview
+    );
+
+    els.size.addEventListener(
+        "input",
+        updatePreview
+    );
+
+    els.lineHeight.addEventListener(
+        "input",
+        updatePreview
+    );
+
+    els.spacing.addEventListener(
+        "input",
+        updatePreview
+    );
+
+    els.download.addEventListener(
+        "click",
+        () =>
+            downloadFont(
+                state.current
+            )
+    );
+
+    els.copyCdn.addEventListener(
+        "click",
+        () => {
+            if (!state.current) {
+                return;
+            }
+
+            copyText(
+                generateCDN(
+                    state.current
+                ),
+                els.copyCdn,
+                "Copy CDN"
+            );
+        }
+    );
+
+    els.copyUsage.addEventListener(
+        "click",
+        () => {
+            if (!state.current) {
+                return;
+            }
+
+            copyText(
+                generateUsage(
+                    state.current
+                ),
+                els.copyUsage,
+                "Copy Usage"
+            );
+        }
+    );
+
+    els.backgrounds.addEventListener(
+        "click",
+        event => {
+            const button =
+                event.target.closest(
+                    ".background-button"
+                );
+
+            if (!button) {
+                return;
+            }
+
+            setPreviewBackground(
+                button.dataset
+                    .background
+            );
+        }
+    );
+
+    els.weights.addEventListener(
+        "click",
+        event => {
+            const button =
+                event.target.closest(
+                    ".weight-button"
+                );
+
+            if (!button) {
+                return;
+            }
+
+            state.weight =
+                Number(
+                    button.dataset.weight
+                );
+
+            updateWeightButtons();
+            updatePreview();
+            updateResources();
+        }
+    );
+
+    els.search.addEventListener(
+        "input",
+        () => {
+            clearTimeout(
+                state.searchTimer
+            );
+
+            state.searchTimer =
+                setTimeout(
+                    filterFonts,
+                    100
+                );
+        }
+    );
+
+    els.sortToggle.addEventListener(
+        "click",
+        toggleSort
+    );
+
+    els.sortChips.addEventListener(
+        "click",
+        event => {
+            const chip =
+                event.target.closest(
+                    ".sort-chip"
+                );
+
+            if (!chip) {
+                return;
+            }
+
+            setSort(
+                chip.dataset.sort
+            );
+
+            closeSort();
+        }
+    );
+
+    els.viewButtons.forEach(
+        button => {
+            button.addEventListener(
+                "click",
+                () =>
+                    setView(
+                        button.dataset
+                            .view
+                    )
+            );
+        }
+    );
+
+    document.addEventListener(
+        "click",
+        event => {
+            if (
+                !event.target.closest(
+                    ".sort-area"
+                )
+            ) {
+                closeSort();
+            }
+        }
+    );
+
+    document.addEventListener(
+        "keydown",
+        event => {
+            if (
+                event.key === "Escape"
+            ) {
+                if (
+                    els.previewOverlay.classList.contains(
+                        "active"
+                    )
+                ) {
+                    closePreview();
+
+                    return;
+                }
+
+                if (
+                    els.aboutOverlay.classList.contains(
+                        "active"
+                    )
+                ) {
+                    closeAbout();
+
+                    return;
+                }
+
+                closeSort();
+
+                return;
+            }
+
+            if (
+                event.key === "/" &&
+                ![
+                    "INPUT",
+                    "TEXTAREA"
+                ].includes(
+                    document.activeElement
+                        ?.tagName
+                )
+            ) {
+                event.preventDefault();
+
+                els.search.focus();
+                els.search.select();
+            }
+        }
+    );
+
+    /* =========================================================
        FONT API
     ========================================================= */
 
     async function fetchFonts() {
-
         els.status.innerHTML = `
             <span class="spinner"></span>
             Scanning fonts…
         `;
 
         try {
-
             const response =
                 await fetch(
-                    API_URL,
+                    CONFIG.API_URL,
                     {
                         cache: "no-store",
-
                         headers: {
                             Accept:
                                 "application/json"
@@ -3843,16 +4554,16 @@
                     ? payload
                     : payload?.fonts;
 
-            if (!Array.isArray(data)) {
+            if (
+                !Array.isArray(data)
+            ) {
                 throw new Error(
                     "Invalid font API response."
                 );
             }
 
             state.fonts =
-                normalizeFonts(
-                    data
-                );
+                normalizeFonts(data);
 
             storageSet(
                 "fontsData",
@@ -3862,7 +4573,6 @@
             filterFonts();
 
         } catch (error) {
-
             console.error(
                 "Typace:",
                 error
@@ -3877,12 +4587,11 @@
             const fonts =
                 Array.isArray(cached)
                     ? normalizeFonts(
-                        cached
-                    )
+                          cached
+                      )
                     : [];
 
             if (fonts.length) {
-
                 state.fonts =
                     fonts;
 
@@ -3920,354 +4629,6 @@
     }
 
     /* =========================================================
-       EVENTS
-    ========================================================= */
-
-    els.aboutButton.addEventListener(
-        "click",
-        openAbout
-    );
-
-    els.aboutBack.addEventListener(
-        "click",
-        closeAbout
-    );
-
-    els.previewBack.addEventListener(
-        "click",
-        closePreview
-    );
-
-    els.aboutOverlay.addEventListener(
-        "click",
-        event => {
-
-            if (
-                event.target ===
-                els.aboutOverlay
-            ) {
-                closeAbout();
-            }
-        }
-    );
-
-    els.previewOverlay.addEventListener(
-        "click",
-        event => {
-
-            if (
-                event.target ===
-                els.previewOverlay
-            ) {
-                closePreview();
-            }
-        }
-    );
-
-    /* FONT CARD EVENT DELEGATION */
-
-    els.fontList.addEventListener(
-        "click",
-        event => {
-
-            const card =
-                event.target.closest(
-                    ".font-card"
-                );
-
-            if (!card) {
-                return;
-            }
-
-            const index =
-                Number(
-                    card.dataset.index
-                );
-
-            const font =
-                state.filtered[index];
-
-            if (font) {
-                openPreview(font);
-            }
-        }
-    );
-
-    els.fontList.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key !== "Enter" &&
-                event.key !== " "
-            ) {
-                return;
-            }
-
-            const card =
-                event.target.closest(
-                    ".font-card"
-                );
-
-            if (!card) {
-                return;
-            }
-
-            event.preventDefault();
-
-            const index =
-                Number(
-                    card.dataset.index
-                );
-
-            const font =
-                state.filtered[index];
-
-            if (font) {
-                openPreview(font);
-            }
-        }
-    );
-
-    /* THEME */
-
-    els.theme.addEventListener(
-        "click",
-        () => {
-
-            state.dark =
-                !state.dark;
-
-            applyTheme();
-        }
-    );
-
-    /* SORT TOGGLE */
-
-    els.sortToggle.addEventListener(
-        "click",
-        () => {
-
-            const open =
-                els.filterOptions.classList.toggle(
-                    "open"
-                );
-
-            els.sortToggle.classList.toggle(
-                "active",
-                open
-            );
-
-            els.sortToggle.setAttribute(
-                "aria-expanded",
-                String(open)
-            );
-        }
-    );
-
-    /* SORT CHIPS */
-
-    els.filterOptions.addEventListener(
-        "click",
-        event => {
-
-            const button =
-                event.target.closest(
-                    ".sort-chip"
-                );
-
-            if (!button) {
-                return;
-            }
-
-            setSort(
-                button.dataset.sort
-            );
-        }
-    );
-
-    /* DISPLAY */
-
-    document.addEventListener(
-        "click",
-        event => {
-
-            const button =
-                event.target.closest(
-                    ".display-button"
-                );
-
-            if (!button) {
-                return;
-            }
-
-            setDisplay(
-                button.dataset.display
-            );
-        }
-    );
-
-    /* SEARCH */
-
-    els.search.addEventListener(
-        "input",
-        () => {
-
-            clearTimeout(
-                state.searchTimer
-            );
-
-            state.searchTimer =
-                setTimeout(
-                    filterFonts,
-                    80
-                );
-        }
-    );
-
-    /* PREVIEW INPUT */
-
-    els.previewInput.addEventListener(
-        "input",
-        updatePreview
-    );
-
-    els.size.addEventListener(
-        "input",
-        updatePreview
-    );
-
-    els.lineHeight.addEventListener(
-        "input",
-        updatePreview
-    );
-
-    els.spacing.addEventListener(
-        "input",
-        updatePreview
-    );
-
-    /* WEIGHTS */
-
-    els.weights.addEventListener(
-        "click",
-        event => {
-
-            const button =
-                event.target.closest(
-                    ".weight-button"
-                );
-
-            if (!button) {
-                return;
-            }
-
-            state.weight =
-                Number(
-                    button.dataset.weight
-                );
-
-            updateWeightButtons();
-            updatePreview();
-        }
-    );
-
-    /* BACKGROUND */
-
-    document.addEventListener(
-        "click",
-        event => {
-
-            const button =
-                event.target.closest(
-                    ".background-button"
-                );
-
-            if (!button) {
-                return;
-            }
-
-            state.background =
-                button.dataset.background;
-
-            storageSet(
-                "background",
-                state.background
-            );
-
-            updatePreviewBackground();
-        }
-    );
-
-    /* DOWNLOAD */
-
-    els.download.addEventListener(
-        "click",
-        () => {
-
-            downloadFont(
-                state.current
-            );
-        }
-    );
-
-    /* COPY */
-
-    els.copySnippet.addEventListener(
-        "click",
-        copySnippet
-    );
-
-    /* KEYBOARD */
-
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key ===
-                "Escape"
-            ) {
-
-                if (
-                    els.previewOverlay
-                        .classList
-                        .contains("active")
-                ) {
-                    closePreview();
-
-                } else if (
-                    els.aboutOverlay
-                        .classList
-                        .contains("active")
-                ) {
-                    closeAbout();
-                }
-
-                return;
-            }
-
-            if (
-                event.key === "/" &&
-                ![
-                    "INPUT",
-                    "TEXTAREA"
-                ].includes(
-                    document
-                        .activeElement
-                        ?.tagName
-                )
-            ) {
-
-                event.preventDefault();
-
-                els.search.focus();
-                els.search.select();
-            }
-        }
-    );
-
-    /* =========================================================
        INITIALIZE
     ========================================================= */
 
@@ -4283,58 +4644,31 @@
             "az"
         );
 
-    state.display =
+    state.view =
         storageGet(
-            "display",
+            "view",
             "cards"
         );
 
-    state.background =
+    state.previewBackground =
         storageGet(
-            "background",
-            "system"
+            "previewBackground",
+            "light"
         );
-
-    /* Restore sort UI */
-
-    document
-        .querySelectorAll(
-            ".sort-chip"
-        )
-        .forEach(
-            button => {
-
-                button.classList.toggle(
-                    "active",
-                    button.dataset.sort ===
-                        state.sort
-                );
-            }
-        );
-
-    /* Restore display UI */
-
-    document
-        .querySelectorAll(
-            ".display-button"
-        )
-        .forEach(
-            button => {
-
-                button.classList.toggle(
-                    "active",
-                    button.dataset.display ===
-                        state.display
-                );
-            }
-        );
-
-    els.fontList.classList.toggle(
-        "peeks",
-        state.display === "peeks"
-    );
 
     applyTheme();
+
+    setView(
+        state.view
+    );
+
+    setSort(
+        state.sort
+    );
+
+    setPreviewBackground(
+        state.previewBackground
+    );
 
     fetchFonts();
 
@@ -4343,34 +4677,26 @@
     ========================================================= */
 
     window.__typace = {
+        all: () => [
+            ...state.fonts
+        ],
 
-        all: () =>
-            [...state.fonts],
+        filtered: () => [
+            ...state.filtered
+        ],
 
-        filtered: () =>
-            [...state.filtered],
+        loaded: () => [
+            ...state.loaded
+        ],
 
-        loaded: () =>
-            [...state.loaded],
+        current: () =>
+            state.current,
 
-        reload:
-            fetchFonts,
+        cdn: file =>
+            fontURL(file),
 
-        cdn:
-            fontURL,
-
-        current:
-            () => state.current,
-
-        state:
-            () => ({
-                sort: state.sort,
-                display: state.display,
-                background: state.background,
-                dark: state.dark
-            })
+        reload: fetchFonts
     };
-
 })();
 </script>
 
