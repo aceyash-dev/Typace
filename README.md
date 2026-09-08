@@ -68,13 +68,13 @@ No font collection needs to be bundled with the frontend.
 Typace keeps the client deliberately small:
 
 HTML<br>
- ↓
+ ↓<br>
 CSS<br>
- ↓
+ ↓<br>
 JavaScript<br>
- ↓
+ ↓<br>
 Font API<br>
- ↓
+ ↓<br>
 Font files<br>
 
 The frontend handles the interface and typography previews while the API provides the font library and associated assets.
