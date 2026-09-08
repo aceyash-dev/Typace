@@ -6,9 +6,9 @@ Typace
   <strong>Typography, beautifully organized.</strong>
 </p><p align="center">
   A quiet, minimal font library for collecting, browsing, previewing, and downloading typefaces.
-</p>---
+</p>
 
-Philosophy
+### Philosophy
 
 Less interface.
 More typography.
@@ -22,7 +22,7 @@ Just a lightweight interface for your type collection.
 
 ---
 
-Your Library
+### Your Library
 
 Typace loads font data and font files through an API, keeping the client lightweight and the library easy to update.
 
@@ -47,7 +47,7 @@ No font collection needs to be bundled with the frontend.
 
 ---
 
-Features
+### Features
 
 - API-powered font library
 - Search and browsing
@@ -63,7 +63,7 @@ Features
 
 ---
 
-Architecture
+### Architecture
 
 Typace keeps the client deliberately small:
 
@@ -85,7 +85,7 @@ No dependency pile pretending to be architecture.
 
 ---
 
-CDN
+### CDN
 
 Font files can be served through a CDN, including jsDelivr when the underlying assets are hosted on GitHub.
 
@@ -93,17 +93,11 @@ This keeps the application lightweight while allowing font files to be delivered
 
 ---
 
-Font Licensing
+### Font Licensing
 
 Typace does not determine the license of fonts available through the library.
 
 Each typeface remains subject to its own license and redistribution terms. Make sure you have the appropriate rights before distributing or serving a font through the API.
-
----
-
-License
-
-The Typace source code is available under the license specified by the project repository.
 
 Font licenses are separate and remain the responsibility of their respective authors or foundries.
 
