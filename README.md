@@ -1,15 +1,12 @@
 Typace
 
-> Typography, beautifully organized.
-
-
-
-A quiet, minimal font library for collecting, browsing, previewing, and downloading typefaces.
-
-Built around a simple idea: your fonts, your library, no unnecessary machinery.
-
-
----
+<p align="center">
+  <img src="./icon.png" width="96" height="96" alt="Typace">
+</p><p align="center">
+  <strong>Typography, beautifully organized.</strong>
+</p><p align="center">
+  A quiet, minimal font library for collecting, browsing, previewing, and downloading typefaces.
+</p>---
 
 Philosophy
 
@@ -23,112 +20,97 @@ No tracking.
 
 Just a lightweight interface for your type collection.
 
-
----
-
-Structure
-
-Typace/
-├── index.html
-├── fonts.json
-└── fonts/
-    ├── Font-One.woff2
-    ├── Font-Two.ttf
-    └── Font-Three.otf
-
-
 ---
 
 Your Library
 
-Typace doesn't ship with a bundled font collection.
+Typace loads font data and font files through an API, keeping the client lightweight and the library easy to update.
 
-Add your own font files to /fonts and describe them in fonts.json.
+Font metadata is provided by the API, including information such as:
 
-Example:
+- Font name
+- File URL
+- Format
+- Available variants
+- Other font metadata
 
-[
-  {
-    "name": "Instrument Serif",
-    "file": "Instrument Serif.woff2",
-    "type": "woff2"
-  },
-  {
-    "name": "Satoshi",
-    "file": "Satoshi.ttf",
-    "type": "ttf"
-  }
-]
+The interface uses this data to dynamically load, preview, browse, and download typefaces.
 
 Supported formats include:
 
-WOFF2
+- WOFF2
+- WOFF
+- TTF
+- OTF
 
-WOFF
-
-TTF
-
-OTF
-
-
-The file type can be provided explicitly in fonts.json, or inferred from the filename.
-
+No font collection needs to be bundled with the frontend.
 
 ---
 
 Features
 
-Local font collection
-
-Search and browsing
-
-Live typography previews
-
-Font metadata
-
-Multiple font formats
-
-Downloadable font files
-
-Light and dark themes
-
-Responsive interface
-
-Offline-friendly architecture
-
-No framework or build step
-
-
+- API-powered font library
+- Search and browsing
+- Live typography previews
+- Font metadata
+- Multiple font formats
+- Downloadable font files
+- Light and dark themes
+- Responsive interface
+- Offline-friendly client architecture
+- No framework
+- No build step
 
 ---
 
 Architecture
 
-Typace keeps the stack deliberately small:
+Typace keeps the client deliberately small:
 
-HTML → CSS → JavaScript → fonts.json → /fonts
+HTML
+ ↓
+CSS
+ ↓
+JavaScript
+ ↓
+Font API
+ ↓
+Font files
 
-No database.
-No backend required for the basic library.
+The frontend handles the interface and typography previews while the API provides the font library and associated assets.
+
+No database or backend is required by the Typace client itself.
+
 No dependency pile pretending to be architecture.
-
 
 ---
 
 CDN
 
-For deployments where fonts are hosted through GitHub, Typace can also load font files through jsDelivr, allowing the library to remain lightweight while serving the actual font assets from a CDN.
+Font files can be served through a CDN, including jsDelivr when the underlying assets are hosted on GitHub.
 
+This keeps the application lightweight while allowing font files to be delivered separately from the frontend.
+
+---
+
+Font Licensing
+
+Typace does not determine the license of fonts available through the library.
+
+Each typeface remains subject to its own license and redistribution terms. Make sure you have the appropriate rights before distributing or serving a font through the API.
 
 ---
 
 License
 
-Typace itself is open to whatever license you choose for the project.
+The Typace source code is available under the license specified by the project repository.
 
-The fonts inside your library remain subject to their individual licenses. Make sure you have the right to redistribute any typeface you place in /fonts.
-
+Font licenses are separate and remain the responsibility of their respective authors or foundries.
 
 ---
 
-> Typography deserves a quiet place.
+<p align="center">
+  <img src="./icon.png" width="32" height="32" alt="Typace">
+</p><p align="center">
+  <sub>Typography deserves a quiet place.</sub>
+</p>
