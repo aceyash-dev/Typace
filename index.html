@@ -693,9 +693,33 @@
         .view-button.active {
             background: var(--accent);
             color: #fff;
+        }
 
+        /* =====================================================
+           VIEW SLIDE
+        ===================================================== */
+
+        .font-list.view-slide {
             animation:
-                pillPop .3s var(--spring);
+                viewSlideIn .32s
+                cubic-bezier(.22, 1, .36, 1)
+                both;
+        }
+
+        @keyframes viewSlideIn {
+            from {
+                opacity: 0;
+                transform:
+                    translateX(
+                        var(--view-slide-x, 18px)
+                    );
+            }
+
+            to {
+                opacity: 1;
+                transform:
+                    translateX(0);
+            }
         }
 
         @keyframes pillPop {
@@ -1517,6 +1541,10 @@
             font-size: .72rem;
         }
 
+        /* =====================================================
+           EDITABLE SPECIMEN
+        ===================================================== */
+
         .preview-display {
             min-height: 190px;
 
@@ -1524,13 +1552,23 @@
             align-items: center;
 
             padding:
-                1rem .1rem 1.25rem;
+                1rem;
 
             overflow-x: auto;
 
             white-space: nowrap;
 
-            color: var(--preview-text);
+            border: 1px solid var(--preview-specimen-border);
+
+            border-radius: 18px;
+
+            outline: none;
+
+            background:
+                var(--preview-specimen-bg);
+
+            color:
+                var(--preview-specimen-text);
 
             font-size:
                 clamp(2.4rem, 9vw, 6rem);
@@ -1539,80 +1577,52 @@
 
             line-height: 1.3;
 
+            cursor: text;
+
+            caret-color: var(--accent);
+
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
 
             transition:
+                background .2s ease,
+                color .2s ease,
+                border-color .2s ease,
                 font-size .22s var(--spring),
                 letter-spacing .22s ease,
                 line-height .22s ease;
         }
 
-        .preview-characters {
-            display: grid;
-
-            gap: .7rem;
-
-            margin-top: .8rem;
-        }
-
-        .character-line {
-            padding:
-                .8rem .9rem 1rem;
-
-            border:
-                1px solid var(--preview-border);
-
-            border-radius: 16px;
-
-            background:
-                var(--preview-surface-soft);
-
-            color: var(--preview-text);
-
-            overflow-x: auto;
-
-            white-space: nowrap;
-
-            font-size:
-                clamp(1.2rem, 4vw, 1.7rem);
-
-            line-height: 1.4;
-
-            -webkit-font-smoothing: antialiased;
-
-            transition:
-                transform .25s var(--spring),
-                border-color .18s ease;
-        }
-
-        .character-line:hover {
-            transform: translateY(-2px);
-
+        .preview-display:focus {
             border-color: var(--accent);
+
+            box-shadow:
+                0 0 0 4px var(--accent-soft);
+        }
+
+        .preview-display.specimen-light {
+            --preview-specimen-bg: #fdfdf1;
+            --preview-specimen-text: #24211e;
+            --preview-specimen-border: #ded8cf;
+        }
+
+        .preview-display.specimen-dark {
+            --preview-specimen-bg: #11100f;
+            --preview-specimen-text: #f7f2ea;
+            --preview-specimen-border: #3c3732;
+        }
+
+        .preview-edit-hint {
+            margin-top: .55rem;
+
+            color: var(--muted);
+
+            font-size: .62rem;
         }
 
         /* =====================================================
            PREVIEW BACKGROUNDS
         ===================================================== */
-
-        .preview-hero.preview-light {
-            --preview-bg: var(--preview-light);
-            --preview-text: #24211e;
-            --preview-border: #ded8cf;
-            --preview-surface-soft: #f6f1e8;
-        }
-
-        .preview-hero.preview-dark {
-            --preview-bg: var(--preview-dark);
-            --preview-text: #f7f2ea;
-            --preview-border: #3c3732;
-            --preview-surface-soft: #211f1c;
-        }
-
-        .preview-hero {
-            background: var(--preview-bg, var(--surface));
-        }
 
         .preview-backgrounds {
             display: flex;
@@ -1687,15 +1697,15 @@
                 .55rem .8rem;
 
             border:
-                1px solid var(--preview-border);
+                1px solid var(--border);
 
             border-radius: 16px;
 
             background:
-                var(--preview-bg);
+                var(--surface);
 
             color:
-                var(--preview-text);
+                var(--text);
 
             transition:
                 transform .25s var(--spring),
@@ -1751,7 +1761,7 @@
         .control-value {
             min-width: 48px;
 
-            color: var(--preview-text);
+            color: var(--text);
 
             font-size: .7rem;
             font-weight: 600;
@@ -1775,15 +1785,15 @@
             padding: 0 .6rem;
 
             border:
-                1px solid var(--preview-border);
+                1px solid var(--border);
 
             border-radius: 999px;
 
             background:
-                var(--preview-surface-soft);
+                var(--surface-soft);
 
             color:
-                var(--preview-text);
+                var(--text);
 
             font-size: .68rem;
 
@@ -1811,51 +1821,61 @@
                 pillPop .3s var(--spring);
         }
 
-        .preview-input {
+        /* =====================================================
+           CUSTOM FONT NAME
+        ===================================================== */
+
+        .font-name-control {
+            display: flex;
+            align-items: center;
+
+            gap: .7rem;
+
+            margin-bottom: .8rem;
+        }
+
+        .font-name-control-label {
+            flex: 0 0 auto;
+
+            color: var(--muted);
+
+            font-size: .68rem;
+        }
+
+        .font-name-input {
             width: 100%;
 
-            min-height: 92px;
+            min-height: 38px;
 
-            margin-top: .8rem;
-
-            padding: .9rem;
-
-            resize: vertical;
+            padding:
+                0 .75rem;
 
             border:
-                1px solid var(--preview-border);
+                1px solid var(--border);
 
-            border-radius: 18px;
+            border-radius: 999px;
 
             outline: none;
 
-            background:
-                var(--preview-bg);
+            background: var(--surface);
+            color: var(--text);
 
-            color:
-                var(--preview-text);
-
-            font-size: .95rem;
-
-            line-height: 1.5;
+            font-size: .72rem;
 
             transition:
                 border-color .2s ease,
-                box-shadow .25s ease,
-                transform .25s var(--spring);
+                box-shadow .2s ease;
         }
 
-        .preview-input:focus {
-            transform: translateY(-2px);
-
+        .font-name-input:focus {
             border-color: var(--accent);
 
             box-shadow:
-                0 5px 18px var(--accent-soft);
+                0 0 0 3px var(--accent-soft);
         }
 
         /* =====================================================
-           CDN / USAGE
+           RESOURCES
         ===================================================== */
 
         .resource-grid {
@@ -2044,6 +2064,8 @@
             align-items: center;
             justify-content: space-between;
 
+            gap: .8rem;
+
             padding: .85rem 1rem;
 
             border:
@@ -2084,6 +2106,8 @@
             color: var(--muted);
 
             font-size: .7rem;
+
+            text-align: right;
         }
 
         /* =====================================================
@@ -2095,7 +2119,8 @@
             input,
             textarea,
             .font-card,
-            .social-link
+            .social-link,
+            .preview-display
         ):focus-visible {
             outline:
                 3px solid var(--accent-soft);
@@ -2232,6 +2257,12 @@
             .empty-doodle {
                 width: 105px;
                 height: 88px;
+            }
+
+            .font-name-control {
+                align-items: stretch;
+                flex-direction: column;
+                gap: .35rem;
             }
         }
 
@@ -2541,8 +2572,13 @@
             </div>
 
             <div
-                class="preview-display"
+                class="preview-display specimen-light"
                 style="font-family:var(--ui-font)"
+                contenteditable="true"
+                role="textbox"
+                aria-multiline="true"
+                aria-label="Editable Typace preview"
+                spellcheck="false"
             >
                 Typace
             </div>
@@ -2557,16 +2593,16 @@
 
                 <a
                     class="social-link"
-                    href="https://github.com/tab-gl"
+                    href="https://chai4.me/aceyash-dev"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
                     <span class="social-name">
-                        GitHub
+                        Help us keep Typace ad-free
                     </span>
 
                     <span class="social-handle">
-                        See Organisation ↗
+                        Support ↗
                     </span>
                 </a>
 
@@ -2668,7 +2704,7 @@
         </div>
 
         <section
-            class="preview-hero preview-light"
+            class="preview-hero"
             id="previewHero"
         >
 
@@ -2680,35 +2716,18 @@
             </div>
 
             <div
-                class="preview-display"
+                class="preview-display specimen-light"
                 id="previewDisplay"
-            >
-                The Quick Brown Fox Jumps Over The Lazy Dog
-            </div>
+                contenteditable="true"
+                role="textbox"
+                aria-multiline="true"
+                aria-label="Editable font preview"
+                spellcheck="false"
+                tabindex="0"
+            >The Quick Brown Fox Jumps Over The Lazy Dog</div>
 
-            <div class="preview-characters">
-
-                <div
-                    class="character-line"
-                    id="lowercasePreview"
-                >
-                    abcdefghijklmnopqrstuvwxyz
-                </div>
-
-                <div
-                    class="character-line"
-                    id="uppercasePreview"
-                >
-                    ABCDEFGHIJKLMNOPQRSTUVWXYZ
-                </div>
-
-                <div
-                    class="character-line"
-                    id="numbersPreview"
-                >
-                    0123456789
-                </div>
-
+            <div class="preview-edit-hint">
+                Tap to edit
             </div>
 
             <!-- BACKGROUND -->
@@ -2901,12 +2920,6 @@
 
             </div>
 
-            <textarea
-                class="preview-input"
-                id="previewInput"
-                aria-label="Custom font preview text"
-            >The Quick Brown Fox Jumps Over The Lazy Dog</textarea>
-
         </section>
 
         <!-- =================================================
@@ -2975,6 +2988,27 @@
 
                 <div class="resource-body">
 
+                    <div class="font-name-control">
+
+                        <label
+                            class="font-name-control-label"
+                            for="fontNameInput"
+                        >
+                            Font name
+                        </label>
+
+                        <input
+                            class="font-name-input"
+                            id="fontNameInput"
+                            type="text"
+                            value=""
+                            autocomplete="off"
+                            spellcheck="false"
+                            aria-label="Custom CSS font name"
+                        >
+
+                    </div>
+
                     <code
                         class="resource-code"
                         id="usageCode"
@@ -3006,9 +3040,12 @@
     const API_URL = "/api/fonts";
 
     const CDN_BASE =
-        "https://cdn.jsdelivr.net/gh/aceyash-dev/Typace@main/fonts/";
+        "https://typace.ace-base.cc/fonts/";
 
     const BATCH_SIZE = 20;
+
+    const DEFAULT_SPECIMEN =
+        "The Quick Brown Fox Jumps Over The Lazy Dog";
 
     const FONT_FORMATS = {
         woff2: "woff2",
@@ -3016,14 +3053,6 @@
         ttf: "truetype",
         otf: "opentype",
         eot: "embedded-opentype"
-    };
-
-    const FONT_MIME = {
-        woff2: "font/woff2",
-        woff: "font/woff",
-        ttf: "font/ttf",
-        otf: "font/otf",
-        eot: "application/vnd.ms-fontobject"
     };
 
     /* ========================================================
@@ -3082,35 +3111,43 @@
     const previewTitle = $("#previewTitle");
     const previewFontName = $("#previewFontName");
 
-    const previewHero = $("#previewHero");
     const previewDisplay = $("#previewDisplay");
-
-    const lowercasePreview = $("#lowercasePreview");
-    const uppercasePreview = $("#uppercasePreview");
-    const numbersPreview = $("#numbersPreview");
-
-    const previewInput = $("#previewInput");
 
     const sizeSlider = $("#sizeSlider");
     const sizeValue = $("#sizeValue");
 
-    const lineHeightSlider = $("#lineHeightSlider");
-    const lineHeightValue = $("#lineHeightValue");
+    const lineHeightSlider =
+        $("#lineHeightSlider");
 
-    const letterSpacingSlider = $("#letterSpacingSlider");
-    const letterSpacingValue = $("#letterSpacingValue");
+    const lineHeightValue =
+        $("#lineHeightValue");
 
-    const weightOptions = $("#weightOptions");
+    const letterSpacingSlider =
+        $("#letterSpacingSlider");
 
-    const previewDownload = $("#previewDownload");
+    const letterSpacingValue =
+        $("#letterSpacingValue");
+
+    const weightOptions =
+        $("#weightOptions");
+
+    const previewDownload =
+        $("#previewDownload");
 
     const cdnType = $("#cdnType");
     const cdnCode = $("#cdnCode");
 
-    const usageCode = $("#usageCode");
+    const fontNameInput =
+        $("#fontNameInput");
 
-    const copyCdn = $("#copyCdn");
-    const copyUsage = $("#copyUsage");
+    const usageCode =
+        $("#usageCode");
+
+    const copyCdn =
+        $("#copyCdn");
+
+    const copyUsage =
+        $("#copyUsage");
 
     /* ========================================================
        ICONS
@@ -3173,9 +3210,14 @@
 
     function getPreferredTheme() {
         const saved =
-            localStorage.getItem("typace-theme");
+            localStorage.getItem(
+                "typace-theme"
+            );
 
-        if (saved === "dark" || saved === "light") {
+        if (
+            saved === "dark" ||
+            saved === "light"
+        ) {
             return saved;
         }
 
@@ -3214,7 +3256,9 @@
         "click",
         () => {
             const next =
-                document.body.classList.contains("dark")
+                document.body.classList.contains(
+                    "dark"
+                )
                     ? "light"
                     : "dark";
 
@@ -3229,7 +3273,10 @@
     ======================================================== */
 
     function normalizeFont(raw) {
-        if (!raw || typeof raw !== "object") {
+        if (
+            !raw ||
+            typeof raw !== "object"
+        ) {
             return null;
         }
 
@@ -3281,7 +3328,9 @@
 
             name: String(name),
 
-            file: String(file).replace(/^\/+/, ""),
+            file:
+                String(file)
+                    .replace(/^\/+/, ""),
 
             extension,
 
@@ -3335,8 +3384,13 @@
             ["black", "900"]
         ];
 
-        for (const [label, weight] of names) {
-            if (value.includes(label)) {
+        for (
+            const [label, weight]
+            of names
+        ) {
+            if (
+                value.includes(label)
+            ) {
                 return weight;
             }
         }
@@ -3373,7 +3427,9 @@
                 .split("/")
                 .map(
                     segment =>
-                        encodeURIComponent(segment)
+                        encodeURIComponent(
+                            segment
+                        )
                 )
                 .join("/")
         );
@@ -3395,15 +3451,14 @@
         }
 
         const family =
-            `Typace-${font.name.replace(
-                /[^a-zA-Z0-9_-]/g,
-                "-"
-            )}-${font.weight}-${font.style}`;
+            getFamily(font);
 
         const key =
             `${family}|${url}`;
 
-        if (loadedFaces.has(key)) {
+        if (
+            loadedFaces.has(key)
+        ) {
             return loadedFaces.get(key);
         }
 
@@ -3430,16 +3485,19 @@
                 }
             );
 
-        loadedFaces.set(
-            key,
+        const promise =
             face.load()
                 .then(loaded => {
-                    document.fonts.add(loaded);
+                    document.fonts.add(
+                        loaded
+                    );
 
                     return loaded;
                 })
                 .catch(error => {
-                    loadedFaces.delete(key);
+                    loadedFaces.delete(
+                        key
+                    );
 
                     console.warn(
                         `Typace: failed to load ${font.name}`,
@@ -3447,36 +3505,57 @@
                     );
 
                     return null;
-                })
+                });
+
+        loadedFaces.set(
+            key,
+            promise
         );
 
-        return loadedFaces.get(key);
+        return promise;
     }
 
     function getFamily(font) {
-        return `Typace-${font.name.replace(
-            /[^a-zA-Z0-9_-]/g,
-            "-"
-        )}-${font.weight}-${font.style}`;
+        return (
+            `Typace-${font.name.replace(
+                /[^a-zA-Z0-9_-]/g,
+                "-"
+            )}-${font.weight}-${font.style}`
+        );
     }
 
     /* ========================================================
        FONT DISPLAY
     ======================================================== */
 
+    function specimenFor() {
+        return state.view === "peeks"
+            ? "Aa"
+            : DEFAULT_SPECIMEN;
+    }
+
     function fontMeta(font) {
         const parts = [];
 
         if (font.category) {
-            parts.push(font.category);
+            parts.push(
+                font.category
+            );
         }
 
         if (font.weight) {
-            parts.push(`Weight ${font.weight}`);
+            parts.push(
+                `Weight ${font.weight}`
+            );
         }
 
-        if (font.style && font.style !== "normal") {
-            parts.push(font.style);
+        if (
+            font.style &&
+            font.style !== "normal"
+        ) {
+            parts.push(
+                font.style
+            );
         }
 
         if (font.extension) {
@@ -3488,125 +3567,127 @@
         return parts.join(" · ");
     }
 
-    function specimenFor(font) {
-        return (
-            font.preview ||
-            "Aa"
-        );
-    }
-
     /* ========================================================
-       EMPTY STATE
+       EMPTY DOODLE
     ======================================================== */
 
-    function emptyState() {
+    function doodleMarkup() {
+        return `
+            <svg
+                class="empty-doodle"
+                viewBox="0 0 120 100"
+                aria-hidden="true"
+            >
+                <path
+                    class="doodle-line"
+                    d="
+                        M39 40
+                        C35 31 39 21 48 18
+                        C58 14 70 18 74 27
+                        C78 37 72 47 62 50
+                        C51 53 43 49 39 40Z
+                    "
+                />
+
+                <path
+                    class="doodle-line"
+                    d="
+                        M48 32
+                        C49 30 51 30 52 32
+                    "
+                />
+
+                <path
+                    class="doodle-line"
+                    d="
+                        M62 32
+                        C63 30 65 30 66 32
+                    "
+                />
+
+                <path
+                    class="doodle-line"
+                    d="
+                        M54 40
+                        C57 38 60 38 62 40
+                    "
+                />
+
+                <path
+                    class="doodle-line"
+                    d="
+                        M45 53
+                        C42 62 42 73 43 83
+                    "
+                />
+
+                <path
+                    class="doodle-line"
+                    d="
+                        M69 53
+                        C74 61 77 72 78 82
+                    "
+                />
+
+                <path
+                    class="doodle-line"
+                    d="
+                        M44 61
+                        C35 60 29 64 25 70
+                    "
+                />
+
+                <path
+                    class="doodle-line"
+                    d="
+                        M70 61
+                        C79 59 87 62 94 68
+                    "
+                />
+
+                <path
+                    class="doodle-line"
+                    d="
+                        M20 35
+                        l-5 -3
+                    "
+                />
+
+                <path
+                    class="doodle-line"
+                    d="
+                        M91 31
+                        l5 -4
+                    "
+                />
+
+                <path
+                    class="doodle-line"
+                    d="
+                        M98 48
+                        h6
+                    "
+                />
+            </svg>
+        `;
+    }
+
+    function emptyState(
+        title = "No fonts found",
+        copy =
+            "Nothing matched your search. Try another name or clear the search."
+    ) {
         return `
             <div class="empty">
 
-                <svg
-                    class="empty-doodle"
-                    viewBox="0 0 120 100"
-                    aria-hidden="true"
-                >
-                    <path
-                        class="doodle-line"
-                        d="
-                            M39 40
-                            C35 31 39 21 48 18
-                            C58 14 70 18 74 27
-                            C78 37 72 47 62 50
-                            C51 53 43 49 39 40Z
-                        "
-                    />
-
-                    <path
-                        class="doodle-line"
-                        d="
-                            M48 32
-                            C49 30 51 30 52 32
-                        "
-                    />
-
-                    <path
-                        class="doodle-line"
-                        d="
-                            M62 32
-                            C63 30 65 30 66 32
-                        "
-                    />
-
-                    <path
-                        class="doodle-line"
-                        d="
-                            M54 40
-                            C57 38 60 38 62 40
-                        "
-                    />
-
-                    <path
-                        class="doodle-line"
-                        d="
-                            M45 53
-                            C42 62 42 73 43 83
-                        "
-                    />
-
-                    <path
-                        class="doodle-line"
-                        d="
-                            M69 53
-                            C74 61 77 72 78 82
-                        "
-                    />
-
-                    <path
-                        class="doodle-line"
-                        d="
-                            M44 61
-                            C35 60 29 64 25 70
-                        "
-                    />
-
-                    <path
-                        class="doodle-line"
-                        d="
-                            M70 61
-                            C79 59 87 62 94 68
-                        "
-                    />
-
-                    <path
-                        class="doodle-line"
-                        d="
-                            M20 35
-                            l-5 -3
-                        "
-                    />
-
-                    <path
-                        class="doodle-line"
-                        d="
-                            M91 31
-                            l5 -4
-                        "
-                    />
-
-                    <path
-                        class="doodle-line"
-                        d="
-                            M98 48
-                            h6
-                        "
-                    />
-                </svg>
+                ${doodleMarkup()}
 
                 <p class="empty-title">
-                    No fonts found
+                    ${escapeHTML(title)}
                 </p>
 
                 <p class="empty-copy">
-                    Nothing matched your search.
-                    Try another name or clear the search.
+                    ${escapeHTML(copy)}
                 </p>
 
             </div>
@@ -3617,11 +3698,17 @@
        CARD
     ======================================================== */
 
-    function createCard(font, index) {
+    function createCard(
+        font,
+        index
+    ) {
         const card =
-            document.createElement("article");
+            document.createElement(
+                "article"
+            );
 
-        card.className = "font-card";
+        card.className =
+            "font-card loading";
 
         card.tabIndex = 0;
 
@@ -3637,7 +3724,12 @@
 
         card.style.setProperty(
             "--delay",
-            `${Math.min(index % BATCH_SIZE, 19) * 32}ms`
+            `${
+                Math.min(
+                    index % BATCH_SIZE,
+                    19
+                ) * 32
+            }ms`
         );
 
         const family =
@@ -3646,24 +3738,32 @@
         card.innerHTML = `
             <div>
                 <div class="font-name">
-                    ${escapeHTML(font.name)}
+                    ${escapeHTML(
+                        font.name
+                    )}
                 </div>
 
                 <div
                     class="font-specimen"
                     style="
                         font-family:
-                        ${escapeCSSFamily(family)};
+                        ${escapeCSSFamily(
+                            family
+                        )};
                     "
                 >
-                    ${escapeHTML(specimenFor(font))}
+                    ${escapeHTML(
+                        specimenFor()
+                    )}
                 </div>
             </div>
 
             <div class="font-card-bottom">
 
                 <div class="font-meta">
-                    ${escapeHTML(fontMeta(font))}
+                    ${escapeHTML(
+                        fontMeta(font)
+                    )}
                 </div>
 
                 <span class="preview-label">
@@ -3688,7 +3788,9 @@
                 }
 
                 specimen.style.fontFamily =
-                    `"${family}"`;
+                    escapeCSSFamily(
+                        family
+                    );
 
                 card.classList.remove(
                     "loading"
@@ -3723,51 +3825,173 @@
 
     function escapeHTML(value) {
         return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
     }
 
     function escapeCSSFamily(value) {
         return `"${String(value)
-            .replaceAll("\\", "\\\\")
-            .replaceAll('"', '\\"')}"`;
+            .replaceAll(
+                "\\",
+                "\\\\"
+            )
+            .replaceAll(
+                '"',
+                '\\"'
+            )}"`;
+    }
+
+    /* ========================================================
+       FILTER + SORT
+    ======================================================== */
+
+    function getCurrentFonts() {
+        const query =
+            state.search
+                .trim()
+                .toLowerCase();
+
+        let result =
+            state.fonts.filter(
+                font => {
+                    if (!query) {
+                        return true;
+                    }
+
+                    const haystack =
+                        [
+                            font.name,
+                            font.category,
+                            font.style,
+                            font.weight,
+                            font.extension,
+                            font.format
+                        ]
+                            .filter(
+                                Boolean
+                            )
+                            .join(" ")
+                            .toLowerCase();
+
+                    return haystack.includes(
+                        query
+                    );
+                }
+            );
+
+        if (state.sort === "az") {
+            result.sort(
+                (a, b) =>
+                    a.name.localeCompare(
+                        b.name,
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    )
+            );
+        }
+
+        if (state.sort === "za") {
+            result.sort(
+                (a, b) =>
+                    b.name.localeCompare(
+                        a.name,
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    )
+            );
+        }
+
+        if (state.sort === "random") {
+            result =
+                shuffle(result);
+        }
+
+        return result;
+    }
+
+    function shuffle(array) {
+        const result =
+            [...array];
+
+        for (
+            let i = result.length - 1;
+            i > 0;
+            i--
+        ) {
+            const j =
+                Math.floor(
+                    Math.random() *
+                    (i + 1)
+                );
+
+            [
+                result[i],
+                result[j]
+            ] = [
+                result[j],
+                result[i]
+            ];
+        }
+
+        return result;
     }
 
     /* ========================================================
        RENDER
     ======================================================== */
 
-    function render(reset = true) {
+    function render(
+        reset = true
+    ) {
         if (reset) {
             fontList.innerHTML = "";
 
             state.rendered = 0;
+
+            state.filtered =
+                getCurrentFonts();
         }
 
-        const fonts =
-            getSortedFilteredFonts();
-
-        state.filtered = fonts;
-
         stats.textContent =
-            `${fonts.length.toLocaleString()} ${
-                fonts.length === 1
+            `${state.filtered.length.toLocaleString()} ${
+                state.filtered.length === 1
                     ? "font"
                     : "fonts"
             }`;
 
-        if (!fonts.length) {
-            loadStatus.textContent = "";
+        fontList.classList.toggle(
+            "peeks",
+            state.view === "peeks"
+        );
 
-            fontList.className =
-                `font-list ${
-                    state.view === "peeks"
-                        ? "peeks"
-                        : ""
-                }`;
+        if (
+            !state.filtered.length
+        ) {
+            loadStatus.textContent = "";
 
             fontList.innerHTML =
                 emptyState();
@@ -3775,19 +3999,18 @@
             return;
         }
 
-        fontList.className =
-            `font-list ${
-                state.view === "peeks"
-                    ? "peeks"
-                    : ""
-            }`;
-
         renderNextBatch();
     }
 
     function renderNextBatch() {
-        const fonts =
-            state.filtered;
+        if (
+            state.rendered >=
+            state.filtered.length
+        ) {
+            updateLoadStatus();
+
+            return;
+        }
 
         const start =
             state.rendered;
@@ -3795,13 +4018,8 @@
         const end =
             Math.min(
                 start + BATCH_SIZE,
-                fonts.length
+                state.filtered.length
             );
-
-        if (start >= end) {
-            updateLoadStatus();
-            return;
-        }
 
         const fragment =
             document.createDocumentFragment();
@@ -3813,13 +4031,15 @@
         ) {
             fragment.appendChild(
                 createCard(
-                    fonts[index],
+                    state.filtered[index],
                     index
                 )
             );
         }
 
-        fontList.appendChild(fragment);
+        fontList.appendChild(
+            fragment
+        );
 
         state.rendered = end;
 
@@ -3853,79 +4073,44 @@
         }
     }
 
-    /* ========================================================
-       FILTER / SORT
-    ======================================================== */
+    function renderView(
+        direction
+    ) {
+        fontList.style.setProperty(
+            "--view-slide-x",
+            `${direction * 20}px`
+        );
 
-    function getSortedFilteredFonts() {
-        const query =
-            state.search
-                .trim()
-                .toLowerCase();
+        fontList.classList.remove(
+            "view-slide"
+        );
 
-        let result =
-            state.fonts.filter(font => {
-                if (!query) {
-                    return true;
-                }
+        void fontList.offsetWidth;
 
-                const haystack =
-                    [
-                        font.name,
-                        font.category,
-                        font.style,
-                        font.weight,
-                        font.extension,
-                        font.format
-                    ]
-                        .filter(Boolean)
-                        .join(" ")
-                        .toLowerCase();
+        render(true);
 
-                return haystack.includes(query);
-            });
-
-        if (state.sort === "az") {
-            result.sort(
-                (a, b) =>
-                    a.name.localeCompare(
-                        b.name,
-                        undefined,
-                        {
-                            sensitivity:
-                                "base"
-                        }
-                    )
+        requestAnimationFrame(() => {
+            fontList.classList.add(
+                "view-slide"
             );
-        }
-
-        if (state.sort === "za") {
-            result.sort(
-                (a, b) =>
-                    b.name.localeCompare(
-                        a.name,
-                        undefined,
-                        {
-                            sensitivity:
-                                "base"
-                        }
-                    )
-            );
-        }
-
-        return result;
+        });
     }
+
+    window.renderTypace =
+        render;
 
     /* ========================================================
        SEARCH
     ======================================================== */
 
-    let searchTimer;
+    let searchTimer = 0;
 
     searchInput.addEventListener(
         "input",
         () => {
-            clearTimeout(searchTimer);
+            clearTimeout(
+                searchTimer
+            );
 
             searchTimer =
                 setTimeout(() => {
@@ -3963,38 +4148,43 @@
         }
     );
 
-    $$(".sort-chip").forEach(
-        button => {
-            button.addEventListener(
-                "click",
-                () => {
-                    state.sort =
-                        button.dataset.sort;
+    sortChips.addEventListener(
+        "click",
+        event => {
+            const button =
+                event.target.closest(
+                    ".sort-chip"
+                );
 
-                    $$(".sort-chip")
-                        .forEach(chip => {
-                            chip.classList.toggle(
-                                "active",
-                                chip === button
-                            );
-                        });
+            if (!button) {
+                return;
+            }
 
-                    sortChips.classList.remove(
-                        "open"
+            state.sort =
+                button.dataset.sort;
+
+            $$(".sort-chip")
+                .forEach(chip => {
+                    chip.classList.toggle(
+                        "active",
+                        chip === button
                     );
+                });
 
-                    sortToggle.classList.remove(
-                        "active"
-                    );
-
-                    sortToggle.setAttribute(
-                        "aria-expanded",
-                        "false"
-                    );
-
-                    render(true);
-                }
+            sortChips.classList.remove(
+                "open"
             );
+
+            sortToggle.classList.remove(
+                "active"
+            );
+
+            sortToggle.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+            render(true);
         }
     );
 
@@ -4026,13 +4216,29 @@
        VIEW
     ======================================================== */
 
-    $$(".view-button").forEach(
-        button => {
+    $$(".view-button")
+        .forEach(button => {
             button.addEventListener(
                 "click",
                 () => {
-                    state.view =
+                    const nextView =
                         button.dataset.view;
+
+                    if (
+                        nextView ===
+                        state.view
+                    ) {
+                        return;
+                    }
+
+                    const direction =
+                        nextView ===
+                        "peeks"
+                            ? 1
+                            : -1;
+
+                    state.view =
+                        nextView;
 
                     $$(".view-button")
                         .forEach(item => {
@@ -4042,16 +4248,17 @@
                             );
                         });
 
-                    render(true);
-
                     localStorage.setItem(
                         "typace-view",
                         state.view
                     );
+
+                    renderView(
+                        direction
+                    );
                 }
             );
-        }
-    );
+        });
 
     const savedView =
         localStorage.getItem(
@@ -4062,7 +4269,8 @@
         savedView === "cards" ||
         savedView === "peeks"
     ) {
-        state.view = savedView;
+        state.view =
+            savedView;
 
         $$(".view-button")
             .forEach(button => {
@@ -4079,14 +4287,17 @@
     ======================================================== */
 
     const loadSentinel =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     loadSentinel.setAttribute(
         "aria-hidden",
         "true"
     );
 
-    loadSentinel.style.height = "1px";
+    loadSentinel.style.height =
+        "1px";
 
     document.body.appendChild(
         loadSentinel
@@ -4096,7 +4307,9 @@
         new IntersectionObserver(
             entries => {
                 if (
-                    entries[0].isIntersecting &&
+                    entries[0]
+                        .isIntersecting &&
+                    !state.loading &&
                     state.rendered <
                         state.filtered.length
                 ) {
@@ -4117,7 +4330,9 @@
        OVERLAY HELPERS
     ======================================================== */
 
-    function openOverlay(overlay) {
+    function openOverlay(
+        overlay
+    ) {
         overlay.classList.add(
             "active"
         );
@@ -4131,7 +4346,9 @@
             "hidden";
     }
 
-    function closeOverlay(overlay) {
+    function closeOverlay(
+        overlay
+    ) {
         overlay.classList.remove(
             "active"
         );
@@ -4194,8 +4411,11 @@
        PREVIEW
     ======================================================== */
 
-    async function openPreview(font) {
-        state.previewFont = font;
+    async function openPreview(
+        font
+    ) {
+        state.previewFont =
+            font;
 
         previewTitle.textContent =
             font.name;
@@ -4203,21 +4423,15 @@
         previewFontName.textContent =
             font.name;
 
-        previewInput.value =
-            previewInput.value ||
-            "The Quick Brown Fox Jumps Over The Lazy Dog";
+        previewDisplay.textContent =
+            DEFAULT_SPECIMEN;
 
-        const url =
-            getFontUrl(font);
-
-        state.previewUrl = url;
-
-        previewHero.classList.remove(
-            "preview-dark"
+        previewDisplay.classList.remove(
+            "specimen-dark"
         );
 
-        previewHero.classList.add(
-            "preview-light"
+        previewDisplay.classList.add(
+            "specimen-light"
         );
 
         $$(".background-button")
@@ -4231,11 +4445,18 @@
 
         resetPreviewControls();
 
+        fontNameInput.value =
+            font.name;
+
         openOverlay(
             previewOverlay
         );
 
-        await loadFont(font);
+        const face =
+            await loadFont(font);
+
+        state.previewFace =
+            face;
 
         applyPreviewFont();
 
@@ -4243,7 +4464,9 @@
     }
 
     function applyPreviewFont() {
-        if (!state.previewFont) {
+        if (
+            !state.previewFont
+        ) {
             return;
         }
 
@@ -4253,50 +4476,16 @@
         const family =
             getFamily(font);
 
-        const text =
-            previewInput.value ||
-            "The Quick Brown Fox Jumps Over The Lazy Dog";
+        previewDisplay.style.fontFamily =
+            escapeCSSFamily(
+                family
+            );
 
-        previewDisplay.textContent =
-            text;
+        previewDisplay.style.fontWeight =
+            getCurrentWeight();
 
-        lowercasePreview.textContent =
-            "abcdefghijklmnopqrstuvwxyz";
-
-        uppercasePreview.textContent =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-        numbersPreview.textContent =
-            "0123456789";
-
-        const style = {
-            fontFamily:
-                `"${family}"`,
-            fontWeight:
-                getCurrentWeight(),
-            fontStyle:
-                font.style || "normal"
-        };
-
-        Object.assign(
-            previewDisplay.style,
-            style
-        );
-
-        Object.assign(
-            lowercasePreview.style,
-            style
-        );
-
-        Object.assign(
-            uppercasePreview.style,
-            style
-        );
-
-        Object.assign(
-            numbersPreview.style,
-            style
-        );
+        previewDisplay.style.fontStyle =
+            font.style || "normal";
 
         updatePreviewStyles();
     }
@@ -4305,9 +4494,11 @@
         const active =
             $(".weight-button.active");
 
-        return active?.dataset.weight ||
+        return (
+            active?.dataset.weight ||
             state.previewFont?.weight ||
-            "400";
+            "400"
+        );
     }
 
     function resetPreviewControls() {
@@ -4339,33 +4530,41 @@
     }
 
     function updatePreviewStyles() {
-        const size =
+        previewDisplay.style.fontSize =
             `${sizeSlider.value}px`;
 
-        const line =
+        previewDisplay.style.lineHeight =
             lineHeightSlider.value;
 
-        const spacing =
-            `${letterSpacingSlider.value}em`;
-
-        previewDisplay.style.fontSize =
-            size;
-
-        previewDisplay.style.lineHeight =
-            line;
-
         previewDisplay.style.letterSpacing =
-            spacing;
-
-        lowercasePreview.style.lineHeight =
-            line;
-
-        uppercasePreview.style.lineHeight =
-            line;
-
-        numbersPreview.style.lineHeight =
-            line;
+            `${letterSpacingSlider.value}em`;
     }
+
+    /* ========================================================
+       EDITABLE SPECIMEN
+    ======================================================== */
+
+    previewDisplay.addEventListener(
+        "input",
+        () => {
+            updateResources();
+        }
+    );
+
+    previewDisplay.addEventListener(
+        "keydown",
+        event => {
+            if (
+                event.key === "Enter"
+            ) {
+                event.preventDefault();
+
+                document.execCommand(
+                    "insertLineBreak"
+                );
+            }
+        }
+    );
 
     /* ========================================================
        PREVIEW CONTROLS
@@ -4429,13 +4628,8 @@
                 });
 
             applyPreviewFont();
-        }
-    );
 
-    previewInput.addEventListener(
-        "input",
-        () => {
-            applyPreviewFont();
+            updateResources();
         }
     );
 
@@ -4448,13 +4642,13 @@
                         button.dataset.background ===
                         "dark";
 
-                    previewHero.classList.toggle(
-                        "preview-dark",
+                    previewDisplay.classList.toggle(
+                        "specimen-dark",
                         dark
                     );
 
-                    previewHero.classList.toggle(
-                        "preview-light",
+                    previewDisplay.classList.toggle(
+                        "specimen-light",
                         !dark
                     );
 
@@ -4470,8 +4664,30 @@
         });
 
     /* ========================================================
+       CUSTOM CSS NAME
+    ======================================================== */
+
+    fontNameInput.addEventListener(
+        "input",
+        () => {
+            updateResources();
+        }
+    );
+
+    /* ========================================================
        CDN / USAGE
     ======================================================== */
+
+    function getCustomFontName() {
+        const value =
+            fontNameInput.value.trim();
+
+        return (
+            value ||
+            state.previewFont?.name ||
+            "Typace Font"
+        );
+    }
 
     function updateResources() {
         const font =
@@ -4496,8 +4712,15 @@
         cdnCode.textContent =
             url;
 
-        const family =
-            getFamily(font);
+        const customName =
+            getCustomFontName();
+
+        const format =
+            FONT_FORMATS[
+                font.extension
+            ] ||
+            font.format ||
+            "woff2";
 
         const weight =
             getCurrentWeight();
@@ -4508,31 +4731,20 @@
 
         usageCode.textContent =
 `@font-face {
-    font-family: "${font.name}";
-    src: url("${url}") format("${FONT_FORMATS[
-        font.extension
-    ] || font.format || "woff2"}");
+    font-family: "${customName}";
+    src: url("${url}") format("${format}");
     font-weight: ${weight};
     font-style: ${style};
     font-display: swap;
 }
 
 .your-element {
-    font-family: "${font.name}", sans-serif;
+    font-family: "${customName}", sans-serif;
     font-weight: ${weight};
 }`;
 
-        void family;
+        void previewDisplay;
     }
-
-    /* Update usage when weight changes */
-
-    weightOptions.addEventListener(
-        "click",
-        () => {
-            updateResources();
-        }
-    );
 
     /* ========================================================
        COPY
@@ -4543,45 +4755,33 @@
         button,
         original
     ) {
+        if (!text) {
+            return;
+        }
+
         try {
             await navigator.clipboard.writeText(
                 text
             );
-
-            button.textContent =
-                "Copied";
-
-            button.classList.add(
-                "copied"
-            );
-
-            setTimeout(() => {
-                button.textContent =
-                    original;
-
-                button.classList.remove(
-                    "copied"
-                );
-            }, 1200);
         } catch {
             fallbackCopy(text);
+        }
 
+        button.textContent =
+            "Copied";
+
+        button.classList.add(
+            "copied"
+        );
+
+        setTimeout(() => {
             button.textContent =
-                "Copied";
+                original;
 
-            button.classList.add(
+            button.classList.remove(
                 "copied"
             );
-
-            setTimeout(() => {
-                button.textContent =
-                    original;
-
-                button.classList.remove(
-                    "copied"
-                );
-            }, 1200);
-        }
+        }, 1200);
     }
 
     function fallbackCopy(text) {
@@ -4590,7 +4790,8 @@
                 "textarea"
             );
 
-        textarea.value = text;
+        textarea.value =
+            text;
 
         textarea.style.position =
             "fixed";
@@ -4661,7 +4862,9 @@
                 state.previewFont.file
                     ?.split("/")
                     .pop() ||
-                `${state.previewFont.name}.${state.previewFont.extension || "woff2"}`;
+                `${
+                    state.previewFont.name
+                }.${state.previewFont.extension || "woff2"}`;
 
             link.target = "_blank";
 
@@ -4743,54 +4946,6 @@
     );
 
     /* ========================================================
-       RANDOM SORT
-    ======================================================== */
-
-    function shuffle(array) {
-        const result =
-            [...array];
-
-        for (
-            let i = result.length - 1;
-            i > 0;
-            i--
-        ) {
-            const j =
-                Math.floor(
-                    Math.random() *
-                    (i + 1)
-                );
-
-            [
-                result[i],
-                result[j]
-            ] = [
-                result[j],
-                result[i]
-            ];
-        }
-
-        return result;
-    }
-
-    const originalGetSorted =
-        getSortedFilteredFonts;
-
-    /* ========================================================
-       RANDOM OVERRIDE
-    ======================================================== */
-
-    window.addEventListener(
-        "typace:random-sort",
-        () => {
-            state.filtered =
-                shuffle(
-                    state.filtered
-                );
-        }
-    );
-
-    /* ========================================================
        API
     ======================================================== */
 
@@ -4811,7 +4966,8 @@
                             Accept:
                                 "application/json"
                         },
-                        cache: "no-store"
+                        cache:
+                            "no-store"
                     }
                 );
 
@@ -4858,193 +5014,6 @@
 
             state.loading = false;
 
-            fontList.innerHTML = `
-                <div class="empty">
-
-                    <svg
-                        class="empty-doodle"
-                        viewBox="0 0 120 100"
-                        aria-hidden="true"
-                    >
-                        <path
-                            class="doodle-line"
-                            d="
-                                M39 40
-                                C35 31 39 21 48 18
-                                C58 14 70 18 74 27
-                                C78 37 72 47 62 50
-                                C51 53 43 49 39 40Z
-                            "
-                        />
-
-                        <path
-                            class="doodle-line"
-                            d="
-                                M48 32
-                                C49 30 51 30 52 32
-                            "
-                        />
-
-                        <path
-                            class="doodle-line"
-                            d="
-                                M62 32
-                                C63 30 65 30 66 32
-                            "
-                        />
-
-                        <path
-                            class="doodle-line"
-                            d="
-                                M54 40
-                                C57 38 60 38 62 40
-                            "
-                        />
-
-                        <path
-                            class="doodle-line"
-                            d="
-                                M45 53
-                                C42 62 42 73 43 83
-                            "
-                        />
-
-                        <path
-                            class="doodle-line"
-                            d="
-                                M69 53
-                                C74 61 77 72 78 82
-                            "
-                        />
-
-                        <path
-                            class="doodle-line"
-                            d="
-                                M44 61
-                                C35 60 29 64 25 70
-                            "
-                        />
-
-                        <path
-                            class="doodle-line"
-                            d="
-                                M70 61
-                                C79 59 87 62 94 68
-                            "
-                        />
-
-                    </svg>
-
-                    <p class="empty-title">
-                        Fonts couldn't load
-                    </p>
-
-                    <p class="empty-copy">
-                        The font index didn't respond.
-                        Check the API and try again.
-                    </p>
-
-                </div>
-            `;
-
-            stats.textContent =
-                "Unable to load fonts";
-
-            loadStatus.textContent = "";
-
-        } finally {
-            state.loading = false;
-        }
-    }
-
-    /* ========================================================
-       RANDOM SORT FIX
-    ======================================================== */
-
-    function getCurrentFonts() {
-        let result =
-            state.fonts.filter(font => {
-                const query =
-                    state.search
-                        .trim()
-                        .toLowerCase();
-
-                if (!query) {
-                    return true;
-                }
-
-                return [
-                    font.name,
-                    font.category,
-                    font.style,
-                    font.weight,
-                    font.extension,
-                    font.format
-                ]
-                    .filter(Boolean)
-                    .join(" ")
-                    .toLowerCase()
-                    .includes(query);
-            });
-
-        if (state.sort === "az") {
-            result.sort(
-                (a, b) =>
-                    a.name.localeCompare(
-                        b.name,
-                        undefined,
-                        {
-                            sensitivity:
-                                "base"
-                        }
-                    )
-            );
-        }
-
-        if (state.sort === "za") {
-            result.sort(
-                (a, b) =>
-                    b.name.localeCompare(
-                        a.name,
-                        undefined,
-                        {
-                            sensitivity:
-                                "base"
-                        }
-                    )
-            );
-        }
-
-        if (state.sort === "random") {
-            result =
-                shuffle(result);
-        }
-
-        return result;
-    }
-
-    /* Replace normal getter with random-aware version */
-
-    function renderWithSort(reset = true) {
-        if (reset) {
-            fontList.innerHTML = "";
-
-            state.rendered = 0;
-        }
-
-        state.filtered =
-            getCurrentFonts();
-
-        stats.textContent =
-            `${state.filtered.length.toLocaleString()} ${
-                state.filtered.length === 1
-                    ? "font"
-                    : "fonts"
-            }`;
-
-        if (!state.filtered.length) {
-            loadStatus.textContent = "";
-
             fontList.className =
                 `font-list ${
                     state.view === "peeks"
@@ -5053,108 +5022,21 @@
                 }`;
 
             fontList.innerHTML =
-                emptyState();
+                emptyState(
+                    "Fonts couldn't load",
+                    "The font index didn't respond. Check the API and try again."
+                );
 
-            return;
+            stats.textContent =
+                "Unable to load fonts";
+
+            loadStatus.textContent =
+                "";
+
+        } finally {
+            state.loading = false;
         }
-
-        fontList.className =
-            `font-list ${
-                state.view === "peeks"
-                    ? "peeks"
-                    : ""
-                }`;
-
-        renderNextBatch();
     }
-
-    /* ========================================================
-       PATCH RENDER
-    ======================================================== */
-
-    window.renderTypace =
-        renderWithSort;
-
-    /* ========================================================
-       REBIND SEARCH/SORT RENDERING
-    ======================================================== */
-
-    searchInput.addEventListener(
-        "input",
-        () => {
-            clearTimeout(searchTimer);
-
-            searchTimer =
-                setTimeout(() => {
-                    state.search =
-                        searchInput.value;
-
-                    renderWithSort(true);
-                }, 90);
-        }
-    );
-
-    $$(".sort-chip").forEach(
-        button => {
-            button.addEventListener(
-                "click",
-                () => {
-                    state.sort =
-                        button.dataset.sort;
-
-                    $$(".sort-chip")
-                        .forEach(chip => {
-                            chip.classList.toggle(
-                                "active",
-                                chip === button
-                            );
-                        });
-
-                    sortChips.classList.remove(
-                        "open"
-                    );
-
-                    sortToggle.classList.remove(
-                        "active"
-                    );
-
-                    sortToggle.setAttribute(
-                        "aria-expanded",
-                        "false"
-                    );
-
-                    renderWithSort(true);
-                }
-            );
-        }
-    );
-
-    $$(".view-button").forEach(
-        button => {
-            button.addEventListener(
-                "click",
-                () => {
-                    state.view =
-                        button.dataset.view;
-
-                    $$(".view-button")
-                        .forEach(item => {
-                            item.classList.toggle(
-                                "active",
-                                item === button
-                            );
-                        });
-
-                    localStorage.setItem(
-                        "typace-view",
-                        state.view
-                    );
-
-                    renderWithSort(true);
-                }
-            );
-        }
-    );
 
     /* ========================================================
        START
