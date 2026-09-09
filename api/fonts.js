@@ -125,7 +125,7 @@ export default async function handler(req, res) {
                                 modifiedAt <=
                             NEW_FONT_WINDOW_MS;
 
-                        return {
+                        const font = {
                             name,
                             file,
                             type: metadata.type,
@@ -137,10 +137,21 @@ export default async function handler(req, res) {
                             updatedAt:
                                 new Date(
                                     modifiedAt
-                                ).toISOString(),
-
-                            isNew
+                                ).toISOString()
                         };
+
+                        /*
+                         * Only include isNew when the
+                         * font is actually new.
+                         *
+                         * Old fonts have no "isNew"
+                         * property at all.
+                         */
+                        if (isNew) {
+                            font.isNew = true;
+                        }
+
+                        return font;
                     })
             )
         ).sort((a, b) =>
