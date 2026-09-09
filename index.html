@@ -258,6 +258,62 @@
         }
 
         /* =====================================================
+           THEME TRANSITION
+        ===================================================== */
+
+        html.theme-transition,
+        html.theme-transition body,
+        html.theme-transition body * {
+            transition:
+                background-color .58s cubic-bezier(.22, 1, .36, 1),
+                color .42s cubic-bezier(.22, 1, .36, 1),
+                border-color .42s cubic-bezier(.22, 1, .36, 1),
+                box-shadow .52s cubic-bezier(.22, 1, .36, 1) !important;
+        }
+
+        html.theme-transition .font-specimen,
+        html.theme-transition .preview-display,
+        html.theme-transition .resource-code {
+            transition:
+                background-color .58s cubic-bezier(.22, 1, .36, 1),
+                color .48s cubic-bezier(.22, 1, .36, 1),
+                border-color .42s cubic-bezier(.22, 1, .36, 1),
+                box-shadow .52s cubic-bezier(.22, 1, .36, 1),
+                transform .3s var(--spring) !important;
+        }
+
+        html.theme-transition .brand-logo,
+        html.theme-transition .icon-button svg,
+        html.theme-transition .search-icon svg {
+            transition:
+                filter .42s cubic-bezier(.22, 1, .36, 1),
+                opacity .25s ease,
+                transform .3s var(--spring) !important;
+        }
+
+        html.theme-transition .font-card,
+        html.theme-transition .resource-card,
+        html.theme-transition .preview-hero,
+        html.theme-transition .control,
+        html.theme-transition .social-link,
+        html.theme-transition .search input,
+        html.theme-transition .sort-toggle,
+        html.theme-transition .sort-chips,
+        html.theme-transition .view-switch,
+        html.theme-transition .back-button,
+        html.theme-transition .download-button,
+        html.theme-transition .font-name-input,
+        html.theme-transition .background-button,
+        html.theme-transition .weight-button {
+            transition:
+                background-color .58s cubic-bezier(.22, 1, .36, 1),
+                color .42s cubic-bezier(.22, 1, .36, 1),
+                border-color .42s cubic-bezier(.22, 1, .36, 1),
+                box-shadow .52s cubic-bezier(.22, 1, .36, 1),
+                transform .3s var(--spring) !important;
+        }
+
+        /* =====================================================
            APP
         ===================================================== */
 
@@ -612,6 +668,10 @@
         }
 
         .sort-chip {
+            position: relative;
+
+            z-index: 2;
+
             min-height: 34px;
 
             padding: 0 .7rem;
@@ -627,7 +687,6 @@
 
             transition:
                 transform .2s var(--spring),
-                background .18s ease,
                 color .18s ease;
         }
 
@@ -640,11 +699,35 @@
         }
 
         .sort-chip.active {
-            background: var(--accent);
             color: #fff;
+        }
 
-            animation:
-                pillPop .3s var(--spring);
+        /* =====================================================
+           SLIDING SORT TAB
+        ===================================================== */
+
+        .sort-slider {
+            position: absolute;
+
+            z-index: 1;
+
+            top: .3rem;
+            left: .3rem;
+
+            height: 34px;
+
+            border-radius: 999px;
+
+            background: var(--accent);
+
+            pointer-events: none;
+
+            transition:
+                transform .32s var(--spring),
+                width .32s var(--spring);
+
+            box-shadow:
+                0 4px 14px var(--accent-soft);
         }
 
         /* =====================================================
@@ -652,7 +735,12 @@
         ===================================================== */
 
         .view-switch {
+            position: relative;
+
             display: inline-flex;
+            align-items: center;
+
+            gap: 0;
 
             padding: .25rem;
 
@@ -662,9 +750,15 @@
             background: var(--surface);
 
             box-shadow: var(--shadow);
+
+            overflow: hidden;
         }
 
         .view-button {
+            position: relative;
+
+            z-index: 2;
+
             min-height: 34px;
 
             padding: 0 .8rem;
@@ -676,9 +770,10 @@
 
             font-size: .7rem;
 
+            white-space: nowrap;
+
             transition:
                 transform .2s var(--spring),
-                background .18s ease,
                 color .18s ease;
         }
 
@@ -691,8 +786,40 @@
         }
 
         .view-button.active {
-            background: var(--accent);
             color: #fff;
+        }
+
+        /* =====================================================
+           SLIDING VIEW TAB
+        ===================================================== */
+
+        .view-slider {
+            position: absolute;
+
+            z-index: 1;
+
+            top: 0;
+            left: 0;
+
+            width: 0;
+            height: 0;
+
+            border-radius: 999px;
+
+            background: var(--accent);
+
+            pointer-events: none;
+
+            transform:
+                translate3d(0, 0, 0);
+
+            transition:
+                transform .34s var(--spring),
+                width .34s var(--spring),
+                height .34s var(--spring);
+
+            box-shadow:
+                0 4px 14px var(--accent-soft);
         }
 
         /* =====================================================
@@ -709,6 +836,7 @@
         @keyframes viewSlideIn {
             from {
                 opacity: 0;
+
                 transform:
                     translateX(
                         var(--view-slide-x, 18px)
@@ -717,6 +845,7 @@
 
             to {
                 opacity: 1;
+
                 transform:
                     translateX(0);
             }
@@ -832,9 +961,59 @@
                 scale(.975);
         }
 
+        /* =====================================================
+           FONT SKELETON
+        ===================================================== */
+
         .font-card.loading .font-specimen {
-            color: var(--muted);
-            opacity: .55;
+            color: transparent;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--border) 0%,
+                    var(--surface-soft) 45%,
+                    var(--border) 90%
+                );
+
+            background-size: 220% 100%;
+
+            background-clip: text;
+            -webkit-background-clip: text;
+
+            animation:
+                fontSkeleton 1.05s
+                ease-in-out
+                infinite;
+
+            user-select: none;
+        }
+
+        .font-card.loading .font-specimen::selection {
+            color: transparent;
+        }
+
+        @keyframes fontSkeleton {
+            0% {
+                background-position: 180% 0;
+            }
+
+            100% {
+                background-position: -40% 0;
+            }
+        }
+
+        /* =====================================================
+           FONT NAME + BADGES
+        ===================================================== */
+
+        .font-name-row {
+            display: flex;
+            align-items: center;
+
+            gap: .5rem;
+
+            min-width: 0;
         }
 
         .font-name {
@@ -854,6 +1033,43 @@
             letter-spacing: -.025em;
             line-height: 1.15;
         }
+
+        .font-new-badge,
+        .font-old-badge {
+            flex: 0 0 auto;
+
+            padding: .2rem .45rem;
+
+            border-radius: 999px;
+
+            font-size: .56rem;
+            font-weight: 700;
+
+            line-height: 1;
+
+            letter-spacing: .01em;
+        }
+
+        .font-new-badge {
+            background: var(--accent);
+            color: #fff;
+
+            box-shadow:
+                0 3px 10px var(--accent-soft);
+        }
+
+        .font-old-badge {
+            background: var(--surface-soft);
+            color: var(--muted);
+
+            border: 1px solid var(--border);
+
+            font-weight: 600;
+        }
+
+        /* =====================================================
+           FONT SPECIMEN
+        ===================================================== */
 
         .font-specimen {
             width: 100%;
@@ -906,7 +1122,7 @@
         .font-card-bottom {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-end;
 
             gap: .6rem;
 
@@ -1014,17 +1230,27 @@
             transform: scale(.965);
         }
 
-        .peeks .font-name {
+        .peeks .font-name-row {
             order: 2;
 
-            margin-top: .4rem;
+            justify-content: center;
 
+            margin-top: .4rem;
+        }
+
+        .peeks .font-name {
             font-size:
                 clamp(.8rem, 3vw, 1rem);
 
             font-weight: 500;
 
             letter-spacing: -.025em;
+        }
+
+        .peeks .font-new-badge,
+        .peeks .font-old-badge {
+            font-size: .48rem;
+            padding: .18rem .35rem;
         }
 
         .peeks .font-specimen {
@@ -1325,8 +1551,8 @@
             visibility: hidden;
 
             transition:
-                opacity .25s ease,
-                visibility .25s ease;
+                opacity .18s ease,
+                visibility .18s ease;
         }
 
         .preview-overlay.active {
@@ -1350,11 +1576,11 @@
             overscroll-behavior: contain;
 
             transform:
-                translateY(24px)
-                scale(.99);
+                translateY(12px)
+                scale(.995);
 
             transition:
-                transform .4s var(--spring);
+                transform .22s var(--spring);
         }
 
         .preview-overlay.active .preview-panel {
@@ -1502,7 +1728,7 @@
 
         .preview-overlay.active .preview-hero {
             animation:
-                previewBounce .55s
+                previewBounce .28s
                 var(--spring)
                 both;
         }
@@ -1512,16 +1738,8 @@
                 opacity: 0;
 
                 transform:
-                    translateY(18px)
-                    scale(.975);
-            }
-
-            65% {
-                opacity: 1;
-
-                transform:
-                    translateY(-3px)
-                    scale(1.005);
+                    translateY(8px)
+                    scale(.99);
             }
 
             100% {
@@ -2442,6 +2660,12 @@
                     aria-label="Sort fonts"
                 >
 
+                    <span
+                        class="sort-slider"
+                        id="sortSlider"
+                        aria-hidden="true"
+                    ></span>
+
                     <button
                         class="sort-chip active"
                         data-sort="az"
@@ -2456,6 +2680,14 @@
                         type="button"
                     >
                         Z–A
+                    </button>
+
+                    <button
+                        class="sort-chip"
+                        data-sort="new"
+                        type="button"
+                    >
+                        New
                     </button>
 
                     <button
@@ -2477,6 +2709,12 @@
                 role="group"
                 aria-label="Font display style"
             >
+
+                <span
+                    class="view-slider"
+                    id="viewSlider"
+                    aria-hidden="true"
+                ></span>
 
                 <button
                     class="view-button active"
@@ -2870,54 +3108,6 @@
 
                 </div>
 
-                <label class="control">
-
-                    <span class="control-label">
-                        Line
-                    </span>
-
-                    <input
-                        id="lineHeightSlider"
-                        type="range"
-                        min="1"
-                        max="2.5"
-                        step=".05"
-                        value="1.3"
-                    >
-
-                    <span
-                        class="control-value"
-                        id="lineHeightValue"
-                    >
-                        1.30
-                    </span>
-
-                </label>
-
-                <label class="control">
-
-                    <span class="control-label">
-                        Spacing
-                    </span>
-
-                    <input
-                        id="letterSpacingSlider"
-                        type="range"
-                        min="-.08"
-                        max=".15"
-                        step=".01"
-                        value="-.03"
-                    >
-
-                    <span
-                        class="control-value"
-                        id="letterSpacingValue"
-                    >
-                        -.03em
-                    </span>
-
-                </label>
-
             </div>
 
         </section>
@@ -3044,6 +3234,9 @@
 
     const BATCH_SIZE = 20;
 
+    const NEW_FONT_WINDOW_MS =
+        50 * 60 * 60 * 1000;
+
     const DEFAULT_SPECIMEN =
         "The Quick Brown Fox Jumps Over The Lazy Dog";
 
@@ -3098,6 +3291,9 @@
 
     const sortToggle = $("#sortToggle");
     const sortChips = $("#sortChips");
+    const sortSlider = $("#sortSlider");
+
+    const viewSlider = $("#viewSlider");
 
     const themeButton = $("#themeButton");
 
@@ -3115,18 +3311,6 @@
 
     const sizeSlider = $("#sizeSlider");
     const sizeValue = $("#sizeValue");
-
-    const lineHeightSlider =
-        $("#lineHeightSlider");
-
-    const lineHeightValue =
-        $("#lineHeightValue");
-
-    const letterSpacingSlider =
-        $("#letterSpacingSlider");
-
-    const letterSpacingValue =
-        $("#letterSpacingValue");
 
     const weightOptions =
         $("#weightOptions");
@@ -3228,7 +3412,7 @@
             : "light";
     }
 
-    function setTheme(theme) {
+    function setThemeBase(theme) {
         document.body.classList.toggle(
             "dark",
             theme === "dark"
@@ -3252,9 +3436,46 @@
         );
     }
 
+    function setTheme(
+        theme,
+        event = null,
+        animate = false
+    ) {
+        const html =
+            document.documentElement;
+
+        const reducedMotion =
+            window.matchMedia(
+                "(prefers-reduced-motion: reduce)"
+            ).matches;
+
+        if (
+            animate &&
+            !reducedMotion
+        ) {
+            html.classList.add(
+                "theme-transition"
+            );
+
+            requestAnimationFrame(() => {
+                setThemeBase(theme);
+            });
+
+            setTimeout(() => {
+                html.classList.remove(
+                    "theme-transition"
+                );
+            }, 650);
+
+            return;
+        }
+
+        setThemeBase(theme);
+    }
+
     themeButton.addEventListener(
         "click",
-        () => {
+        event => {
             const next =
                 document.body.classList.contains(
                     "dark"
@@ -3262,11 +3483,17 @@
                     ? "light"
                     : "dark";
 
-            setTheme(next);
+            setTheme(
+                next,
+                event,
+                true
+            );
         }
     );
 
-    setTheme(getPreferredTheme());
+    setTheme(
+        getPreferredTheme()
+    );
 
     /* ========================================================
        FONT NORMALIZATION
@@ -3413,6 +3640,57 @@
     }
 
     /* ========================================================
+       NEW FONT
+    ======================================================== */
+
+    function getFontTimestamp(font) {
+        const updated =
+            Date.parse(
+                font?.updatedAt || ""
+            );
+
+        if (
+            Number.isFinite(updated)
+        ) {
+            return updated;
+        }
+
+        const created =
+            Date.parse(
+                font?.createdAt || ""
+            );
+
+        if (
+            Number.isFinite(created)
+        ) {
+            return created;
+        }
+
+        return 0;
+    }
+
+    function isFontNew(font) {
+        if (
+            typeof font?.isNew ===
+            "boolean"
+        ) {
+            return font.isNew;
+        }
+
+        const timestamp =
+            getFontTimestamp(font);
+
+        if (!timestamp) {
+            return false;
+        }
+
+        return (
+            Date.now() - timestamp <=
+            NEW_FONT_WINDOW_MS
+        );
+    }
+
+    /* ========================================================
        FONT URL
     ======================================================== */
 
@@ -3536,27 +3814,6 @@
 
     function fontMeta(font) {
         const parts = [];
-
-        if (font.category) {
-            parts.push(
-                font.category
-            );
-        }
-
-        if (font.weight) {
-            parts.push(
-                `Weight ${font.weight}`
-            );
-        }
-
-        if (
-            font.style &&
-            font.style !== "normal"
-        ) {
-            parts.push(
-                font.style
-            );
-        }
 
         if (font.extension) {
             parts.push(
@@ -3735,12 +3992,38 @@
         const family =
             getFamily(font);
 
+        const newFont =
+            isFontNew(font);
+
         card.innerHTML = `
             <div>
-                <div class="font-name">
-                    ${escapeHTML(
-                        font.name
-                    )}
+
+                <div class="font-name-row">
+
+                    <div class="font-name">
+                        ${escapeHTML(
+                            font.name
+                        )}
+                    </div>
+
+                    ${
+                        newFont
+                            ? `
+                                <span
+                                    class="font-new-badge"
+                                >
+                                    New
+                                </span>
+                            `
+                            : `
+                                <span
+                                    class="font-old-badge"
+                                >
+                                    Old
+                                </span>
+                            `
+                    }
+
                 </div>
 
                 <div
@@ -3756,6 +4039,7 @@
                         specimenFor()
                     )}
                 </div>
+
             </div>
 
             <div class="font-card-bottom">
@@ -3780,10 +4064,6 @@
         loadFont(font)
             .then(face => {
                 if (!face) {
-                    card.classList.remove(
-                        "loading"
-                    );
-
                     return;
                 }
 
@@ -3925,6 +4205,51 @@
             );
         }
 
+        if (state.sort === "new") {
+            result.sort(
+                (a, b) => {
+                    const aTime =
+                        getFontTimestamp(a);
+
+                    const bTime =
+                        getFontTimestamp(b);
+
+                    if (
+                        aTime ||
+                        bTime
+                    ) {
+                        return (
+                            bTime -
+                            aTime
+                        );
+                    }
+
+                    const aNew =
+                        isFontNew(a);
+
+                    const bNew =
+                        isFontNew(b);
+
+                    if (
+                        aNew !== bNew
+                    ) {
+                        return aNew
+                            ? -1
+                            : 1;
+                    }
+
+                    return a.name.localeCompare(
+                        b.name,
+                        undefined,
+                        {
+                            sensitivity:
+                                "base"
+                        }
+                    );
+                }
+            );
+        }
+
         if (state.sort === "random") {
             result =
                 shuffle(result);
@@ -3958,6 +4283,90 @@
         }
 
         return result;
+    }
+
+    /* ========================================================
+       SORT SLIDER
+    ======================================================== */
+
+    function updateSortSlider(
+        button
+    ) {
+        if (
+            !button ||
+            !sortSlider
+        ) {
+            return;
+        }
+
+        const container =
+            sortChips.getBoundingClientRect();
+
+        const rect =
+            button.getBoundingClientRect();
+
+        sortSlider.style.width =
+            `${rect.width}px`;
+
+        sortSlider.style.transform =
+            `translateX(${
+                rect.left -
+                container.left -
+                .3
+            }px)`;
+    }
+
+    /* ========================================================
+       VIEW SLIDER
+    ======================================================== */
+
+    function updateViewSlider(
+        button
+    ) {
+        if (
+            !button ||
+            !viewSlider
+        ) {
+            return;
+        }
+
+        const container =
+            button.parentElement
+                .getBoundingClientRect();
+
+        const rect =
+            button.getBoundingClientRect();
+
+        viewSlider.style.width =
+            `${rect.width}px`;
+
+        viewSlider.style.height =
+            `${rect.height}px`;
+
+        viewSlider.style.transform =
+            `translate3d(${
+                rect.left -
+                container.left
+            }px, ${
+                rect.top -
+                container.top
+            }px, 0)`;
+    }
+
+    function updateActiveSliders() {
+        const activeSort =
+            $(".sort-chip.active");
+
+        const activeView =
+            $(".view-button.active");
+
+        updateSortSlider(
+            activeSort
+        );
+
+        updateViewSlider(
+            activeView
+        );
     }
 
     /* ========================================================
@@ -4145,6 +4554,12 @@
                 "aria-expanded",
                 String(open)
             );
+
+            if (open) {
+                requestAnimationFrame(
+                    updateActiveSliders
+                );
+            }
         }
     );
 
@@ -4160,6 +4575,9 @@
                 return;
             }
 
+            const previous =
+                state.sort;
+
             state.sort =
                 button.dataset.sort;
 
@@ -4170,6 +4588,11 @@
                         chip === button
                     );
                 });
+
+            requestAnimationFrame(
+                updateSortSlider
+                    .bind(null, button)
+            );
 
             sortChips.classList.remove(
                 "open"
@@ -4184,7 +4607,12 @@
                 "false"
             );
 
-            render(true);
+            if (
+                previous !==
+                state.sort
+            ) {
+                render(true);
+            }
         }
     );
 
@@ -4247,6 +4675,10 @@
                                 item === button
                             );
                         });
+
+                    updateViewSlider(
+                        button
+                    );
 
                     localStorage.setItem(
                         "typace-view",
@@ -4417,6 +4849,9 @@
         state.previewFont =
             font;
 
+        state.previewUrl =
+            getFontUrl(font);
+
         previewTitle.textContent =
             font.name;
 
@@ -4448,6 +4883,10 @@
         fontNameInput.value =
             font.name;
 
+        applyPreviewFont();
+
+        updateResources();
+
         openOverlay(
             previewOverlay
         );
@@ -4458,9 +4897,15 @@
         state.previewFace =
             face;
 
-        applyPreviewFont();
+        if (
+            state.previewFont === font
+        ) {
+            if (face) {
+                applyPreviewFont();
+            }
 
-        updateResources();
+            updateResources();
+        }
     }
 
     function applyPreviewFont() {
@@ -4504,12 +4949,6 @@
     function resetPreviewControls() {
         sizeSlider.value = "52";
 
-        lineHeightSlider.value =
-            "1.3";
-
-        letterSpacingSlider.value =
-            "-.03";
-
         $$(".weight-button")
             .forEach(button => {
                 button.classList.toggle(
@@ -4521,23 +4960,11 @@
 
         sizeValue.textContent =
             "52px";
-
-        lineHeightValue.textContent =
-            "1.30";
-
-        letterSpacingValue.textContent =
-            "-.03em";
     }
 
     function updatePreviewStyles() {
         previewDisplay.style.fontSize =
             `${sizeSlider.value}px`;
-
-        previewDisplay.style.lineHeight =
-            lineHeightSlider.value;
-
-        previewDisplay.style.letterSpacing =
-            `${letterSpacingSlider.value}em`;
     }
 
     /* ========================================================
@@ -4575,33 +5002,6 @@
         () => {
             sizeValue.textContent =
                 `${sizeSlider.value}px`;
-
-            updatePreviewStyles();
-        }
-    );
-
-    lineHeightSlider.addEventListener(
-        "input",
-        () => {
-            lineHeightValue.textContent =
-                Number(
-                    lineHeightSlider.value
-                ).toFixed(2);
-
-            updatePreviewStyles();
-        }
-    );
-
-    letterSpacingSlider.addEventListener(
-        "input",
-        () => {
-            const value =
-                Number(
-                    letterSpacingSlider.value
-                );
-
-            letterSpacingValue.textContent =
-                `${value.toFixed(2)}em`;
 
             updatePreviewStyles();
         }
@@ -5006,6 +5406,10 @@
 
             render(true);
 
+            requestAnimationFrame(
+                updateActiveSliders
+            );
+
         } catch (error) {
             console.error(
                 "Typace font API error:",
@@ -5039,8 +5443,28 @@
     }
 
     /* ========================================================
+       RESIZE
+    ======================================================== */
+
+    window.addEventListener(
+        "resize",
+        () => {
+            requestAnimationFrame(
+                updateActiveSliders
+            );
+        },
+        {
+            passive: true
+        }
+    );
+
+    /* ========================================================
        START
     ======================================================== */
+
+    requestAnimationFrame(
+        updateActiveSliders
+    );
 
     loadFonts();
 
