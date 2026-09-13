@@ -108,7 +108,6 @@
         rel="stylesheet"
     >
 
-<<<<<<< HEAD
     <!-- Google Tag Manager -->
     <script>
     (function(w,d,s,l,i){
@@ -2526,12 +2525,6 @@
             }
         }
     </style>
-=======
-    <link
-        rel="stylesheet"
-        href="/style.css"
-    >
->>>>>>> 1aa26a4 (Specimens personally used, fr!)
 </head>
 
 <body>
@@ -2833,7 +2826,9 @@
                 Back
             </button>
 
-            <div class="preview-title">
+            <div
+                class="preview-title"
+            >
                 About Typace
             </div>
 
@@ -3057,6 +3052,93 @@
 
                 </label>
 
+                <div class="control">
+
+                    <span class="control-label">
+                        Weight
+                    </span>
+
+                    <div
+                        class="weight-options"
+                        id="weightOptions"
+                    >
+
+                        <button
+                            class="weight-button"
+                            data-weight="100"
+                            type="button"
+                        >
+                            100
+                        </button>
+
+                        <button
+                            class="weight-button"
+                            data-weight="200"
+                            type="button"
+                        >
+                            200
+                        </button>
+
+                        <button
+                            class="weight-button"
+                            data-weight="300"
+                            type="button"
+                        >
+                            300
+                        </button>
+
+                        <button
+                            class="weight-button active"
+                            data-weight="400"
+                            type="button"
+                        >
+                            400
+                        </button>
+
+                        <button
+                            class="weight-button"
+                            data-weight="500"
+                            type="button"
+                        >
+                            500
+                        </button>
+
+                        <button
+                            class="weight-button"
+                            data-weight="600"
+                            type="button"
+                        >
+                            600
+                        </button>
+
+                        <button
+                            class="weight-button"
+                            data-weight="700"
+                            type="button"
+                        >
+                            700
+                        </button>
+
+                        <button
+                            class="weight-button"
+                            data-weight="800"
+                            type="button"
+                        >
+                            800
+                        </button>
+
+                        <button
+                            class="weight-button"
+                            data-weight="900"
+                            type="button"
+                        >
+                            900
+                        </button>
+
+                    </div>
+
+                </div>
+
             </div>
 
         </section>
@@ -3260,6 +3342,9 @@
 
     const sizeSlider = $("#sizeSlider");
     const sizeValue = $("#sizeValue");
+
+    const weightOptions =
+        $("#weightOptions");
 
     const previewDownload =
         $("#previewDownload");
@@ -3962,11 +4047,7 @@
                                 </span>
                             `
                             : `
-<<<<<<< HEAD
                             `
-=======
-                              `
->>>>>>> 1aa26a4 (Specimens personally used, fr!)
                     }
 
                 </div>
@@ -4871,14 +4952,37 @@
                 family
             );
 
+        previewDisplay.style.fontWeight =
+            getCurrentWeight();
+
         previewDisplay.style.fontStyle =
             font.style || "normal";
 
         updatePreviewStyles();
     }
 
+    function getCurrentWeight() {
+        const active =
+            $(".weight-button.active");
+
+        return (
+            active?.dataset.weight ||
+            state.previewFont?.weight ||
+            "400"
+        );
+    }
+
     function resetPreviewControls() {
         sizeSlider.value = "52";
+
+        $$(".weight-button")
+            .forEach(button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.weight ===
+                        "400"
+                );
+            });
 
         sizeValue.textContent =
             "52px";
@@ -4926,6 +5030,32 @@
                 `${sizeSlider.value}px`;
 
             updatePreviewStyles();
+        }
+    );
+
+    weightOptions.addEventListener(
+        "click",
+        event => {
+            const button =
+                event.target.closest(
+                    ".weight-button"
+                );
+
+            if (!button) {
+                return;
+            }
+
+            $$(".weight-button")
+                .forEach(item => {
+                    item.classList.toggle(
+                        "active",
+                        item === button
+                    );
+                });
+
+            applyPreviewFont();
+
+            updateResources();
         }
     );
 
@@ -5018,6 +5148,9 @@
             font.format ||
             "woff2";
 
+        const weight =
+            getCurrentWeight();
+
         const style =
             font.style ||
             "normal";
@@ -5026,12 +5159,14 @@
 `@font-face {
     font-family: "${customName}";
     src: url("${url}") format("${format}");
+    font-weight: ${weight};
     font-style: ${style};
     font-display: swap;
 }
 
 .your-element {
     font-family: "${customName}", sans-serif;
+    font-weight: ${weight};
 }`;
 
         void previewDisplay;
