@@ -21,7 +21,7 @@ const FONT_TYPES = {
 };
 
 const NEW_FONT_WINDOW_MS =
-    50 * 60 * 60 * 1000;
+    10 * 24 * 60 * 60 * 1000;
 
 function sendJSON(res, status, data) {
     res.setHeader(
@@ -117,12 +117,18 @@ export default async function handler(req, res) {
                                 filePath
                             );
 
+                        const createdAt =
+                            stats.birthtimeMs;
+
                         const modifiedAt =
                             stats.mtimeMs;
 
                         const isNew =
+                            Number.isFinite(
+                                createdAt
+                            ) &&
                             now -
-                                modifiedAt <=
+                                createdAt <=
                             NEW_FONT_WINDOW_MS;
 
                         const font = {
@@ -132,7 +138,9 @@ export default async function handler(req, res) {
                             format: metadata.format,
 
                             createdAt:
-                                stats.birthtime.toISOString(),
+                                new Date(
+                                    createdAt
+                                ).toISOString(),
 
                             updatedAt:
                                 new Date(
@@ -142,10 +150,8 @@ export default async function handler(req, res) {
 
                         /*
                          * Only include isNew when the
-                         * font is actually new.
-                         *
-                         * Old fonts have no "isNew"
-                         * property at all.
+                         * font was created within the
+                         * last 10 days.
                          */
                         if (isNew) {
                             font.isNew = true;
