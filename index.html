@@ -2843,10 +2843,10 @@
             <div
                 class="preview-display specimen-light"
                 style="font-family:var(--ui-font)"
-                contenteditable="true"
+                contenteditable="false"
                 role="textbox"
                 aria-multiline="true"
-                aria-label="Editable Typace preview"
+                aria-label="Typace preview"
                 spellcheck="false"
             >
                 Typace
@@ -2856,6 +2856,14 @@
                 A lightweight font library for
                 discovering, previewing, and using
                 typefaces on the web.
+            </p>
+
+            <p
+                class="about-copy"
+                id="commitStatus"
+                style="font-size:.68rem;margin-top:.65rem"
+            >
+                Checking latest update…
             </p>
 
             <div class="social-links">
@@ -3051,93 +3059,6 @@
                     </span>
 
                 </label>
-
-                <div class="control">
-
-                    <span class="control-label">
-                        Weight
-                    </span>
-
-                    <div
-                        class="weight-options"
-                        id="weightOptions"
-                    >
-
-                        <button
-                            class="weight-button"
-                            data-weight="100"
-                            type="button"
-                        >
-                            100
-                        </button>
-
-                        <button
-                            class="weight-button"
-                            data-weight="200"
-                            type="button"
-                        >
-                            200
-                        </button>
-
-                        <button
-                            class="weight-button"
-                            data-weight="300"
-                            type="button"
-                        >
-                            300
-                        </button>
-
-                        <button
-                            class="weight-button active"
-                            data-weight="400"
-                            type="button"
-                        >
-                            400
-                        </button>
-
-                        <button
-                            class="weight-button"
-                            data-weight="500"
-                            type="button"
-                        >
-                            500
-                        </button>
-
-                        <button
-                            class="weight-button"
-                            data-weight="600"
-                            type="button"
-                        >
-                            600
-                        </button>
-
-                        <button
-                            class="weight-button"
-                            data-weight="700"
-                            type="button"
-                        >
-                            700
-                        </button>
-
-                        <button
-                            class="weight-button"
-                            data-weight="800"
-                            type="button"
-                        >
-                            800
-                        </button>
-
-                        <button
-                            class="weight-button"
-                            data-weight="900"
-                            type="button"
-                        >
-                            900
-                        </button>
-
-                    </div>
-
-                </div>
 
             </div>
 
@@ -3342,9 +3263,6 @@
 
     const sizeSlider = $("#sizeSlider");
     const sizeValue = $("#sizeValue");
-
-    const weightOptions =
-        $("#weightOptions");
 
     const previewDownload =
         $("#previewDownload");
@@ -4953,7 +4871,7 @@
             );
 
         previewDisplay.style.fontWeight =
-            getCurrentWeight();
+            font.weight || "400";
 
         previewDisplay.style.fontStyle =
             font.style || "normal";
@@ -4961,28 +4879,8 @@
         updatePreviewStyles();
     }
 
-    function getCurrentWeight() {
-        const active =
-            $(".weight-button.active");
-
-        return (
-            active?.dataset.weight ||
-            state.previewFont?.weight ||
-            "400"
-        );
-    }
-
     function resetPreviewControls() {
         sizeSlider.value = "52";
-
-        $$(".weight-button")
-            .forEach(button => {
-                button.classList.toggle(
-                    "active",
-                    button.dataset.weight ===
-                        "400"
-                );
-            });
 
         sizeValue.textContent =
             "52px";
@@ -5030,32 +4928,6 @@
                 `${sizeSlider.value}px`;
 
             updatePreviewStyles();
-        }
-    );
-
-    weightOptions.addEventListener(
-        "click",
-        event => {
-            const button =
-                event.target.closest(
-                    ".weight-button"
-                );
-
-            if (!button) {
-                return;
-            }
-
-            $$(".weight-button")
-                .forEach(item => {
-                    item.classList.toggle(
-                        "active",
-                        item === button
-                    );
-                });
-
-            applyPreviewFont();
-
-            updateResources();
         }
     );
 
@@ -5149,7 +5021,7 @@
             "woff2";
 
         const weight =
-            getCurrentWeight();
+            font.weight || "400";
 
         const style =
             font.style ||
@@ -5493,6 +5365,144 @@
     );
 
     loadFonts();
+
+    /* ========================================================
+       LATEST COMMIT
+    ======================================================== */
+
+    const commitStatus =
+        $("#commitStatus");
+
+    function relativeTime(date) {
+        const timestamp =
+            new Date(date).getTime();
+
+        if (!Number.isFinite(timestamp)) {
+            return "Recently updated";
+        }
+
+        const seconds =
+            Math.max(
+                0,
+                Math.floor(
+                    (Date.now() - timestamp) /
+                    1000
+                )
+            );
+
+        if (seconds < 60) {
+            return "Updated just now";
+        }
+
+        const minutes =
+            Math.floor(seconds / 60);
+
+        if (minutes < 60) {
+            return `Updated ${minutes} ${
+                minutes === 1
+                    ? "minute"
+                    : "minutes"
+            } ago`;
+        }
+
+        const hours =
+            Math.floor(minutes / 60);
+
+        if (hours < 24) {
+            return `Updated ${hours} ${
+                hours === 1
+                    ? "hour"
+                    : "hours"
+            } ago`;
+        }
+
+        const days =
+            Math.floor(hours / 24);
+
+        if (days < 30) {
+            return `Updated ${days} ${
+                days === 1
+                    ? "day"
+                    : "days"
+            } ago`;
+        }
+
+        const months =
+            Math.floor(days / 30);
+
+        if (months < 12) {
+            return `Updated ${months} ${
+                months === 1
+                    ? "month"
+                    : "months"
+            } ago`;
+        }
+
+        const years =
+            Math.floor(days / 365);
+
+        return `Updated ${years} ${
+            years === 1
+                ? "year"
+                : "years"
+        } ago`;
+    }
+
+    async function loadLatestCommit() {
+        if (!commitStatus) {
+            return;
+        }
+
+        try {
+            const response =
+                await fetch(
+                    "/api/commit",
+                    {
+                        headers: {
+                            Accept:
+                                "application/json"
+                        },
+                        cache: "no-store"
+                    }
+                );
+
+            if (!response.ok) {
+                throw new Error(
+                    `HTTP ${response.status}`
+                );
+            }
+
+            const commit =
+                await response.json();
+
+            if (!commit.date) {
+                throw new Error(
+                    "Commit date missing"
+                );
+            }
+
+            commitStatus.textContent =
+                relativeTime(
+                    commit.date
+                );
+
+        } catch (error) {
+            console.warn(
+                "Typace commit API error:",
+                error
+            );
+
+            commitStatus.textContent =
+                "Recently updated";
+        }
+    }
+
+    loadLatestCommit();
+
+    setInterval(
+        loadLatestCommit,
+        60 * 1000
+    );
 
 })();
 </script>
