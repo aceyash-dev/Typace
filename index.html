@@ -2281,6 +2281,57 @@
            ABOUT
         ===================================================== */
 
+        .commit-info {
+            width: min(100%, 100%);
+            margin-top: .7rem;
+            text-align: center;
+        }
+
+        .commit-name {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            overscroll-behavior-x: contain;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+
+            padding: .15rem .35rem;
+
+            color: var(--text);
+            font-size: .72rem;
+            font-weight: 600;
+            line-height: 1.4;
+
+            text-align: center;
+            mask-image: linear-gradient(
+                to right,
+                transparent,
+                #000 7%,
+                #000 93%,
+                transparent
+            );
+            -webkit-mask-image: linear-gradient(
+                to right,
+                transparent,
+                #000 7%,
+                #000 93%,
+                transparent
+            );
+        }
+
+        .commit-name::-webkit-scrollbar {
+            display: none;
+        }
+
+        .commit-time {
+            margin-top: .18rem;
+            color: var(--muted);
+            font-size: .62rem;
+            line-height: 1.3;
+            text-align: center;
+        }
+
         .about-copy {
             color: var(--muted);
 
@@ -2858,13 +2909,25 @@
                 typefaces on the web.
             </p>
 
-            <p
-                class="about-copy"
-                id="commitStatus"
-                style="font-size:.68rem;margin-top:.65rem"
+            <div
+                class="commit-info"
+                aria-live="polite"
             >
-                Checking latest commit…
-            </p>
+                <div
+                    class="commit-name"
+                    id="commitStatus"
+                    title="Latest commit"
+                >
+                    Checking latest commit…
+                </div>
+
+                <div
+                    class="commit-time"
+                    id="commitTime"
+                >
+                    Checking commit time…
+                </div>
+            </div>
 
             <div class="social-links">
 
@@ -4128,30 +4191,26 @@
         }
 
         if (state.sort === "new") {
-            result.sort(
-                (a, b) => {
-                    const aTime =
-                        getFontCreatedTimestamp(a);
-
-                    const bTime =
-                        getFontCreatedTimestamp(b);
-
-                    if (
-                        aTime !== bTime
-                    ) {
-                        return bTime - aTime;
+            result = result
+                .map((font, index) => ({
+                    font,
+                    index,
+                    isNew: isFontNew(font),
+                    timestamp:
+                        getFontCreatedTimestamp(font)
+                }))
+                .sort((a, b) => {
+                    if (a.isNew !== b.isNew) {
+                        return a.isNew ? -1 : 1;
                     }
 
-                    return a.name.localeCompare(
-                        b.name,
-                        undefined,
-                        {
-                            sensitivity:
-                                "base"
-                        }
-                    );
-                }
-            );
+                    if (a.timestamp !== b.timestamp) {
+                        return b.timestamp - a.timestamp;
+                    }
+
+                    return a.index - b.index;
+                })
+                .map(item => item.font);
         }
 
         if (state.sort === "random") {
@@ -5333,6 +5392,9 @@
     const commitStatus =
         $("#commitStatus");
 
+    const commitTime =
+        $("#commitTime");
+
     function relativeTime(date) {
         const timestamp =
             new Date(date).getTime();
@@ -5437,7 +5499,8 @@
 
             if (
                 !commit.shortSha ||
-                !commit.message
+                !commit.message ||
+                !commit.date
             ) {
                 throw new Error(
                     "Commit metadata missing"
@@ -5449,6 +5512,11 @@
                 " · " +
                 commit.message;
 
+            if (commitTime) {
+                commitTime.textContent =
+                    relativeTime(commit.date);
+            }
+
         } catch (error) {
             console.warn(
                 "Typace commit API error:",
@@ -5456,7 +5524,12 @@
             );
 
             commitStatus.textContent =
-                "Recently updated";
+                "Latest commit unavailable";
+
+            if (commitTime) {
+                commitTime.textContent =
+                    "Commit time unavailable";
+            }
         }
     }
 
