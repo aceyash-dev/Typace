@@ -3661,9 +3661,25 @@
                 font?.createdAt || ""
             );
 
-        return Number.isFinite(created)
-            ? created
-            : 0;
+        const updated =
+            Date.parse(
+                font?.updatedAt || ""
+            );
+
+        const createdTime =
+            Number.isFinite(created)
+                ? created
+                : 0;
+
+        const updatedTime =
+            Number.isFinite(updated)
+                ? updated
+                : 0;
+
+        return Math.max(
+            createdTime,
+            updatedTime
+        );
     }
 
     function isFontNew(font) {
