@@ -2863,7 +2863,7 @@
                 id="commitStatus"
                 style="font-size:.68rem;margin-top:.65rem"
             >
-                Checking latest update…
+                Checking latest commit…
             </p>
 
             <div class="social-links">
@@ -2885,16 +2885,16 @@
 
                 <a
                     class="social-link"
-                    href="https://instagram.com/tab.gl"
+                    href="https://bsky.app/profile/ace-base.cc"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
                     <span class="social-name">
-                        Instagram
+                        Bluesky
                     </span>
 
                     <span class="social-handle">
-                        @tab.gl ↗
+                        @ace-base.cc ↗
                     </span>
                 </a>
 
@@ -3592,42 +3592,20 @@
        NEW FONT
     ======================================================== */
 
-    function getFontTimestamp(font) {
-        const updated =
-            Date.parse(
-                font?.updatedAt || ""
-            );
-
-        if (
-            Number.isFinite(updated)
-        ) {
-            return updated;
-        }
-
+    function getFontCreatedTimestamp(font) {
         const created =
             Date.parse(
                 font?.createdAt || ""
             );
 
-        if (
-            Number.isFinite(created)
-        ) {
-            return created;
-        }
-
-        return 0;
+        return Number.isFinite(created)
+            ? created
+            : 0;
     }
 
     function isFontNew(font) {
-        if (
-            typeof font?.isNew ===
-            "boolean"
-        ) {
-            return font.isNew;
-        }
-
         const timestamp =
-            getFontTimestamp(font);
+            getFontCreatedTimestamp(font);
 
         if (!timestamp) {
             return false;
@@ -4153,33 +4131,15 @@
             result.sort(
                 (a, b) => {
                     const aTime =
-                        getFontTimestamp(a);
+                        getFontCreatedTimestamp(a);
 
                     const bTime =
-                        getFontTimestamp(b);
+                        getFontCreatedTimestamp(b);
 
                     if (
-                        aTime ||
-                        bTime
+                        aTime !== bTime
                     ) {
-                        return (
-                            bTime -
-                            aTime
-                        );
-                    }
-
-                    const aNew =
-                        isFontNew(a);
-
-                    const bNew =
-                        isFontNew(b);
-
-                    if (
-                        aNew !== bNew
-                    ) {
-                        return aNew
-                            ? -1
-                            : 1;
+                        return bTime - aTime;
                     }
 
                     return a.name.localeCompare(
@@ -5475,16 +5435,19 @@
             const commit =
                 await response.json();
 
-            if (!commit.date) {
+            if (
+                !commit.shortSha ||
+                !commit.message
+            ) {
                 throw new Error(
-                    "Commit date missing"
+                    "Commit metadata missing"
                 );
             }
 
             commitStatus.textContent =
-                relativeTime(
-                    commit.date
-                );
+                commit.shortSha +
+                " · " +
+                commit.message;
 
         } catch (error) {
             console.warn(
