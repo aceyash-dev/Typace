@@ -1,6 +1,8 @@
 export default async function handler(req, res) {
     try {
-        const token = process.env.GITHUB_TOKEN;
+        const token =
+            process.env.GITHUB_PAT ||
+            process.env.GITHUB_TOKEN;
 
         if (!token) {
             return res.status(500).json({
