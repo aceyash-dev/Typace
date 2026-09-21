@@ -10,6 +10,20 @@ export const FONT_TYPES = {
 
 const NEW_FONT_WINDOW_MS = 10 * 24 * 60 * 60 * 1000;
 const GITHUB_REPOSITORY = "aceyash-dev/Typace";
+
+function inferCategory(name) {
+    const value = String(name).toLowerCase();
+
+    if (/(^|[^a-z])(mono|monospace|typewriter|terminal|code)([^a-z]|$)/.test(value)) {
+        return "monospace";
+    }
+
+    if (/(^|[^a-z])(script|hand|handwritten|handwriting|brush|calligraphy|signature|marker|cursive)([^a-z]|$)/.test(value)) {
+        return "handwritten";
+    }
+
+    return "display";
+}
 const historyCache = new Map();
 
 function githubHeaders() {
@@ -63,6 +77,7 @@ async function getFontMetadata(entry, fontsDirectory) {
         name, file,
         type: metadata.type,
         format: metadata.format,
+        category: inferCategory(name),
         url: `/fonts/${encodeURIComponent(file)}`,
         createdAt: createdTime ? new Date(createdTime).toISOString() : null,
         updatedAt: updatedTime ? new Date(updatedTime).toISOString() : null,
