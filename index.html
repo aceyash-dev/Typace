@@ -1872,12 +1872,14 @@
             --preview-specimen-bg: #fdfdf1;
             --preview-specimen-text: #24211e;
             --preview-specimen-border: #ded8cf;
+            text-shadow: none;
         }
 
         .preview-display.specimen-dark {
             --preview-specimen-bg: #11100f;
             --preview-specimen-text: #f7f2ea;
             --preview-specimen-border: #3c3732;
+            text-shadow: none;
         }
 
         .preview-display.specimen-image {
@@ -1886,16 +1888,8 @@
             background-position: center;
             background-size: cover;
             background-repeat: no-repeat;
-            isolation: isolate;
             --preview-specimen-border: rgba(255,255,255,.22);
-        }
-        .preview-display.specimen-image::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            z-index: -1;
-            background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.18));
-            pointer-events: none;
+            text-shadow: 0 2px 14px rgba(0,0,0,.18);
         }
 
         .preview-edit-hint {
@@ -4836,13 +4830,8 @@
             font.name;
 
         if (previewExtension) {
-            previewExtension.innerHTML =
-                '<i class="hgi-stroke hgi-file" aria-hidden="true"></i>' +
-                '<span>' +
-                escapeHTML(
-                    font.extension || "font"
-                ) +
-                '</span>';
+            previewExtension.textContent =
+                font.extension || "font";
         }
 
         previewDisplay.textContent =
@@ -4991,23 +4980,25 @@
 
     function imageTextColor(r, g, b) {
         const [h, s, l] = rgbToHsl(r, g, b);
-        const textLightness = l < .5
-            ? Math.min(.94, Math.max(.68, l + .42))
-            : Math.max(.08, Math.min(.32, l - .42));
-        const textSaturation = Math.min(.92, Math.max(.38, s + .08));
-        const borderLightness = l < .5
-            ? Math.min(.98, l + .32)
-            : Math.max(.12, l - .28);
+        const dark = l < .5;
+        const textLightness = dark
+            ? Math.min(.96, Math.max(.72, l + .42))
+            : Math.max(.08, Math.min(.3, l - .42));
+        const textSaturation = Math.min(.95, Math.max(.45, s + .12));
+        const borderLightness = dark
+            ? Math.min(.98, l + .30)
+            : Math.max(.12, l - .25);
+
         return {
             text: hslToCss(h, textSaturation, textLightness),
-            border: hslToCss(h, Math.min(.75, textSaturation), borderLightness)
+            border: hslToCss(h, Math.min(.8, textSaturation), borderLightness),
+            overlay: dark ? "rgba(0,0,0,.12)" : "rgba(255,255,255,.14)"
         };
     }
 
     async function loadImageBackground() {
         const requestId = ++imageRequestId;
-        const seed = "typace-" + Date.now() + "-" + Math.random().toString(36).slice(2);
-        const url = "https://picsum.photos/seed/" + encodeURIComponent(seed) + "/1600/1000";
+        const url = "https://picsum.photos/1600/1000?random=" + Date.now();
         const image = new Image();
         image.crossOrigin = "anonymous";
 
@@ -5019,30 +5010,48 @@
 
         if (requestId !== imageRequestId) return;
 
-        let r = 36, g = 33, b = 30;
+        let r = 42;
+        let g = 38;
+        let b = 34;
+
         try {
             const canvas = document.createElement("canvas");
-            canvas.width = 32;
-            canvas.height = 20;
+            canvas.width = 40;
+            canvas.height = 25;
             const context = canvas.getContext("2d", { willReadFrequently: true });
             context.drawImage(image, 0, 0, canvas.width, canvas.height);
             const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-            let totalR = 0, totalG = 0, totalB = 0, count = 0;
+            let totalR = 0;
+            let totalG = 0;
+            let totalB = 0;
+            let weightTotal = 0;
+
             for (let i = 0; i < pixels.length; i += 16) {
-                totalR += pixels[i];
-                totalG += pixels[i + 1];
-                totalB += pixels[i + 2];
-                count++;
+                const pr = pixels[i];
+                const pg = pixels[i + 1];
+                const pb = pixels[i + 2];
+                const [, saturation] = rgbToHsl(pr, pg, pb);
+                const weight = .5 + saturation;
+                totalR += pr * weight;
+                totalG += pg * weight;
+                totalB += pb * weight;
+                weightTotal += weight;
             }
-            r = totalR / count;
-            g = totalG / count;
-            b = totalB / count;
-        } catch {}
+
+            if (weightTotal) {
+                r = totalR / weightTotal;
+                g = totalG / weightTotal;
+                b = totalB / weightTotal;
+            }
+        } catch {
+            // Keep a readable fallback if the remote image disallows canvas sampling.
+        }
 
         const colors = imageTextColor(r, g, b);
         previewDisplay.classList.remove("specimen-light", "specimen-dark");
         previewDisplay.classList.add("specimen-image");
-        previewDisplay.style.backgroundImage = "url(\"" + url + "\")";
+        previewDisplay.style.backgroundImage =
+            "linear-gradient(" + colors.overlay + ", " + colors.overlay + "), url(\"" + url + "\")";
         previewDisplay.style.setProperty("--preview-specimen-text", colors.text);
         previewDisplay.style.setProperty("--preview-specimen-border", colors.border);
     }
