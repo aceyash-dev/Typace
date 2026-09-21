@@ -11,4 +11,4 @@ Disallow: /.github/
 Disallow: /tests/
 Disallow: /*.map$
 
-Sitemap: https://fonts.ace-base.cc/sitemap.xml
+Sitemap: https://typace.ace-base.cc/sitemap.xml
