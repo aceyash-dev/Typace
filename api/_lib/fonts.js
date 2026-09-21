@@ -9,6 +9,33 @@ export const FONT_TYPES = {
 };
 
 const NEW_FONT_WINDOW_MS = 10 * 24 * 60 * 60 * 1000;
+
+function inferFontMetadata(name) {
+    const value = String(name).toLowerCase();
+    let weight = "400";
+    const numeric = value.match(/(?:^|[^0-9])(100|200|300|400|500|600|700|800|900)(?:[^0-9]|$)/);
+    if (numeric) weight = numeric[1];
+    else {
+        const weights = [
+            ["thin","100"],["extralight","200"],["extra light","200"],["light","300"],
+            ["regular","400"],["normal","400"],["medium","500"],["semibold","600"],
+            ["semi bold","600"],["bold","700"],["extrabold","800"],["extra bold","800"],["black","900"]
+        ];
+        for (const [label, valueWeight] of weights) {
+            if (value.includes(label)) { weight = valueWeight; break; }
+        }
+    }
+
+    const style = value.includes("italic") || value.includes("oblique") ? "italic" : "normal";
+    let category = null;
+    if (/(^|[^a-z])(serif|slab)([^a-z]|$)/.test(value)) category = "serif";
+    else if (/(^|[^a-z])(sans|grotesk|grotesque)([^a-z]|$)/.test(value)) category = "sans-serif";
+    else if (/(^|[^a-z])(mono|monospace|code)([^a-z]|$)/.test(value)) category = "monospace";
+    else if (/(^|[^a-z])(script|hand|handwriting|brush|calligraphy)([^a-z]|$)/.test(value)) category = "script";
+    else if (/(^|[^a-z])(display|poster|headline)([^a-z]|$)/.test(value)) category = "display";
+
+    return { weight, style, category };
+}
 const GITHUB_REPOSITORY = "aceyash-dev/Typace";
 const historyCache = new Map();
 
@@ -63,6 +90,7 @@ async function getFontMetadata(entry, fontsDirectory) {
         name, file,
         type: metadata.type,
         format: metadata.format,
+        ...inferFontMetadata(name),
         url: `/fonts/${encodeURIComponent(file)}`,
         createdAt: createdTime ? new Date(createdTime).toISOString() : null,
         updatedAt: updatedTime ? new Date(updatedTime).toISOString() : null,
