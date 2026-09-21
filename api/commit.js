@@ -1,5 +1,20 @@
 export default async function handler(req, res) {
     try {
+        const deploymentSha =
+            process.env.VERCEL_GIT_COMMIT_SHA;
+
+        const deploymentMessage =
+            process.env.VERCEL_GIT_COMMIT_MESSAGE;
+
+        if (deploymentSha && deploymentMessage) {
+            return res.status(200).json({
+                sha: deploymentSha,
+                shortSha: deploymentSha.slice(0, 7),
+                message: deploymentMessage.split("\n")[0],
+                date: null
+            });
+        }
+
         const response = await fetch(
             "https://api.github.com/repos/aceyash-dev/Typace/commits?per_page=1",
             {
