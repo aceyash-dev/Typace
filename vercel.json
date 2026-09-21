@@ -1,46 +1,31 @@
 {
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    }
+  ],
   "headers": [
     {
       "source": "/api/fonts",
       "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=60, s-maxage=300, stale-while-revalidate=3600"
-        }
+        {"key":"Access-Control-Allow-Origin","value":"*"},
+        {"key":"Access-Control-Allow-Methods","value":"GET, OPTIONS"},
+        {"key":"Access-Control-Allow-Headers","value":"Content-Type"},
+        {"key":"Cache-Control","value":"public, max-age=60, s-maxage=300, stale-while-revalidate=3600"}
       ]
     },
     {
       "source": "/fonts/(.*)",
       "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=60, s-maxage=300, stale-while-revalidate=3600"
-        }
+        {"key":"Access-Control-Allow-Origin","value":"*"},
+        {"key":"Cache-Control","value":"public, max-age=60, s-maxage=300, stale-while-revalidate=3600"}
       ]
     },
     {
       "source": "/(.*\\.(?:js|css|png|jpg|jpeg|webp|avif|svg|ico))",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"
-        }
+        {"key":"Cache-Control","value":"public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"}
       ]
     }
   ]
