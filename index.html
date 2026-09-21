@@ -92,6 +92,19 @@
         content="Typace Font Library"
     >
 
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Typace",
+        "alternateName": [
+            "Typace Font Library",
+            "typace.ace-base.cc"
+        ],
+        "url": "https://typace.ace-base.cc/"
+    }
+    </script>
+
     <link
         rel="preconnect"
         href="https://fonts.googleapis.com"
@@ -2896,9 +2909,8 @@
     aria-label="Back to top"
     title="Back to top"
 >
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 19V5"/>
-        <path d="m6 11 6-6 6 6"/>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m6 14 6-6 6 6"/>
     </svg>
 </button>
 
@@ -4151,10 +4163,30 @@
                         return true;
                     }
 
+                    const categoryAliases = {
+                        sans: "sans-serif",
+                        serif: "serif",
+                        mono: "monospace",
+                        monospace: "monospace",
+                        hand: "handwritten",
+                        handwritten: "handwritten",
+                        display: "display"
+                    };
+
+                    const categoryQuery =
+                        categoryAliases[query];
+
+                    if (categoryQuery) {
+                        return (
+                            String(font.category || "")
+                                .toLowerCase() ===
+                            categoryQuery
+                        );
+                    }
+
                     const haystack =
                         [
                             font.name,
-                            font.category,
                             font.style,
                             font.weight,
                             font.extension,
