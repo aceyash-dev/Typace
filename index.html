@@ -3048,7 +3048,7 @@
                     stroke="currentColor"
                     stroke-width="2"
                 >
-                    <path d="M15 18l-6-6 6-6"/>
+                    <path d="m15 5-7 7 7 7"/>
                 </svg>
 
                 Back
@@ -3658,6 +3658,10 @@
     }
 
     function isFontNew(font) {
+        if (font?.isNew === true) {
+            return true;
+        }
+
         const timestamp =
             getFontCreatedTimestamp(font);
 
@@ -4032,10 +4036,18 @@
                         aria-hidden="true"
                     ></i>
                     Preview
-                    <i
-                        class="hgi-stroke hgi-arrow-up-right-01"
+                    <svg
+                        class="ios-chevron"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
                         aria-hidden="true"
-                    ></i>
+                    >
+                        <path d="m9 5 7 7-7 7"/>
+                    </svg>
                 </span>
 
             </div>
