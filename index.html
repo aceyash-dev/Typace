@@ -5612,8 +5612,7 @@
 
             if (
                 !commit.shortSha ||
-                !commit.message ||
-                !commit.date
+                !commit.message
             ) {
                 throw new Error(
                     "Commit metadata missing"
@@ -5627,7 +5626,9 @@
 
             if (commitTime) {
                 commitTime.textContent =
-                    relativeTime(commit.date);
+                    commit.date
+                        ? relativeTime(commit.date)
+                        : "Current deployment";
             }
 
         } catch (error) {
