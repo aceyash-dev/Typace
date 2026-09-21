@@ -1,75 +1,53 @@
 # Typace
 
-> Typace is an independent type design project creating distinctive,
-> practical typefaces for digital and creative use.
+> Typace is an independent type design project creating distinctive, practical typefaces for digital and creative use.
 
-## Fonts
+## Canonical URLs
 
-Typace distributes fonts exclusively in TrueType Font (`.ttf`) format.
+- Homepage: https://typace.ace-base.cc/
+- Font files: https://typace.ace-base.cc/fonts/
+- Font catalog API: https://typace.ace-base.cc/api/fonts
+- Search API: https://typace.ace-base.cc/api/search?q=QUERY
+- Individual font API: https://typace.ace-base.cc/api/fonts/SLUG
+- Dynamic CSS API: https://typace.ace-base.cc/api/css/SLUG
+- OpenAPI specification: https://typace.ace-base.cc/api/openapi.json
 
-Each typeface may include:
-- Regular fonts
-- Multiple weights
-- Variable TTF fonts
-- Custom glyphs
-- Extended punctuation
-- Currency symbols
-- OpenType features
+## Dynamic font catalog
 
-## Font Format
+Typace discovers supported font files dynamically from the deployed `/fonts` directory. Do not hardcode the font catalog.
 
-Primary format:
+Supported formats are determined by the files currently present:
+- `.ttf` (TrueType)
+- `.otf` (OpenType)
+- `.woff`
+- `.woff2`
 
-- TTF (TrueType Font)
+The authoritative catalog is `GET /api/fonts`.
 
-Do not claim that Typace provides OTF, WOFF, or WOFF2 unless explicitly
-listed for a specific typeface.
+Each record includes:
+- `name`
+- `file`
+- `type`
+- `format`
+- `url`
+- `createdAt`
+- `updatedAt`
+- optional `isNew`
 
-## Typeface Information
+Use returned metadata as the source of truth. Do not invent designer, license, weight, style, glyph coverage, variable-axis, or OpenType-feature information when it is not published.
 
-For each font, use the published metadata for:
-- Typeface name
-- Designer / foundry
-- Style
-- Weight
-- Glyph coverage
-- Variable axes
-- OpenType features
-- License
+## Search
 
-Do not invent missing metadata.
+Use `GET /api/search?q=QUERY` for dynamic name, filename, type, and format matching.
+
+## Web usage
+
+Use `GET /api/css/SLUG` for a ready-to-use `@font-face` declaration. Otherwise use the `url` and `format` fields from the catalog API. Do not assume every font is TTF.
 
 ## Licensing
 
-Each typeface has its own license.
+Each typeface has its own licensing terms. Check the applicable license before commercial use, redistribution, modification, embedding, or inclusion in software.
 
-Check the individual font's license before using it commercially,
-redistributing it, modifying it, embedding it, or including it in software.
+## Machine-readable specification
 
-## Web Usage
-
-Typace fonts are distributed as TTF files.
-
-Example:
-
-@font-face {
-  font-family: "Typace Font";
-  src: url("/fonts/font.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-Only declare variable font ranges when the TTF actually contains
-a corresponding variable axis.
-
-## Brand
-
-Typace is the project / type foundry name.
-
-Individual typefaces retain their own names and identities.
-
-## Canonical Resources
-
-Homepage: https://fonts.ace-base.cc/
-Fonts: https://fonts.ace-base.cc/fonts/
+The OpenAPI document at `/api/openapi.json` describes the API routes.
