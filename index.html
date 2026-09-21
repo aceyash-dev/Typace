@@ -1727,6 +1727,31 @@
             height: 16px;
         }
 
+        .scroll-top {
+            position: fixed;
+            right: max(1rem, 3vw);
+            bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+            z-index: 80;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: var(--shadow-hover);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(12px) scale(.9);
+            transition: opacity .2s ease, visibility .2s ease, transform .28s var(--spring), background .18s ease, color .18s ease, border-color .18s ease;
+        }
+        .scroll-top.visible { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
+        .scroll-top:hover { background: var(--accent); color: #fff; border-color: var(--accent); transform: translateY(-3px) scale(1.04); }
+        .scroll-top:active { transform: scale(.9); }
+        .scroll-top svg { width: 18px; height: 18px; }
+
         /* =====================================================
            PREVIEW HERO
         ===================================================== */
@@ -1874,6 +1899,24 @@
             --preview-specimen-bg: #11100f;
             --preview-specimen-text: #f7f2ea;
             --preview-specimen-border: #3c3732;
+        }
+
+        .preview-display.specimen-image {
+            position: relative;
+            background-color: #24211e;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            isolation: isolate;
+            --preview-specimen-border: rgba(255,255,255,.22);
+        }
+        .preview-display.specimen-image::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.18));
+            pointer-events: none;
         }
 
         .preview-edit-hint {
@@ -2873,6 +2916,19 @@
 
 </div>
 
+<button
+    class="scroll-top"
+    id="scrollTopButton"
+    type="button"
+    aria-label="Back to top"
+    title="Back to top"
+>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 19V5"/>
+        <path d="m6 11 6-6 6 6"/>
+    </svg>
+</button>
+
 
 <!-- =========================================================
      ABOUT OVERLAY
@@ -3042,7 +3098,7 @@
                 ></i>
 
                 <span>
-                    Download
+                    Format
                 </span>
             </button>
             <span
@@ -3108,6 +3164,14 @@
                     type="button"
                 >
                     Dark
+                </button>
+
+                <button
+                    class="background-button"
+                    data-background="image"
+                    type="button"
+                >
+                    Image
                 </button>
 
             </div>
@@ -3345,6 +3409,9 @@
 
     const previewDownload =
         $("#previewDownload");
+
+    const scrollTopButton =
+        $("#scrollTopButton");
 
     const cdnType = $("#cdnType");
     const cdnCode = $("#cdnCode");
@@ -4684,6 +4751,19 @@
     );
 
     /* ========================================================
+       SCROLL TO TOP
+    ======================================================== */
+
+    function updateScrollTop() {
+        if (!scrollTopButton) return;
+        scrollTopButton.classList.toggle("visible", window.scrollY > Math.max(420, window.innerHeight * .75));
+    }
+
+    window.addEventListener("scroll", updateScrollTop, { passive: true });
+    scrollTopButton?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    updateScrollTop();
+
+    /* ========================================================
        OVERLAY HELPERS
     ======================================================== */
 
@@ -4796,13 +4876,7 @@
         previewDisplay.textContent =
             DEFAULT_SPECIMEN;
 
-        previewDisplay.classList.remove(
-            "specimen-dark"
-        );
-
-        previewDisplay.classList.add(
-            "specimen-light"
-        );
+        setPreviewBackground("light");
 
         $$(".background-button")
             .forEach(button => {
@@ -4922,35 +4996,106 @@
         }
     );
 
-    $$(".background-button")
-        .forEach(button => {
-            button.addEventListener(
-                "click",
-                () => {
-                    const dark =
-                        button.dataset.background ===
-                        "dark";
+    let imageRequestId = 0;
 
-                    previewDisplay.classList.toggle(
-                        "specimen-dark",
-                        dark
-                    );
+    function rgbToHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const lightness = (max + min) / 2;
+        const delta = max - min;
+        if (!delta) return [0, 0, lightness];
+        const saturation = delta / (1 - Math.abs(2 * lightness - 1));
+        let hue;
+        if (max === r) hue = ((g - b) / delta) % 6;
+        else if (max === g) hue = (b - r) / delta + 2;
+        else hue = (r - g) / delta + 4;
+        return [(hue * 60 + 360) % 360, saturation, lightness];
+    }
 
-                    previewDisplay.classList.toggle(
-                        "specimen-light",
-                        !dark
-                    );
+    function hslToCss(h, s, l) {
+        return "hsl(" + Math.round(h) + " " + Math.round(s * 100) + "% " + Math.round(l * 100) + "%)";
+    }
 
-                    $$(".background-button")
-                        .forEach(item => {
-                            item.classList.toggle(
-                                "active",
-                                item === button
-                            );
-                        });
-                }
-            );
+    function imageTextColor(r, g, b) {
+        const [h, s, l] = rgbToHsl(r, g, b);
+        const textLightness = l < .5
+            ? Math.min(.94, Math.max(.68, l + .42))
+            : Math.max(.08, Math.min(.32, l - .42));
+        const textSaturation = Math.min(.92, Math.max(.38, s + .08));
+        const borderLightness = l < .5
+            ? Math.min(.98, l + .32)
+            : Math.max(.12, l - .28);
+        return {
+            text: hslToCss(h, textSaturation, textLightness),
+            border: hslToCss(h, Math.min(.75, textSaturation), borderLightness)
+        };
+    }
+
+    async function loadImageBackground() {
+        const requestId = ++imageRequestId;
+        const seed = "typace-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+        const url = "https://picsum.photos/seed/" + encodeURIComponent(seed) + "/1600/1000";
+        const image = new Image();
+        image.crossOrigin = "anonymous";
+
+        await new Promise((resolve, reject) => {
+            image.onload = resolve;
+            image.onerror = reject;
+            image.src = url;
         });
+
+        if (requestId !== imageRequestId) return;
+
+        let r = 36, g = 33, b = 30;
+        try {
+            const canvas = document.createElement("canvas");
+            canvas.width = 32;
+            canvas.height = 20;
+            const context = canvas.getContext("2d", { willReadFrequently: true });
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+            let totalR = 0, totalG = 0, totalB = 0, count = 0;
+            for (let i = 0; i < pixels.length; i += 16) {
+                totalR += pixels[i];
+                totalG += pixels[i + 1];
+                totalB += pixels[i + 2];
+                count++;
+            }
+            r = totalR / count;
+            g = totalG / count;
+            b = totalB / count;
+        } catch {}
+
+        const colors = imageTextColor(r, g, b);
+        previewDisplay.classList.remove("specimen-light", "specimen-dark");
+        previewDisplay.classList.add("specimen-image");
+        previewDisplay.style.backgroundImage = "url(\"" + url + "\")";
+        previewDisplay.style.setProperty("--preview-specimen-text", colors.text);
+        previewDisplay.style.setProperty("--preview-specimen-border", colors.border);
+    }
+
+    function setPreviewBackground(background) {
+        previewDisplay.style.backgroundImage = "";
+        previewDisplay.style.removeProperty("--preview-specimen-text");
+        previewDisplay.style.removeProperty("--preview-specimen-border");
+        previewDisplay.classList.remove("specimen-light", "specimen-dark", "specimen-image");
+
+        if (background === "dark") previewDisplay.classList.add("specimen-dark");
+        else previewDisplay.classList.add("specimen-light");
+
+        if (background === "image") {
+            loadImageBackground().catch(() => setPreviewBackground("light"));
+        }
+
+        $(".background-button").forEach(button => {
+            button.classList.toggle("active", button.dataset.background === background);
+        });
+    }
+
+    $(".background-button").forEach(button => {
+        button.addEventListener("click", () => setPreviewBackground(button.dataset.background));
+    });
 
     /* ========================================================
        CUSTOM CSS NAME
