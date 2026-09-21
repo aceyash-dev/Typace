@@ -29,12 +29,20 @@ Each record includes:
 - `file`
 - `type`
 - `format`
+- `category`
 - `url`
 - `createdAt`
 - `updatedAt`
 - optional `isNew`
 
 Typace currently publishes its font files as regular/normal fonts. Weight and style are intentionally not exposed as catalog metadata.
+
+The `category` field is generated dynamically from the font name and is one of:
+- `display`
+- `monospace`
+- `handwritten`
+
+Categorization is heuristic and should be treated as discovery metadata, not as authoritative type-design classification.
 
 Use returned metadata as the source of truth. Do not invent designer, license, glyph coverage, variable-axis, weight/style variants, or OpenType-feature information when it is not published.
 
