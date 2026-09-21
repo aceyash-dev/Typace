@@ -11,6 +11,7 @@ export const FONT_TYPES = {
 const NEW_FONT_WINDOW_MS = 10 * 24 * 60 * 60 * 1000;
 const GITHUB_REPOSITORY = "aceyash-dev/Typace";
 const historyCache = new Map();
+const categoryCache = new Map();
 
 function inferCategory(name) {
     const value = String(name).toLowerCase();
@@ -34,8 +35,80 @@ function inferCategory(name) {
     return "display";
 }
 
+async function readPanose(filePath) {
+    if (categoryCache.has(filePath)) {
+        return categoryCache.get(filePath);
+    }
+
+    const promise = (async () => {
+        try {
+            const buffer = await fs.readFile(filePath);
+
+            if (buffer.length < 12 || buffer.toString("ascii", 0, 4) === "ttcf") {
+                return null;
+            }
+
+            const numTables = buffer.readUInt16BE(4);
+
+            for (let index = 0; index < numTables; index++) {
+                const offset = 12 + index * 16;
+
+                if (offset + 16 > buffer.length) {
+                    break;
+                }
+
+                const tag = buffer.toString("ascii", offset, offset + 4);
+
+                if (tag !== "OS/2") {
+                    continue;
+                }
+
+                const tableOffset = buffer.readUInt32BE(offset + 8);
+                const tableLength = buffer.readUInt32BE(offset + 12);
+
+                if (tableOffset + 42 > buffer.length || tableLength < 42) {
+                    return null;
+                }
+
+                const familyType = buffer[tableOffset + 32];
+                const serifStyle = buffer[tableOffset + 33];
+
+                if (familyType !== 2) {
+                    return null;
+                }
+
+                if ([11, 12, 13, 15].includes(serifStyle)) {
+                    return "sans-serif";
+                }
+
+                if ([2, 3, 4, 5, 6, 7, 8, 9, 10, 14].includes(serifStyle)) {
+                    return "serif";
+                }
+
+                return null;
+            }
+        } catch {
+            return null;
+        }
+
+        return null;
+    })();
+
+    categoryCache.set(filePath, promise);
+    return promise;
+}
+
+async function getFontCategory(filePath, name) {
+    return (
+        await readPanose(filePath) ||
+        inferCategory(name)
+    );
+}
+
 function githubHeaders() {
-    const token = process.env.GITHUB_TOKEN;
+    const token =
+        process.env.GITHUB_PAT ||
+        process.env.GITHUB_TOKEN;
 
     return {
         Accept: "application/vnd.github+json",
@@ -161,7 +234,10 @@ async function getFontMetadata(entry) {
         file: relativePath.split(path.sep).join("/"),
         type: metadata.type,
         format: metadata.format,
-        category: inferCategory(name),
+        category: await getFontCategory(
+            absolutePath,
+            name
+        ),
         url: `/fonts/${relativePath
             .split(path.sep)
             .map(encodeURIComponent)
