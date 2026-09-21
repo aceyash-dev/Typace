@@ -34,7 +34,9 @@ Each record includes:
 - `updatedAt`
 - optional `isNew`
 
-Use returned metadata as the source of truth. Do not invent designer, license, weight, style, glyph coverage, variable-axis, or OpenType-feature information when it is not published.
+Typace currently publishes its font files as regular/normal fonts. Weight and style are intentionally not exposed as catalog metadata.
+
+Use returned metadata as the source of truth. Do not invent designer, license, glyph coverage, variable-axis, weight/style variants, or OpenType-feature information when it is not published.
 
 ## Search
 
