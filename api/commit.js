@@ -11,7 +11,7 @@ export default async function handler(req, res) {
                 sha: deploymentSha,
                 shortSha: deploymentSha.slice(0, 7),
                 message: deploymentMessage.split("\n")[0],
-                date: null
+                date: process.env.VERCEL_GIT_COMMIT_AUTHOR_DATE || null
             });
         }
 
