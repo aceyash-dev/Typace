@@ -7,6 +7,12 @@ export default async function handler(req, res) {
         const fonts = await listFonts();
         const urls = [
             `  <url><loc>https://typace.ace-base.cc/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>`,
+            `  <url><loc>https://typace.ace-base.cc/browse</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>`,
+            `  <url><loc>https://typace.ace-base.cc/browse/woff2</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
+            `  <url><loc>https://typace.ace-base.cc/browse/woff</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
+            `  <url><loc>https://typace.ace-base.cc/browse/ttf</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
+            `  <url><loc>https://typace.ace-base.cc/browse/otf</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
+            `  <url><loc>https://typace.ace-base.cc/developers</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>`,
             ...fonts.map(font =>
                 `  <url><loc>https://typace.ace-base.cc/fonts/${encodeURIComponent(font.name)}</loc><lastmod>${font.updatedAt || font.createdAt || new Date().toISOString()}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>`
             )
