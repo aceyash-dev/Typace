@@ -3612,18 +3612,6 @@
                 extension
             ).toLowerCase();
 
-        const weight =
-            raw.weight ||
-            inferWeight(name);
-
-        const style =
-            raw.style ||
-            inferStyle(name);
-
-        const category =
-            raw.category ||
-            "Typeface";
-
         return {
             ...raw,
 
@@ -3637,80 +3625,11 @@
 
             format,
 
-            weight: String(weight),
+            // Typace publishes regular/normal font files only.
+            weight: "400",
 
-            style: String(style),
-
-            category: String(category)
+            style: "normal"
         };
-    }
-
-    function inferWeight(name) {
-        const value =
-            String(name).toLowerCase();
-
-        const weights = [
-            "100",
-            "200",
-            "300",
-            "400",
-            "500",
-            "600",
-            "700",
-            "800",
-            "900"
-        ];
-
-        for (const weight of weights) {
-            if (
-                value.includes(weight)
-            ) {
-                return weight;
-            }
-        }
-
-        const names = [
-            ["thin", "100"],
-            ["extralight", "200"],
-            ["extra light", "200"],
-            ["light", "300"],
-            ["regular", "400"],
-            ["normal", "400"],
-            ["medium", "500"],
-            ["semibold", "600"],
-            ["semi bold", "600"],
-            ["bold", "700"],
-            ["extrabold", "800"],
-            ["extra bold", "800"],
-            ["black", "900"]
-        ];
-
-        for (
-            const [label, weight]
-            of names
-        ) {
-            if (
-                value.includes(label)
-            ) {
-                return weight;
-            }
-        }
-
-        return "400";
-    }
-
-    function inferStyle(name) {
-        const value =
-            String(name).toLowerCase();
-
-        if (
-            value.includes("italic") ||
-            value.includes("oblique")
-        ) {
-            return "italic";
-        }
-
-        return "normal";
     }
 
     /* ========================================================
