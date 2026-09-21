@@ -44,6 +44,14 @@ Use `GET /api/search?q=QUERY` for dynamic name, filename, type, and format match
 
 Use `GET /api/css/SLUG` for a ready-to-use `@font-face` declaration. Otherwise use the `url` and `format` fields from the catalog API. Do not assume every font is TTF.
 
+## Documentation
+
+- Human-readable documentation: https://docs.ace-base.cc/projects/typace
+- The Ace Base documentation index: https://docs.ace-base.cc/
+- Machine-readable Typace documentation: https://typace.ace-base.cc/llms.txt
+
+Use the human-readable documentation for integration guides and conceptual explanations. Use the live API and OpenAPI specification for current catalog and endpoint details.
+
 ## Licensing
 
 Each typeface has its own licensing terms. Check the applicable license before commercial use, redistribution, modification, embedding, or inclusion in software.
