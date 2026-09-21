@@ -1,0 +1,27 @@
+import { listFonts, normalize } from "./_lib/fonts.js";
+
+function sendJSON(res, status, data) {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    return res.status(status).json(data);
+}
+
+export default async function handler(req, res) {
+    if (req.method === "OPTIONS") return sendJSON(res, 204, null);
+    if (req.method !== "GET") return sendJSON(res, 405, { error: "Method not allowed." });
+    try {
+        const fonts = await listFonts();
+        const query = String(req.query?.q || "").trim();
+        if (!query) return sendJSON(res, 200, fonts);
+        const terms = normalize(query).split("-").filter(Boolean);
+        return sendJSON(res, 200, fonts.filter(font => {
+            const haystack = normalize(`${font.name} ${font.file} ${font.type} ${font.format}`);
+            return terms.every(term => haystack.includes(term));
+        }));
+    } catch (error) {
+        console.error("Typace font search failed:", error);
+        return sendJSON(res, 500, { error: "Unable to search fonts.", code: "FONT_SEARCH_FAILED" });
+    }
+}
