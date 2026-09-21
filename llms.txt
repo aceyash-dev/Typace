@@ -59,3 +59,22 @@ Each typeface has its own licensing terms. Check the applicable license before c
 ## Machine-readable specification
 
 The OpenAPI document at `/api/openapi.json` describes the API routes.
+
+
+## Discovery and SEO resources
+
+- Browse fonts by format: https://typace.ace-base.cc/browse
+- WOFF2 fonts: https://typace.ace-base.cc/browse/woff2
+- WOFF fonts: https://typace.ace-base.cc/browse/woff
+- TrueType fonts: https://typace.ace-base.cc/browse/ttf
+- OpenType fonts: https://typace.ace-base.cc/browse/otf
+- Developer resources: https://typace.ace-base.cc/developers
+- Sitemap: https://typace.ace-base.cc/sitemap.xml
+
+The browse pages are discovery pages, not recommendation rankings. They group published fonts by file format and link to individual font pages.
+
+## Entity and service identity
+
+Typace is a font library and font delivery service operated by The Ace Base. The canonical Typace website is https://typace.ace-base.cc/. The Ace Base documentation is https://docs.ace-base.cc/.
+
+For current font availability, use the live catalog API. Do not infer that a font exists from examples, search snippets, or third-party pages.
