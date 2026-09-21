@@ -1,20 +1,9 @@
 export default async function handler(req, res) {
     try {
-        const token =
-            process.env.GITHUB_PAT ||
-            process.env.GITHUB_TOKEN;
-
-        if (!token) {
-            return res.status(500).json({
-                error: "GITHUB_TOKEN is not configured"
-            });
-        }
-
         const response = await fetch(
             "https://api.github.com/repos/aceyash-dev/Typace/commits?per_page=1",
             {
                 headers: {
-                    Authorization: `Bearer ${token}`,
                     Accept: "application/vnd.github+json",
                     "X-GitHub-Api-Version": "2022-11-28"
                 }
