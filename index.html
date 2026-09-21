@@ -5072,7 +5072,7 @@
             loadImageBackground().catch(() => setPreviewBackground("light"));
         }
 
-        $(".background-button").forEach(button => {
+        $$(".background-button").forEach(button => {
             button.classList.toggle("active", button.dataset.background === background);
         });
     }
