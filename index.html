@@ -336,8 +336,7 @@
         html.theme-transition .back-button,
         html.theme-transition .download-button,
         html.theme-transition .font-name-input,
-        html.theme-transition .background-button,
-        html.theme-transition .weight-button {
+        html.theme-transition .background-button {
             transition:
                 background-color .58s cubic-bezier(.22, 1, .36, 1),
                 color .42s cubic-bezier(.22, 1, .36, 1),
@@ -1037,7 +1036,7 @@
         }
 
         /* =====================================================
-           FONT NAME + BADGES
+           FONT NAME
         ===================================================== */
 
         .font-name-row {
@@ -1064,39 +1063,6 @@
 
             letter-spacing: -.025em;
             line-height: 1.15;
-        }
-
-        .font-new-badge,
-        .font-old-badge {
-            flex: 0 0 auto;
-
-            padding: .2rem .45rem;
-
-            border-radius: 999px;
-
-            font-size: .56rem;
-            font-weight: 700;
-
-            line-height: 1;
-
-            letter-spacing: .01em;
-        }
-
-        .font-new-badge {
-            background: var(--accent);
-            color: #fff;
-
-            box-shadow:
-                0 3px 10px var(--accent-soft);
-        }
-
-        .font-old-badge {
-            background: var(--surface-soft);
-            color: var(--muted);
-
-            border: 1px solid var(--border);
-
-            font-weight: 600;
         }
 
         /* =====================================================
@@ -1277,12 +1243,6 @@
             font-weight: 500;
 
             letter-spacing: -.025em;
-        }
-
-        .peeks .font-new-badge,
-        .peeks .font-old-badge {
-            font-size: .48rem;
-            padding: .18rem .35rem;
         }
 
         .peeks .font-specimen {
@@ -2057,58 +2017,6 @@
             text-align: right;
         }
 
-        .weight-options {
-            flex: 1;
-
-            display: flex;
-
-            flex-wrap: wrap;
-
-            gap: .3rem;
-        }
-
-        .weight-button {
-            height: 30px;
-
-            padding: 0 .6rem;
-
-            border:
-                1px solid var(--border);
-
-            border-radius: 999px;
-
-            background:
-                var(--surface-soft);
-
-            color:
-                var(--text);
-
-            font-size: .68rem;
-
-            transition:
-                transform .2s var(--spring),
-                background .18s ease,
-                border-color .18s ease;
-        }
-
-        .weight-button:hover {
-            transform: translateY(-2px);
-        }
-
-        .weight-button:active {
-            transform: scale(.9);
-        }
-
-        .weight-button.active {
-            background: var(--accent);
-            color: #fff;
-
-            border-color: var(--accent);
-
-            animation:
-                pillPop .3s var(--spring);
-        }
-
         /* =====================================================
            CUSTOM FONT NAME
         ===================================================== */
@@ -2639,11 +2547,6 @@
                 flex-basis: 62px;
             }
 
-            .weight-options {
-                flex-basis:
-                    calc(100% - 75px);
-            }
-
             .sort-chips {
                 max-width:
                     calc(100vw - 2rem);
@@ -2875,14 +2778,6 @@
                         type="button"
                     >
                         Z–A
-                    </button>
-
-                    <button
-                        class="sort-chip"
-                        data-sort="new"
-                        type="button"
-                    >
-                        New
                     </button>
 
                     <button
@@ -3375,9 +3270,6 @@
 
     const BATCH_SIZE = 20;
 
-    const NEW_FONT_WINDOW_MS =
-        50 * 60 * 60 * 1000;
-
     const DEFAULT_SPECIMEN =
         "The Quick Brown Fox Jumps Over The Lazy Dog";
 
@@ -3707,55 +3599,6 @@
     }
 
     /* ========================================================
-       NEW FONT
-    ======================================================== */
-
-    function getFontCreatedTimestamp(font) {
-        const created =
-            Date.parse(
-                font?.createdAt || ""
-            );
-
-        const updated =
-            Date.parse(
-                font?.updatedAt || ""
-            );
-
-        const createdTime =
-            Number.isFinite(created)
-                ? created
-                : 0;
-
-        const updatedTime =
-            Number.isFinite(updated)
-                ? updated
-                : 0;
-
-        return Math.max(
-            createdTime,
-            updatedTime
-        );
-    }
-
-    function isFontNew(font) {
-        if (font?.isNew === true) {
-            return true;
-        }
-
-        const timestamp =
-            getFontCreatedTimestamp(font);
-
-        if (!timestamp) {
-            return false;
-        }
-
-        return (
-            Date.now() - timestamp <=
-            NEW_FONT_WINDOW_MS
-        );
-    }
-
-    /* ========================================================
        FONT URL
     ======================================================== */
 
@@ -4057,9 +3900,6 @@
         const family =
             getFamily(font);
 
-        const newFont =
-            isFontNew(font);
-
         card.innerHTML = `
             <div>
 
@@ -4070,21 +3910,7 @@
                             font.name
                         )}
                     </div>
-
-                    ${
-                        newFont
-                            ? `
-                                <span
-                                    class="font-new-badge"
-                                >
-                                    New
-                                </span>
-                            `
-                            : `
-                            `
-                    }
-
-                </div>
+</div>
 
                 <div
                     class="font-specimen"
@@ -4293,29 +4119,6 @@
                         }
                     )
             );
-        }
-
-        if (state.sort === "new") {
-            result = result
-                .map((font, index) => ({
-                    font,
-                    index,
-                    isNew: isFontNew(font),
-                    timestamp:
-                        getFontCreatedTimestamp(font)
-                }))
-                .sort((a, b) => {
-                    if (a.isNew !== b.isNew) {
-                        return a.isNew ? -1 : 1;
-                    }
-
-                    if (a.timestamp !== b.timestamp) {
-                        return b.timestamp - a.timestamp;
-                    }
-
-                    return a.index - b.index;
-                })
-                .map(item => item.font);
         }
 
         if (state.sort === "random") {
