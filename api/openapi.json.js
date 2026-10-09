@@ -55,13 +55,13 @@ export default function handler(req, res) {
                 },
                 Commit: {
                     type: "object",
-                    required: ["sha", "shortSha", "message", "date", "url", "source"],
+                    required: ["sha", "shortSha", "message", "date", "source"],
                     properties: {
                         sha: { type: "string", pattern: "^[a-fA-F0-9]{7,40}$" },
                         shortSha: { type: "string", minLength: 7, maxLength: 7 },
                         message: { type: "string", maxLength: 200 },
                         date: { type: "string", format: "date-time", nullable: true },
-                        url: { type: "string", format: "uri" },
+
                         source: { type: "string", enum: ["deployment", "github"] }
                     }
                 },
@@ -130,7 +130,7 @@ export default function handler(req, res) {
                     tags: ["Catalog"],
                     operationId: "getCurrentCommit",
                     summary: "Get current deployment commit metadata",
-                    description: "Returns the deployed commit when Vercel Git metadata is available. For private repositories, set GITHUB_TOKEN or GITHUB_PAT with read-only repository access to resolve the commit timestamp.",
+                    description: "Returns the deployed commit identifier, message, timestamp, and metadata source. Repository URLs are intentionally omitted because the source repository is private.",
                     responses: {
                         "200": {
                             description: "Current or latest source commit metadata",
