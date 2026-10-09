@@ -87,7 +87,7 @@ export default function handler(req, res) {
                     parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }],
                     responses: {
                         "200": { description: "Generated CSS", content: { "text/css": { schema: { type: "string" } } } },
-                        "404": { description: "Font not found", content: { "application/json": { schema: { "$ref": "#/components/schemas/Error" } } }
+                        "404": { description: "Font not found", content: { "application/json": { schema: { "$ref": "#/components/schemas/Error" } } } }
                     }
                 }
             },
