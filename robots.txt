@@ -4,7 +4,6 @@ Allow: /
 Disallow: /admin/
 Disallow: /private/
 Disallow: /drafts/
-Disallow: /api/
 Disallow: /node_modules/
 Disallow: /.git/
 Disallow: /.github/
