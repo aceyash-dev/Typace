@@ -23,7 +23,10 @@ function normalizeCommit(commit, source) {
         return null;
     }
 
-    const date = commit.date || null;
+    const parsedDate = commit.date ? new Date(commit.date) : null;
+    const date = parsedDate && Number.isFinite(parsedDate.getTime())
+        ? parsedDate.toISOString()
+        : null;
     const sha = commit.sha;
     const message = String(commit.message || "Typace source revision")
         .split("\n")[0]
