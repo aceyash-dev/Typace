@@ -52,11 +52,11 @@ async function readPanose(filePath) {
                     return null;
                 }
 
-                if ([11, 12, 13, 15].includes(serifStyle)) {
+                if ([11, 12, 13].includes(serifStyle)) {
                     return "sans-serif";
                 }
 
-                if ([2, 3, 4, 5, 6, 7, 8, 9, 10, 14].includes(serifStyle)) {
+                if ([2, 3, 4, 5, 6, 7, 8, 9, 10].includes(serifStyle)) {
                     return "serif";
                 }
 
@@ -156,17 +156,20 @@ export async function listFonts() {
 }
 
 export function findFont(fonts, slug) {
-    const target = normalize(
-        decodeURIComponent(slug || "")
-    );
+    let decoded = "";
+    try {
+        decoded = decodeURIComponent(Array.isArray(slug) ? slug[0] || "" : slug || "");
+    } catch {
+        return null;
+    }
 
-    return (
-        fonts.find(font =>
-            normalize(font.name) === target ||
-            normalize(font.file) === target ||
-            normalize(
-                font.file.replace(/\\.[^.]+$/, "")
-            ) === target
-        ) || null
-    );
+    const target = normalize(decoded);
+    if (!target) return null;
+
+    return fonts.find(font => {
+        const filename = String(font.file || "").split("/").pop() || "";
+        return normalize(font.name) === target ||
+            normalize(filename) === target ||
+            normalize(font.file) === target;
+    }) || null;
 }
