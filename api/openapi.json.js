@@ -44,6 +44,18 @@ export default function handler(req, res) {
                         updatedAt: { type: "string", format: "date-time", nullable: true }
                     }
                 },
+                Commit: {
+                    type: "object",
+                    required: ["sha", "shortSha", "message", "date", "url", "source"],
+                    properties: {
+                        sha: { type: "string", pattern: "^[a-fA-F0-9]{7,40}$" },
+                        shortSha: { type: "string", minLength: 7, maxLength: 7 },
+                        message: { type: "string", maxLength: 200 },
+                        date: { type: "string", format: "date-time", nullable: true },
+                        url: { type: "string", format: "uri" },
+                        source: { type: "string", enum: ["deployment", "github"] }
+                    }
+                },
                 Error: {
                     type: "object",
                     required: ["error"],
@@ -101,6 +113,22 @@ export default function handler(req, res) {
                         "200": ok("Generated CSS", { type: "string" }, "text/css"),
                         "404": ok("Font not found", errorRef),
                         "500": ok("CSS generation failed", errorRef)
+                    }
+                }
+            },
+            "/api/commit": {
+                get: {
+                    tags: ["Catalog"],
+                    operationId: "getCurrentCommit",
+                    summary: "Get current deployment commit metadata",
+                    description: "Returns the deployed commit when Vercel Git metadata is available. For private repositories, set GITHUB_TOKEN or GITHUB_PAT with read-only repository access to resolve the commit timestamp.",
+                    responses: {
+                        "200": {
+                            description: "Current or latest source commit metadata",
+                            content: { "application/json": { schema: { "$ref": "#/components/schemas/Commit" } } }
+                        },
+                        "405": { description: "Method not allowed" },
+                        "502": { description: "Commit metadata could not be resolved", content: { "application/json": { schema: { "$ref": "#/components/schemas/Error" } } }
                     }
                 }
             },
