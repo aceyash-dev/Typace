@@ -22,8 +22,10 @@ export default async function handler(req, res) {
         if (!query) return sendJSON(res, 200, fonts);
         const terms = normalize(query).split("-").filter(Boolean);
         return sendJSON(res, 200, fonts.filter(font => {
-            const haystack = normalize(`${font.name} ${font.file} ${font.type} ${font.format}`);
-            return terms.every(term => haystack.includes(term));
+            const tokens = normalize(`${font.name} ${font.file} ${font.type} ${font.format}`)
+                .split("-")
+                .filter(Boolean);
+            return terms.every(term => tokens.some(token => token.startsWith(term)));
         }));
     } catch (error) {
         console.error("Typace font search failed:", error);
