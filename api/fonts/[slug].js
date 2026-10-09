@@ -21,8 +21,8 @@ export default async function handler(req, res) {
     if (req.method !== "GET") {
         res.setHeader("Allow", "GET, OPTIONS");
         return sendJSON(res, 405, { error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
-    if (!enforceRateLimit(req, res)) return;
     }
+    if (!enforceRateLimit(req, res)) return;
 
     try {
         const font = findFont(await listFonts(), req.query?.slug);
