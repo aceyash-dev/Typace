@@ -12,8 +12,8 @@ export default function handler(req, res) {
         res.setHeader("Allow", "GET, OPTIONS");
         res.setHeader("Cache-Control", "no-store");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
-    if (!enforceRateLimit(req, res)) return;
     }
+    if (!enforceRateLimit(req, res)) return;
 
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");

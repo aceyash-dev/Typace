@@ -199,3 +199,18 @@ test("API rate limiter allows ten requests per IP and blocks the eleventh", () =
     const afterWindow = checkRateLimit(req, start + 60_001);
     assert.equal(afterWindow.allowed, true);
 });
+
+test("catalog endpoint returns 429 after ten requests from one IP", async () => {
+    const ip = "198.51.100.77";
+    let response;
+    for (let index = 0; index < 11; index++) {
+        response = mockResponse();
+        await fontsHandler({ method: "GET", headers: { "x-real-ip": ip }, query: {} }, response);
+    }
+
+    assert.equal(response.statusCode, 429);
+    assert.equal(response.body.code, "RATE_LIMIT_EXCEEDED");
+    assert.equal(response.headers["RateLimit-Limit"], "10");
+    assert.equal(response.headers["RateLimit-Remaining"], "0");
+    assert.ok(Number(response.headers["Retry-After"]) >= 1);
+});
