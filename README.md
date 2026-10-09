@@ -13,7 +13,7 @@ Typace is a font library and font delivery service by [The Ace Base](https://ace
 - Machine-readable documentation: https://typace.ace-base.cc/llms.txt
 - Documentation: https://docs.ace-base.cc/projects/typace
 
-Typace publishes font assets in TTF, OTF, WOFF, and WOFF2 formats. Individual font pages expose downloads, metadata, generated CSS, and API references.
+Available font formats depend on the live catalog. Use the catalog API as the source of truth for current assets. Categories are only returned when supported by font metadata; unknown categories and unavailable source dates are not guessed. Verify the license attached to each font before use.
 
 ## Source
 
