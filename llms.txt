@@ -34,7 +34,7 @@ Each font record includes `name`, `file`, `type`, `format`, `category`, `url`, `
 - Search the catalog with `GET /api/search?q=QUERY`. Omitting `q` returns the catalog.
 - Fetch one record from `GET /api/fonts/SLUG`.
 - Generate a CSS declaration from `GET /api/css/SLUG`.
-- Inspect the deployed commit with `GET /api/commit`, which returns the full SHA, seven-character short SHA, commit message, timestamp when available, commit URL, and source.
+- Inspect the deployed commit with `GET /api/commit`, which returns the full SHA, seven-character short SHA, commit message, timestamp when available, and source. Repository URLs are intentionally omitted because the source repository is private.
 - Read `GET /api/openapi.json` for the machine-readable API contract.
 
 Use the `url` and `format` fields returned by the catalog. Do not assume every font is TTF or that every family has all file formats.

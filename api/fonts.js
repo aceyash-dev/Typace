@@ -1,3 +1,4 @@
+import { enforceRateLimit } from "./_lib/rate-limit.js";
 import { listFonts } from "./_lib/fonts.js";
 
 function sendJSON(res, status, data) {
@@ -14,6 +15,7 @@ function sendJSON(res, status, data) {
 export default async function handler(req, res) {
     if (req.method === "OPTIONS") return sendJSON(res, 204, null);
     if (req.method !== "GET") return sendJSON(res, 405, { error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+    if (!enforceRateLimit(req, res)) return;
     try {
         return sendJSON(res, 200, await listFonts());
     } catch (error) {

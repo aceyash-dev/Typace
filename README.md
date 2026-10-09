@@ -21,3 +21,7 @@ Available font formats depend on the live catalog. Use the catalog API as the so
 This repository contains the Typace web interface, API routes, discovery pages, and published font assets. Font asset URLs are binary resources, not necessarily HTML pages.
 
 Current font availability should be verified against the live catalog API rather than inferred from this README.
+
+## API rate limits
+
+The JSON and CSS API endpoints allow up to **10 requests per minute per client IP**. Responses include `RateLimit-Limit`, `RateLimit-Remaining`, and `RateLimit-Reset` headers. Excess requests receive HTTP `429` with a `Retry-After` header and a machine-readable `RATE_LIMIT_EXCEEDED` error. CORS preflight requests are not counted. The current in-memory limiter is per serverless runtime, so it is best-effort across Vercel instances rather than a globally coordinated quota; use a shared edge/KV limiter for strict cross-instance enforcement.

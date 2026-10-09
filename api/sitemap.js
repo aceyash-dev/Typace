@@ -1,3 +1,4 @@
+import { enforceRateLimit } from "./_lib/rate-limit.js";
 const BASE_URL = "https://typace.ace-base.cc";
 
 const pages = [
@@ -24,6 +25,7 @@ export default function handler(req, res) {
         res.setHeader("Allow", "GET");
         return res.status(405).send("Method not allowed.");
     }
+    if (!enforceRateLimit(req, res)) return;
 
     const urls = pages.map(page =>
         `  <url><loc>${escapeXml(BASE_URL + page.path)}</loc><changefreq>${page.changefreq}</changefreq><priority>${page.priority}</priority></url>`

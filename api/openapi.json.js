@@ -1,3 +1,4 @@
+import { enforceRateLimit } from "./_lib/rate-limit.js";
 export default function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
@@ -11,6 +12,7 @@ export default function handler(req, res) {
         res.setHeader("Allow", "GET, OPTIONS");
         res.setHeader("Cache-Control", "no-store");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+    if (!enforceRateLimit(req, res)) return;
     }
 
     res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -29,7 +31,7 @@ export default function handler(req, res) {
         info: {
             title: "Typace API",
             version: "1.1.0",
-            description: "Public font discovery, search, metadata, and CSS delivery API. Unknown classifications and unavailable source dates are not guessed."
+            description: "Public font discovery, search, metadata, and CSS delivery API. Unknown classifications and unavailable source dates are not guessed. API requests are limited to 10 per minute per IP; excess requests return HTTP 429 with Retry-After."
         },
         servers: [{ url: "https://typace.ace-base.cc" }],
         tags: [
@@ -55,13 +57,13 @@ export default function handler(req, res) {
                 },
                 Commit: {
                     type: "object",
-                    required: ["sha", "shortSha", "message", "date", "url", "source"],
+                    required: ["sha", "shortSha", "message", "date", "source"],
                     properties: {
                         sha: { type: "string", pattern: "^[a-fA-F0-9]{7,40}$" },
                         shortSha: { type: "string", minLength: 7, maxLength: 7 },
                         message: { type: "string", maxLength: 200 },
                         date: { type: "string", format: "date-time", nullable: true },
-                        url: { type: "string", format: "uri" },
+
                         source: { type: "string", enum: ["deployment", "github"] }
                     }
                 },
@@ -83,6 +85,7 @@ export default function handler(req, res) {
                     summary: "List published fonts",
                     responses: {
                         "200": ok("Current catalog", { type: "array", items: fontRef }),
+                        "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Catalog could not be read", errorRef)
                     }
                 }
@@ -96,6 +99,7 @@ export default function handler(req, res) {
                     responses: {
                         "200": ok("Font metadata", fontRef),
                         "404": ok("Font not found", errorRef),
+                        "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Font lookup failed", errorRef)
                     }
                 }
@@ -108,6 +112,7 @@ export default function handler(req, res) {
                     parameters: [{ name: "q", in: "query", description: "Search terms matched against name, path, type, and format. Omit to return the full catalog.", schema: { type: "string" } }],
                     responses: {
                         "200": ok("Matching font records", { type: "array", items: fontRef }),
+                        "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Search failed", errorRef)
                     }
                 }
@@ -121,6 +126,7 @@ export default function handler(req, res) {
                     responses: {
                         "200": ok("Generated CSS", { type: "string" }, "text/css"),
                         "404": ok("Font not found", errorRef),
+                        "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("CSS generation failed", errorRef)
                     }
                 }
@@ -130,13 +136,14 @@ export default function handler(req, res) {
                     tags: ["Catalog"],
                     operationId: "getCurrentCommit",
                     summary: "Get current deployment commit metadata",
-                    description: "Returns the deployed commit when Vercel Git metadata is available. For private repositories, set GITHUB_TOKEN or GITHUB_PAT with read-only repository access to resolve the commit timestamp.",
+                    description: "Returns the deployed commit identifier, message, timestamp, and metadata source. Repository URLs are intentionally omitted because the source repository is private.",
                     responses: {
                         "200": {
                             description: "Current or latest source commit metadata",
                             content: { "application/json": { schema: { "$ref": "#/components/schemas/Commit" } } }
                         },
                         "405": { description: "Method not allowed" },
+                        "429": ok("Rate limit exceeded", errorRef),
                         "502": { description: "Commit metadata could not be resolved", content: { "application/json": { schema: { "$ref": "#/components/schemas/Error" } } } }
                     }
                 }
