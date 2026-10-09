@@ -170,3 +170,13 @@ test("search matches token prefixes instead of arbitrary substrings", async () =
     assert.ok(response.body.some(font => font.name === "Ace Script"));
     assert.equal(response.body.some(font => font.name === "Space Grotesk"), false);
 });
+
+test("About build metadata is text-only and Support is replaced by Join Dock", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(html, /id="commitCard"/);
+    assert.doesNotMatch(html, /id="commitLink"|commitLink\.href|commit\.url/);
+    assert.match(html, /Join Dock/);
+    assert.match(html, /https:\/\/aero\.aryankaushik\.space\/d\/tabgl/);
+    assert.doesNotMatch(html, /Help us keep Typace ad-free|Support ↗/);
+    assert.match(html, /BENTO PREVIEW LAYOUT/);
+});
