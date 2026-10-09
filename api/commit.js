@@ -120,8 +120,8 @@ export default async function handler(req, res) {
             error: "Method not allowed.",
             code: "METHOD_NOT_ALLOWED"
         });
-    if (!enforceRateLimit(req, res)) return;
     }
+    if (!enforceRateLimit(req, res)) return;
 
     if (cachedCommit && Date.now() - cachedAt < CACHE_TTL_MS) {
         return sendJSON(res, 200, cachedCommit);
