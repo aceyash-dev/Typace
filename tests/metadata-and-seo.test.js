@@ -9,6 +9,7 @@ import searchHandler from "../api/search.js";
 import fontHandler from "../api/fonts/[slug].js";
 import cssHandler from "../api/css/[slug].js";
 import { readFile } from "node:fs/promises";
+import { checkRateLimit } from "../api/_lib/rate-limit.js";
 
 test("normalize removes accents, punctuation, and supported extensions", () => {
     assert.equal(normalize("Café Font.ttf"), "cafe-font");
@@ -179,4 +180,22 @@ test("About build metadata is text-only and Support is replaced by Join Dock", a
     assert.match(html, /https:\/\/aero\.aryankaushik\.space\/d\/tabgl/);
     assert.doesNotMatch(html, /Help us keep Typace ad-free|Support ↗/);
     assert.match(html, /BENTO PREVIEW LAYOUT/);
+});
+
+test("API rate limiter allows ten requests per IP and blocks the eleventh", () => {
+    const req = { headers: { "x-real-ip": "198.51.100.42" } };
+    const start = 1_800_000_000_000;
+    for (let index = 0; index < 10; index++) {
+        const result = checkRateLimit(req, start + index);
+        assert.equal(result.allowed, true);
+        assert.equal(result.limit, 10);
+    }
+
+    const blocked = checkRateLimit(req, start + 10);
+    assert.equal(blocked.allowed, false);
+    assert.equal(blocked.remaining, 0);
+    assert.equal(blocked.retryAfter, 60);
+
+    const afterWindow = checkRateLimit(req, start + 60_001);
+    assert.equal(afterWindow.allowed, true);
 });
