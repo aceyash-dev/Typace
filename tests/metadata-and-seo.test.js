@@ -160,3 +160,11 @@ test("commit metadata normalizes valid timestamps and rejects invalid dates", ()
     }, "deployment");
     assert.equal(invalid.date, null);
 });
+
+test("search matches token prefixes instead of arbitrary substrings", async () => {
+    const response = mockResponse();
+    await searchHandler({ method: "GET", query: { q: "Ace" } }, response);
+    assert.equal(response.statusCode, 200);
+    assert.ok(response.body.some(font => font.name === "Ace Script"));
+    assert.equal(response.body.some(font => font.name === "Space Grotesk"), false);
+});
