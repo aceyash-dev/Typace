@@ -5,6 +5,9 @@ function sendJSON(res, status, data) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Cache-Control", status === 200
+        ? "public, max-age=30, s-maxage=120, stale-while-revalidate=600"
+        : "no-store");
     return res.status(status).json(data);
 }
 
@@ -13,7 +16,7 @@ export default async function handler(req, res) {
     if (req.method !== "GET") return sendJSON(res, 405, { error: "Method not allowed." });
     try {
         const fonts = await listFonts();
-        const query = String(req.query?.q || "").trim();
+        const query = String(Array.isArray(req.query?.q) ? req.query.q[0] || "" : req.query?.q || "").trim().slice(0, 200);
         if (!query) return sendJSON(res, 200, fonts);
         const terms = normalize(query).split("-").filter(Boolean);
         return sendJSON(res, 200, fonts.filter(font => {
