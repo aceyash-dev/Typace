@@ -31,7 +31,7 @@ export default function handler(req, res) {
         info: {
             title: "Typace API",
             version: "1.1.0",
-            description: "Public font discovery, search, metadata, and CSS delivery API. Unknown classifications and unavailable source dates are not guessed."
+            description: "Public font discovery, search, metadata, and CSS delivery API. Unknown classifications and unavailable source dates are not guessed. API requests are limited to 10 per minute per IP; excess requests return HTTP 429 with Retry-After."
         },
         servers: [{ url: "https://typace.ace-base.cc" }],
         tags: [
@@ -85,6 +85,7 @@ export default function handler(req, res) {
                     summary: "List published fonts",
                     responses: {
                         "200": ok("Current catalog", { type: "array", items: fontRef }),
+                        "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Catalog could not be read", errorRef)
                     }
                 }
@@ -98,6 +99,7 @@ export default function handler(req, res) {
                     responses: {
                         "200": ok("Font metadata", fontRef),
                         "404": ok("Font not found", errorRef),
+                        "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Font lookup failed", errorRef)
                     }
                 }
@@ -110,6 +112,7 @@ export default function handler(req, res) {
                     parameters: [{ name: "q", in: "query", description: "Search terms matched against name, path, type, and format. Omit to return the full catalog.", schema: { type: "string" } }],
                     responses: {
                         "200": ok("Matching font records", { type: "array", items: fontRef }),
+                        "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Search failed", errorRef)
                     }
                 }
@@ -123,6 +126,7 @@ export default function handler(req, res) {
                     responses: {
                         "200": ok("Generated CSS", { type: "string" }, "text/css"),
                         "404": ok("Font not found", errorRef),
+                        "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("CSS generation failed", errorRef)
                     }
                 }
@@ -139,6 +143,7 @@ export default function handler(req, res) {
                             content: { "application/json": { schema: { "$ref": "#/components/schemas/Commit" } } }
                         },
                         "405": { description: "Method not allowed" },
+                        "429": ok("Rate limit exceeded", errorRef),
                         "502": { description: "Commit metadata could not be resolved", content: { "application/json": { schema: { "$ref": "#/components/schemas/Error" } } } }
                     }
                 }
