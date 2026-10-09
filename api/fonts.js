@@ -5,12 +5,15 @@ function sendJSON(res, status, data) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Cache-Control", status === 200 ? "public, max-age=60, s-maxage=300, stale-while-revalidate=3600" : "no-store");
+    if (status === 405) res.setHeader("Allow", "GET, OPTIONS");
     return res.status(status).json(data);
 }
 
 export default async function handler(req, res) {
     if (req.method === "OPTIONS") return sendJSON(res, 204, null);
-    if (req.method !== "GET") return sendJSON(res, 405, { error: "Method not allowed." });
+    if (req.method !== "GET") return sendJSON(res, 405, { error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     try {
         return sendJSON(res, 200, await listFonts());
     } catch (error) {
