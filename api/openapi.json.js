@@ -128,7 +128,7 @@ export default function handler(req, res) {
                             content: { "application/json": { schema: { "$ref": "#/components/schemas/Commit" } } }
                         },
                         "405": { description: "Method not allowed" },
-                        "502": { description: "Commit metadata could not be resolved", content: { "application/json": { schema: { "$ref": "#/components/schemas/Error" } } }
+                        "502": { description: "Commit metadata could not be resolved", content: { "application/json": { schema: { "$ref": "#/components/schemas/Error" } } } }
                     }
                 }
             },
