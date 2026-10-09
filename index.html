@@ -2591,7 +2591,53 @@
                     .001ms !important;
             }
         }
-    </style>
+    
+        /* BENTO PREVIEW LAYOUT */
+        #previewOverlay .preview-panel { width: min(100%, 1040px); }
+        #previewOverlay .preview-hero {
+            display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(220px, .8fr);
+            grid-template-areas: "name name" "specimen specimen" "hint backgrounds" "controls controls";
+            gap: .9rem; align-items: center;
+        }
+        #previewOverlay #previewFontName { grid-area: name; }
+        #previewOverlay #previewDisplay {
+            grid-area: specimen; min-height: clamp(220px, 34vh, 360px);
+            padding: clamp(1rem, 3vw, 2rem); border-radius: 24px;
+            font-size: clamp(2rem, 7vw, 5rem); line-height: 1.12;
+            white-space: normal; overflow-wrap: anywhere;
+        }
+        #previewOverlay .preview-edit-hint { grid-area: hint; }
+        #previewOverlay .preview-backgrounds { grid-area: backgrounds; justify-self: end; margin: 0; }
+        #previewOverlay .preview-controls {
+            grid-area: controls; display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .75rem;
+        }
+        #previewOverlay .control {
+            min-width: 0; padding: 1rem; border: 1px solid var(--border);
+            border-radius: 20px; background: var(--surface-soft);
+        }
+        #previewOverlay .resource-grid {
+            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: stretch; gap: .9rem; margin-top: .9rem;
+        }
+        #previewOverlay .resource-card { min-width: 0; border-radius: 24px; box-shadow: var(--shadow); }
+        #previewOverlay .resource-card:first-child { grid-column: span 2; }
+        #previewOverlay .resource-code { max-width: 100%; overflow-wrap: anywhere; white-space: pre-wrap; }
+        #aboutOverlay .preview-hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+        #aboutOverlay .commit-info, #aboutOverlay .social-link { border-radius: 24px; }
+        #aboutOverlay .commit-card { cursor: default; }
+        #aboutOverlay .commit-card .commit-message { overflow-wrap: anywhere; }
+        #aboutOverlay .commit-open { display: none; }
+        @media (max-width: 620px) {
+            #previewOverlay .preview-hero {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-areas: "name" "specimen" "hint" "backgrounds" "controls";
+            }
+            #previewOverlay .preview-backgrounds { justify-self: start; flex-wrap: wrap; }
+            #previewOverlay .resource-grid { grid-template-columns: minmax(0, 1fr); }
+            #previewOverlay .resource-card:first-child { grid-column: auto; }
+        }
+</style>
 </head>
 
 <body>
@@ -2934,21 +2980,17 @@
                 <div class="commit-heading">
                     <span class="commit-indicator" aria-hidden="true"></span>
                     <span>Current build</span>
-                    <span class="commit-label">Source revision</span>
+                    <span class="commit-label">Build info</span>
                 </div>
 
-                <a
+                <div
                     class="commit-card"
-                    id="commitLink"
-                    href="https://github.com/aceyash-dev/Typace/commits/main"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="View current Typace commit on GitHub"
+                    id="commitCard"
+                    aria-label="Current deployed revision"
                 >
                     <span class="commit-sha" id="commitStatus">Loading revision…</span>
-                    <span class="commit-message" id="commitMessage">Fetching deployment metadata</span>
-                    <span class="commit-open" aria-hidden="true">↗</span>
-                </a>
+                    <span class="commit-message" id="commitMessage">Fetching build metadata</span>
+                </div>
 
                 <div class="commit-meta">
                     <time class="commit-time" id="commitTime">Checking commit time…</time>
@@ -2961,16 +3003,16 @@
 
                 <a
                     class="social-link"
-                    href="https://chai4.me/aceyash-dev"
+                    href="https://aero.aryankaushik.space/d/tabgl"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
                     <span class="social-name">
-                        Help us keep Typace ad-free
+                        Join Dock
                     </span>
 
                     <span class="social-handle">
-                        Support ↗
+                        Open Dock ↗
                     </span>
                 </a>
 
@@ -5403,7 +5445,7 @@
     const commitStatus = $("#commitStatus");
     const commitMessage = $("#commitMessage");
     const commitTime = $("#commitTime");
-    const commitLink = $("#commitLink");
+    const commitCard = $("#commitCard");
     const commitSource = $("#commitSource");
 
     function relativeTime(date) {
@@ -5431,7 +5473,7 @@
     }
 
     async function loadLatestCommit() {
-        if (!commitStatus || !commitLink) return;
+        if (!commitStatus || !commitCard) return;
 
         try {
             const response = await fetch("/api/commit", {
@@ -5443,14 +5485,12 @@
 
             const commit = await response.json();
             if (!/^[a-f0-9]{7,40}$/i.test(commit.sha || "") ||
-                !commit.shortSha || !commit.message || !commit.url) {
+                !commit.shortSha || !commit.message) {
                 throw new Error("Commit metadata is incomplete");
             }
 
             commitStatus.textContent = commit.shortSha;
             commitMessage.textContent = commit.message;
-            commitLink.href = commit.url;
-            commitLink.title = `Commit ${commit.sha}`;
 
             if (commitTime) {
                 const relative = commit.date ? relativeTime(commit.date) : null;
@@ -5472,7 +5512,7 @@
         } catch (error) {
             console.warn("Typace commit API error:", error);
             commitStatus.textContent = "Unavailable";
-            if (commitMessage) commitMessage.textContent = "Could not load source revision";
+            if (commitMessage) commitMessage.textContent = "Build metadata unavailable";
             if (commitTime) commitTime.textContent = "Commit time unavailable";
             if (commitSource) commitSource.textContent = "Status unavailable";
             commitLink.href = "https://github.com/aceyash-dev/Typace";
