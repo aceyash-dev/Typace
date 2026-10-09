@@ -1,3 +1,4 @@
+import { enforceRateLimit } from "./_lib/rate-limit.js";
 const REPOSITORY = "aceyash-dev/Typace";
 const CACHE_TTL_MS = 60_000;
 let cachedCommit = null;
@@ -119,6 +120,7 @@ export default async function handler(req, res) {
             error: "Method not allowed.",
             code: "METHOD_NOT_ALLOWED"
         });
+    if (!enforceRateLimit(req, res)) return;
     }
 
     if (cachedCommit && Date.now() - cachedAt < CACHE_TTL_MS) {
