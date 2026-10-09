@@ -10,7 +10,6 @@ export default function handler(req, res) {
 
     const fontRef = { "$ref": "#/components/schemas/Font" };
     const errorRef = { "$ref": "#/components/schemas/Error" };
-    const json = schema => ({ "application/json": { schema } });
     const ok = (description, schema, contentType = "application/json") => ({
         description,
         content: { [contentType]: { schema } }
