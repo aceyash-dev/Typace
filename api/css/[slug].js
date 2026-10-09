@@ -4,10 +4,16 @@ export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("X-Content-Type-Options", "nosniff");
 
-    if (req.method === "OPTIONS") return res.status(204).end();
+    if (req.method === "OPTIONS") {
+        res.setHeader("Cache-Control", "no-store");
+        return res.status(204).end();
+    }
     if (req.method !== "GET") {
         res.setHeader("Allow", "GET, OPTIONS");
+        res.setHeader("Allow", "GET, OPTIONS");
+        res.setHeader("Cache-Control", "no-store");
         res.setHeader("Content-Type", "application/json; charset=utf-8");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
@@ -15,6 +21,7 @@ export default async function handler(req, res) {
     try {
         const font = findFont(await listFonts(), req.query?.slug);
         if (!font) {
+            res.setHeader("Cache-Control", "no-store");
             res.setHeader("Content-Type", "application/json; charset=utf-8");
             return res.status(404).json({ error: "Font not found.", code: "FONT_NOT_FOUND" });
         }
@@ -31,6 +38,7 @@ export default async function handler(req, res) {
         return res.status(200).send(css);
     } catch (error) {
         console.error("Typace CSS generation failed:", error);
+        res.setHeader("Cache-Control", "no-store");
         res.setHeader("Content-Type", "application/json; charset=utf-8");
         return res.status(500).json({ error: "Unable to generate font CSS.", code: "CSS_GENERATION_FAILED" });
     }
