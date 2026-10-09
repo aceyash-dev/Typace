@@ -4,6 +4,11 @@ import { normalize, findFont, listFonts } from "../api/_lib/fonts.js";
 import handler from "../api/openapi.json.js";
 import sitemapHandler from "../api/sitemap.js";
 import commitHandler from "../api/commit.js";
+import fontsHandler from "../api/fonts.js";
+import searchHandler from "../api/search.js";
+import fontHandler from "../api/fonts/[slug].js";
+import cssHandler from "../api/css/[slug].js";
+import { readFile } from "node:fs/promises";
 
 test("normalize removes accents, punctuation, and supported extensions", () => {
     assert.equal(normalize("Café Font.ttf"), "cafe-font");
@@ -99,4 +104,41 @@ test("commit endpoint supports CORS preflight", async () => {
     await commitHandler({ method: "OPTIONS" }, response);
     assert.equal(response.statusCode, 204);
     assert.equal(response.headers["Access-Control-Allow-Methods"], "GET, OPTIONS");
+});
+
+test("catalog and search endpoints return consistent method errors", async () => {
+    for (const handler of [fontsHandler, searchHandler]) {
+        const response = mockResponse();
+        await handler({ method: "POST", query: {} }, response);
+        assert.equal(response.statusCode, 405);
+        assert.equal(response.headers.Allow, "GET, OPTIONS");
+        assert.equal(response.body.code, "METHOD_NOT_ALLOWED");
+        assert.equal(response.headers["X-Content-Type-Options"], "nosniff");
+        assert.equal(response.headers["Cache-Control"], "no-store");
+    }
+});
+
+test("font metadata and CSS endpoints reject unsupported methods consistently", async () => {
+    for (const handler of [fontHandler, cssHandler]) {
+        const response = mockResponse();
+        await handler({ method: "POST", query: { slug: "test" } }, response);
+        assert.equal(response.statusCode, 405);
+        assert.equal(response.headers.Allow, "GET, OPTIONS");
+        assert.equal(response.body.code, "METHOD_NOT_ALLOWED");
+        assert.equal(response.headers["X-Content-Type-Options"], "nosniff");
+    }
+});
+
+test("OpenAPI endpoint supports CORS preflight", () => {
+    const response = mockResponse();
+    handler({ method: "OPTIONS" }, response);
+    assert.equal(response.statusCode, 204);
+    assert.equal(response.headers["Access-Control-Allow-Methods"], "GET, OPTIONS");
+    assert.equal(response.headers["Cache-Control"], "no-store");
+});
+
+test("date-dependent New sort and badges are not advertised without reliable dates", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.doesNotMatch(html, /data-sort="new"/);
+    assert.doesNotMatch(html, /isFontNew|getFontCreatedTimestamp|font-new-badge|font-old-badge/);
 });
