@@ -53,6 +53,7 @@ test("OpenAPI contract documents the real category values and API paths", () => 
     assert.ok(response.body.paths["/api/css/{slug}"]);
     assert.ok(response.body.paths["/api/commit"]);
     assert.deepEqual(response.body.components.schemas.Commit.properties.source.enum, ["deployment", "github"]);
+    assert.equal("url" in response.body.components.schemas.Commit.properties, false);
 });
 
 test("sitemap contains canonical discovery pages, not binary font assets", () => {
@@ -152,6 +153,7 @@ test("commit metadata normalizes valid timestamps and rejects invalid dates", ()
     assert.equal(valid.shortSha, "0123456");
     assert.equal(valid.message, "Release");
     assert.equal(valid.date, "2026-10-09T12:00:00.000Z");
+    assert.equal("url" in valid, false);
 
     const invalid = normalizeCommit({
         sha: "0123456789abcdef0123456789abcdef01234567",
