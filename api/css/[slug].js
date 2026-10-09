@@ -17,8 +17,8 @@ export default async function handler(req, res) {
         res.setHeader("Cache-Control", "no-store");
         res.setHeader("Content-Type", "application/json; charset=utf-8");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
-    if (!enforceRateLimit(req, res)) return;
     }
+    if (!enforceRateLimit(req, res)) return;
 
     try {
         const font = findFont(await listFonts(), req.query?.slug);
