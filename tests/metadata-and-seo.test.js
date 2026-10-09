@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { normalize, findFont, listFonts } from "../api/_lib/fonts.js";
 import handler from "../api/openapi.json.js";
 import sitemapHandler from "../api/sitemap.js";
+import commitHandler from "../api/commit.js";
 
 test("normalize removes accents, punctuation, and supported extensions", () => {
     assert.equal(normalize("Café Font.ttf"), "cafe-font");
@@ -45,6 +46,8 @@ test("OpenAPI contract documents the real category values and API paths", () => 
     assert.ok(response.body.paths["/api/fonts"]);
     assert.ok(response.body.paths["/api/search"]);
     assert.ok(response.body.paths["/api/css/{slug}"]);
+    assert.ok(response.body.paths["/api/commit"]);
+    assert.deepEqual(response.body.components.schemas.Commit.properties.source.enum, ["deployment", "github"]);
 });
 
 test("sitemap contains canonical discovery pages, not binary font assets", () => {
@@ -82,3 +85,18 @@ function mockResponse() {
         }
     };
 }
+
+test("commit endpoint rejects unsupported methods without a network request", async () => {
+    const response = mockResponse();
+    await commitHandler({ method: "POST" }, response);
+    assert.equal(response.statusCode, 405);
+    assert.equal(response.body.code, "METHOD_NOT_ALLOWED");
+    assert.equal(response.headers.Allow, "GET, OPTIONS");
+});
+
+test("commit endpoint supports CORS preflight", async () => {
+    const response = mockResponse();
+    await commitHandler({ method: "OPTIONS" }, response);
+    assert.equal(response.statusCode, 204);
+    assert.equal(response.headers["Access-Control-Allow-Methods"], "GET, OPTIONS");
+});
