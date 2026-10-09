@@ -136,11 +136,7 @@ export async function listFonts() {
         entries.map(getFontMetadata)
     );
 
-    return fonts.sort(
-        (a, b) =>
-            (Date.parse(b.createdAt || "") || 0) -
-            (Date.parse(a.createdAt || "") || 0)
-    );
+    return fonts.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 }
 
 export function findFont(fonts, slug) {
