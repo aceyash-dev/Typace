@@ -1,3 +1,4 @@
+import { enforceRateLimit } from "./_lib/rate-limit.js";
 export default function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
@@ -11,6 +12,7 @@ export default function handler(req, res) {
         res.setHeader("Allow", "GET, OPTIONS");
         res.setHeader("Cache-Control", "no-store");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+    if (!enforceRateLimit(req, res)) return;
     }
 
     res.setHeader("Content-Type", "application/json; charset=utf-8");
