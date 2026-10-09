@@ -41,7 +41,7 @@ export function normalizeCommit(commit, source) {
         shortSha: sha.slice(0, 7),
         message: message || "Typace source revision",
         date,
-        url: `https://github.com/${REPOSITORY}/commit/${sha}`,
+
         source
     };
 }
