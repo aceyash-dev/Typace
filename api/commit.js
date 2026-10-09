@@ -45,12 +45,16 @@ async function fetchGitHubCommit(reference) {
         ? `https://api.github.com/repos/${REPOSITORY}/commits/${encodeURIComponent(reference)}`
         : `https://api.github.com/repos/${REPOSITORY}/commits/main`;
 
+    const token = process.env.GITHUB_TOKEN || process.env.GITHUB_PAT;
+    const headers = {
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "Typace-Commit-Status"
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
     const response = await fetch(endpoint, {
-        headers: {
-            Accept: "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": "Typace-Commit-Status"
-        },
+        headers,
         signal: AbortSignal.timeout(2500)
     });
 
