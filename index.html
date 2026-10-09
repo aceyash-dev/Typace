@@ -42,7 +42,6 @@
 
     <link
         rel="icon"
-        rel="icon"
         type="image/png"
         href="/icon.png"
         sizes="512x512"
@@ -3625,7 +3624,7 @@
 
             category:
                 raw.category ||
-                "display",
+                "unknown",
 
             // Typace publishes regular/normal font files only.
             weight: "400",
@@ -4161,12 +4160,7 @@
 
                     const categoryAliases = {
                         sans: "sans-serif",
-                        serif: "serif",
-                        mono: "monospace",
-                        monospace: "monospace",
-                        hand: "handwritten",
-                        handwritten: "handwritten",
-                        display: "display"
+                        serif: "serif"
                     };
 
                     const categoryQuery =
