@@ -11,61 +11,49 @@ export const FONT_TYPES = {
 const categoryCache = new Map();
 
 async function readPanose(filePath) {
-    if (categoryCache.has(filePath)) {
-        return categoryCache.get(filePath);
-    }
+    if (categoryCache.has(filePath)) return categoryCache.get(filePath);
 
     const promise = (async () => {
+        let handle;
         try {
-            const buffer = await fs.readFile(filePath);
+            handle = await fs.open(filePath, "r");
+            const header = Buffer.alloc(12);
+            const firstRead = await handle.read(header, 0, header.length, 0);
+            if (firstRead.bytesRead !== header.length) return null;
 
-            if (buffer.length < 12 || buffer.toString("ascii", 0, 4) === "ttcf") {
-                return null;
-            }
+            const signature = header.toString("ascii", 0, 4);
+            if (!["\u0000\u0001\u0000\u0000", "OTTO", "true", "typ1"].includes(signature)) return null;
 
-            const numTables = buffer.readUInt16BE(4);
+            const tableCount = header.readUInt16BE(4);
+            if (tableCount < 1 || tableCount > 4096) return null;
 
-            for (let index = 0; index < numTables; index++) {
-                const offset = 12 + index * 16;
+            const directory = Buffer.alloc(tableCount * 16);
+            const directoryRead = await handle.read(directory, 0, directory.length, 12);
+            if (directoryRead.bytesRead !== directory.length) return null;
 
-                if (offset + 16 > buffer.length) {
-                    break;
-                }
+            for (let index = 0; index < tableCount; index++) {
+                const offset = index * 16;
+                if (directory.toString("ascii", offset, offset + 4) !== "OS/2") continue;
 
-                const tag = buffer.toString("ascii", offset, offset + 4);
+                const tableOffset = directory.readUInt32BE(offset + 8);
+                const tableLength = directory.readUInt32BE(offset + 12);
+                if (tableLength < 42 || tableOffset + 42 > 0xffffffff) return null;
 
-                if (tag !== "OS/2") {
-                    continue;
-                }
+                const os2 = Buffer.alloc(42);
+                const tableRead = await handle.read(os2, 0, os2.length, tableOffset);
+                if (tableRead.bytesRead !== os2.length) return null;
 
-                const tableOffset = buffer.readUInt32BE(offset + 8);
-                const tableLength = buffer.readUInt32BE(offset + 12);
-
-                if (tableOffset + 42 > buffer.length || tableLength < 42) {
-                    return null;
-                }
-
-                const familyType = buffer[tableOffset + 32];
-                const serifStyle = buffer[tableOffset + 33];
-
-                if (familyType !== 2) {
-                    return null;
-                }
-
-                if ([11, 12, 13].includes(serifStyle)) {
-                    return "sans-serif";
-                }
-
-                if ([2, 3, 4, 5, 6, 7, 8, 9, 10].includes(serifStyle)) {
-                    return "serif";
-                }
-
+                if (os2[32] !== 2) return null;
+                const serifStyle = os2[33];
+                if ([11, 12, 13].includes(serifStyle)) return "sans-serif";
+                if ([2, 3, 4, 5, 6, 7, 8, 9, 10].includes(serifStyle)) return "serif";
                 return null;
             }
         } catch {
             return null;
+        } finally {
+            if (handle) await handle.close().catch(() => {});
         }
-
         return null;
     })();
 
