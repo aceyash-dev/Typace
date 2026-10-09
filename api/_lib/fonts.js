@@ -132,9 +132,13 @@ export async function listFonts() {
     const fontsDirectory = path.join(process.cwd(), "fonts");
     const entries = await readFontFiles(fontsDirectory);
 
-    const fonts = await Promise.all(
-        entries.map(getFontMetadata)
-    );
+    const fonts = [];
+    const batchSize = 16;
+
+    for (let index = 0; index < entries.length; index += batchSize) {
+        const batch = entries.slice(index, index + batchSize);
+        fonts.push(...await Promise.all(batch.map(getFontMetadata)));
+    }
 
     return fonts.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 }
