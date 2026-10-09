@@ -21,8 +21,8 @@ async function readPanose(filePath) {
             const firstRead = await handle.read(header, 0, header.length, 0);
             if (firstRead.bytesRead !== header.length) return null;
 
-            const signature = header.toString("ascii", 0, 4);
-            if (!["\u0000\u0001\u0000\u0000", "OTTO", "true", "typ1"].includes(signature)) return null;
+            const signature = header.toString("hex", 0, 4);
+            if (!["00010000", "4f54544f", "74727565", "74797031"].includes(signature)) return null;
 
             const tableCount = header.readUInt16BE(4);
             if (tableCount < 1 || tableCount > 4096) return null;
