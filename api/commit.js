@@ -18,15 +18,18 @@ function sendJSON(res, status, data) {
     return res.status(status).json(data);
 }
 
-function normalizeCommit(commit, source) {
+function validTimestamp(value) {
+    if (typeof value !== "string" || !value.trim()) return null;
+    const parsed = new Date(value);
+    return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : null;
+}
+
+export function normalizeCommit(commit, source) {
     if (!commit || typeof commit.sha !== "string" || !/^[a-f0-9]{7,40}$/i.test(commit.sha)) {
         return null;
     }
 
-    const parsedDate = commit.date ? new Date(commit.date) : null;
-    const date = parsedDate && Number.isFinite(parsedDate.getTime())
-        ? parsedDate.toISOString()
-        : null;
+    const date = validTimestamp(commit.date);
     const sha = commit.sha;
     const message = String(commit.message || "Typace source revision")
         .split("\n")[0]
@@ -66,10 +69,14 @@ async function fetchGitHubCommit(reference) {
     }
 
     const data = await response.json();
+    const date = validTimestamp(data.commit?.author?.date)
+        || validTimestamp(data.commit?.committer?.date)
+        || null;
+
     return normalizeCommit({
         sha: data.sha,
         message: data.commit?.message,
-        date: data.commit?.author?.date || data.commit?.committer?.date || null
+        date
     }, "github");
 }
 
@@ -89,7 +96,7 @@ async function resolveCommit() {
         return normalizeCommit({
             sha: deploymentSha,
             message: deploymentMessage || fromGitHub?.message,
-            date: deploymentDate || fromGitHub?.date || null
+            date: validTimestamp(deploymentDate) || fromGitHub?.date || null
         }, "deployment");
     }
 
@@ -100,8 +107,12 @@ export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("X-Content-Type-Options", "nosniff");
 
-    if (req.method === "OPTIONS") return res.status(204).end();
+    if (req.method === "OPTIONS") {
+        res.setHeader("Cache-Control", "no-store");
+        return res.status(204).end();
+    }
     if (req.method !== "GET") {
         res.setHeader("Allow", "GET, OPTIONS");
         return sendJSON(res, 405, {
