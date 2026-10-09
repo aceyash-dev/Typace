@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { normalize, findFont, listFonts } from "../api/_lib/fonts.js";
 import handler from "../api/openapi.json.js";
 import sitemapHandler from "../api/sitemap.js";
-import commitHandler from "../api/commit.js";
+import commitHandler, { normalizeCommit } from "../api/commit.js";
 import fontsHandler from "../api/fonts.js";
 import searchHandler from "../api/search.js";
 import fontHandler from "../api/fonts/[slug].js";
@@ -141,4 +141,22 @@ test("date-dependent New sort and badges are not advertised without reliable dat
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     assert.doesNotMatch(html, /data-sort="new"/);
     assert.doesNotMatch(html, /isFontNew|getFontCreatedTimestamp|font-new-badge|font-old-badge/);
+});
+
+test("commit metadata normalizes valid timestamps and rejects invalid dates", () => {
+    const valid = normalizeCommit({
+        sha: "0123456789abcdef0123456789abcdef01234567",
+        message: "Release\nAdditional details",
+        date: "2026-10-09T12:00:00Z"
+    }, "deployment");
+    assert.equal(valid.shortSha, "0123456");
+    assert.equal(valid.message, "Release");
+    assert.equal(valid.date, "2026-10-09T12:00:00.000Z");
+
+    const invalid = normalizeCommit({
+        sha: "0123456789abcdef0123456789abcdef01234567",
+        message: "Release",
+        date: "not-a-date"
+    }, "deployment");
+    assert.equal(invalid.date, null);
 });
