@@ -1,19 +1,18 @@
 /* TEAM */
 
 Name: Typace
-Role: Independent Type Design Project
-Website: https://fonts.ace-base.cc/
+Role: Font Library and Font Delivery Service
+Website: https://typace.ace-base.cc/
 
 /* PROJECT */
 
 Project: Typace
-Description: Independent typeface design and digital typography project.
+Description: Font discovery, metadata, and digital font delivery service.
 
 /* FOCUS */
 
 - Typeface design
 - Font engineering
-- Variable fonts
 - Digital typography
 - OpenType
 - Web typography

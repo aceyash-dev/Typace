@@ -1,90 +1,59 @@
 # Typace
 
-> Typace is an independent type design project creating distinctive, practical typefaces for digital and creative use.
+> Typace is a font library and font delivery service operated by The Ace Base.
 
 ## Canonical URLs
 
-- Homepage: https://typace.ace-base.cc/
-- Font files: https://typace.ace-base.cc/fonts/
+- Website: https://typace.ace-base.cc/
+- Browse catalog: https://typace.ace-base.cc/browse
+- Developer guide: https://typace.ace-base.cc/developers
 - Font catalog API: https://typace.ace-base.cc/api/fonts
 - Search API: https://typace.ace-base.cc/api/search?q=QUERY
 - Individual font API: https://typace.ace-base.cc/api/fonts/SLUG
-- Dynamic CSS API: https://typace.ace-base.cc/api/css/SLUG
+- CSS API: https://typace.ace-base.cc/api/css/SLUG
+- Current deployment commit: https://typace.ace-base.cc/api/commit
 - OpenAPI specification: https://typace.ace-base.cc/api/openapi.json
+- Sitemap: https://typace.ace-base.cc/sitemap.xml
+- Documentation: https://docs.ace-base.cc/projects/typace
 
-## Dynamic font catalog
+## Source of truth
 
-Typace discovers supported font files dynamically from the deployed `/fonts` directory. Do not hardcode the font catalog.
+The live `GET /api/fonts` response is the authoritative list of published font assets. The available catalog can change; do not hardcode font names or assume every format exists for every family.
 
-Supported formats are determined by the files currently present:
-- `.ttf` (TrueType)
-- `.otf` (OpenType)
-- `.woff`
-- `.woff2`
+Each font record includes `name`, `file`, `type`, `format`, `category`, `url`, `createdAt`, and `updatedAt`.
 
-The authoritative catalog is `GET /api/fonts`.
+- `type` identifies the file extension: `ttf`, `otf`, `woff`, or `woff2`.
+- `format` is the CSS format label suitable for `@font-face`.
+- `category` is only classified where supported by the font's embedded metadata. `unknown` means the file did not provide enough reliable data. It is not a quality judgment.
+- `createdAt` and `updatedAt` are null when trustworthy source dates are unavailable.
+- Do not infer a designer, foundry, license, glyph coverage, variable axes, weight, style, or OpenType features unless a reliable source explicitly publishes that information.
 
-Each record includes:
-- `name`
-- `file`
-- `type`
-- `format`
-- `category`
-- `url`
-- `createdAt`
-- `updatedAt`
-- optional `isNew`
+## API usage
 
-Typace currently publishes its font files as regular/normal fonts. Weight and style are intentionally not exposed as catalog metadata.
+- Fetch the catalog with `GET /api/fonts`.
+- Search the catalog with `GET /api/search?q=QUERY`. Omitting `q` returns the catalog.
+- Fetch one record from `GET /api/fonts/SLUG`.
+- Generate a CSS declaration from `GET /api/css/SLUG`.
+- Inspect the deployed commit with `GET /api/commit`, which returns the full SHA, seven-character short SHA, commit message, timestamp when available, commit URL, and source.
+- Read `GET /api/openapi.json` for the machine-readable API contract.
 
-The `category` field is generated dynamically from the font name and is one of:
-- `display`
-- `monospace`
-- `handwritten`
+Use the `url` and `format` fields returned by the catalog. Do not assume every font is TTF or that every family has all file formats.
 
-Categorization is heuristic and should be treated as discovery metadata, not as authoritative type-design classification.
+## Discovery pages
 
-Use returned metadata as the source of truth. Do not invent designer, license, glyph coverage, variable-axis, weight/style variants, or OpenType-feature information when it is not published.
+- Browse all fonts: https://typace.ace-base.cc/browse
+- WOFF2: https://typace.ace-base.cc/browse/woff2
+- WOFF: https://typace.ace-base.cc/browse/woff
+- TrueType: https://typace.ace-base.cc/browse/ttf
+- OpenType: https://typace.ace-base.cc/browse/otf
+- Developer resources: https://typace.ace-base.cc/developers
 
-## Search
-
-Use `GET /api/search?q=QUERY` for dynamic name, filename, type, and format matching.
-
-## Web usage
-
-Use `GET /api/css/SLUG` for a ready-to-use `@font-face` declaration. Otherwise use the `url` and `format` fields from the catalog API. Do not assume every font is TTF.
-
-## Documentation
-
-- Human-readable documentation: https://docs.ace-base.cc/projects/typace
-- The Ace Base documentation index: https://docs.ace-base.cc/
-- Machine-readable Typace documentation: https://typace.ace-base.cc/llms.txt
-
-Use the human-readable documentation for integration guides and conceptual explanations. Use the live API and OpenAPI specification for current catalog and endpoint details.
+These pages group published assets by format. They are not recommendation rankings. The sitemap contains canonical discovery pages rather than raw binary font URLs.
 
 ## Licensing
 
-Each typeface has its own licensing terms. Check the applicable license before commercial use, redistribution, modification, embedding, or inclusion in software.
+Each font can have separate licensing terms. Check the applicable license before commercial use, embedding, redistribution, modification, or bundling in software. Do not assume all catalog entries share one license.
 
-## Machine-readable specification
+## Identity
 
-The OpenAPI document at `/api/openapi.json` describes the API routes.
-
-
-## Discovery and SEO resources
-
-- Browse fonts by format: https://typace.ace-base.cc/browse
-- WOFF2 fonts: https://typace.ace-base.cc/browse/woff2
-- WOFF fonts: https://typace.ace-base.cc/browse/woff
-- TrueType fonts: https://typace.ace-base.cc/browse/ttf
-- OpenType fonts: https://typace.ace-base.cc/browse/otf
-- Developer resources: https://typace.ace-base.cc/developers
-- Sitemap: https://typace.ace-base.cc/sitemap.xml
-
-The browse pages are discovery pages, not recommendation rankings. They group published fonts by file format and link to individual font pages.
-
-## Entity and service identity
-
-Typace is a font library and font delivery service operated by The Ace Base. The canonical Typace website is https://typace.ace-base.cc/. The Ace Base documentation is https://docs.ace-base.cc/.
-
-For current font availability, use the live catalog API. Do not infer that a font exists from examples, search snippets, or third-party pages.
+Typace is a font library and font delivery service operated by The Ace Base. Canonical website: https://typace.ace-base.cc/.

@@ -42,7 +42,6 @@
 
     <link
         rel="icon"
-        rel="icon"
         type="image/png"
         href="/icon.png"
         sizes="512x512"
@@ -337,8 +336,7 @@
         html.theme-transition .back-button,
         html.theme-transition .download-button,
         html.theme-transition .font-name-input,
-        html.theme-transition .background-button,
-        html.theme-transition .weight-button {
+        html.theme-transition .background-button {
             transition:
                 background-color .58s cubic-bezier(.22, 1, .36, 1),
                 color .42s cubic-bezier(.22, 1, .36, 1),
@@ -1038,7 +1036,7 @@
         }
 
         /* =====================================================
-           FONT NAME + BADGES
+           FONT NAME
         ===================================================== */
 
         .font-name-row {
@@ -1065,39 +1063,6 @@
 
             letter-spacing: -.025em;
             line-height: 1.15;
-        }
-
-        .font-new-badge,
-        .font-old-badge {
-            flex: 0 0 auto;
-
-            padding: .2rem .45rem;
-
-            border-radius: 999px;
-
-            font-size: .56rem;
-            font-weight: 700;
-
-            line-height: 1;
-
-            letter-spacing: .01em;
-        }
-
-        .font-new-badge {
-            background: var(--accent);
-            color: #fff;
-
-            box-shadow:
-                0 3px 10px var(--accent-soft);
-        }
-
-        .font-old-badge {
-            background: var(--surface-soft);
-            color: var(--muted);
-
-            border: 1px solid var(--border);
-
-            font-weight: 600;
         }
 
         /* =====================================================
@@ -1278,12 +1243,6 @@
             font-weight: 500;
 
             letter-spacing: -.025em;
-        }
-
-        .peeks .font-new-badge,
-        .peeks .font-old-badge {
-            font-size: .48rem;
-            padding: .18rem .35rem;
         }
 
         .peeks .font-specimen {
@@ -2058,58 +2017,6 @@
             text-align: right;
         }
 
-        .weight-options {
-            flex: 1;
-
-            display: flex;
-
-            flex-wrap: wrap;
-
-            gap: .3rem;
-        }
-
-        .weight-button {
-            height: 30px;
-
-            padding: 0 .6rem;
-
-            border:
-                1px solid var(--border);
-
-            border-radius: 999px;
-
-            background:
-                var(--surface-soft);
-
-            color:
-                var(--text);
-
-            font-size: .68rem;
-
-            transition:
-                transform .2s var(--spring),
-                background .18s ease,
-                border-color .18s ease;
-        }
-
-        .weight-button:hover {
-            transform: translateY(-2px);
-        }
-
-        .weight-button:active {
-            transform: scale(.9);
-        }
-
-        .weight-button.active {
-            background: var(--accent);
-            color: #fff;
-
-            border-color: var(--accent);
-
-            animation:
-                pillPop .3s var(--spring);
-        }
-
         /* =====================================================
            CUSTOM FONT NAME
         ===================================================== */
@@ -2333,61 +2240,123 @@
         ===================================================== */
 
         .commit-info {
-            width: min(100%, 100%);
-            margin-top: .7rem;
-            text-align: center;
+            width: min(100%, 32rem);
+            margin: 1.25rem auto 0;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            background: var(--surface);
+            text-align: left;
+            box-shadow: 0 12px 36px rgba(20, 16, 12, .06);
         }
 
-        .commit-name {
-            width: 100%;
-            overflow-x: auto;
-            overflow-y: hidden;
-            white-space: nowrap;
-            overscroll-behavior-x: contain;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-
-            padding: .15rem .35rem;
-
+        .commit-heading {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin-bottom: .75rem;
             color: var(--text);
             font-size: .72rem;
-            font-weight: 600;
-            line-height: 1.4;
-
-            text-align: center;
-            mask-image: linear-gradient(
-                to right,
-                transparent,
-                #000 7%,
-                #000 93%,
-                transparent
-            );
-            -webkit-mask-image: linear-gradient(
-                to right,
-                transparent,
-                #000 7%,
-                #000 93%,
-                transparent
-            );
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
         }
 
-        .commit-name::-webkit-scrollbar {
-            display: none;
+        .commit-indicator {
+            width: .48rem;
+            height: .48rem;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            background: #299764;
+            box-shadow: 0 0 0 3px rgba(41, 151, 100, .13);
+        }
+
+        .commit-label {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: .62rem;
+            font-weight: 600;
+            letter-spacing: .08em;
+        }
+
+        .commit-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: .25rem .75rem;
+            padding: .85rem .9rem;
+            border: 1px solid var(--border);
+            border-radius: .75rem;
+            color: var(--text);
+            background: var(--bg);
+            text-decoration: none;
+            transition: border-color .18s ease, transform .18s ease, background .18s ease;
+        }
+
+        .commit-card:hover {
+            border-color: var(--accent);
+            background: var(--surface-soft);
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+
+        .commit-sha {
+            overflow: hidden;
+            color: var(--accent);
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+            font-size: .8rem;
+            font-weight: 750;
+            letter-spacing: .015em;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .commit-message {
+            grid-column: 1;
+            overflow: hidden;
+            color: var(--muted);
+            font-size: .76rem;
+            line-height: 1.45;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .commit-open {
+            grid-column: 2;
+            grid-row: 1 / span 2;
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        .commit-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .4rem;
+            margin-top: .7rem;
+            color: var(--muted);
+            font-size: .7rem;
+            line-height: 1.45;
         }
 
         .commit-time {
-            margin-top: .18rem;
+            color: var(--text);
+            font-weight: 650;
+        }
+
+        .commit-meta-separator {
+            opacity: .55;
+        }
+
+        .commit-source {
             color: var(--muted);
-            font-size: .62rem;
-            line-height: 1.3;
-            text-align: center;
         }
 
         .about-copy {
+            max-width: 28rem;
+            margin: .25rem auto 0;
             color: var(--muted);
-
             font-size: .85rem;
-
             line-height: 1.65;
         }
 
@@ -2576,11 +2545,6 @@
 
             .control-label {
                 flex-basis: 62px;
-            }
-
-            .weight-options {
-                flex-basis:
-                    calc(100% - 75px);
             }
 
             .sort-chips {
@@ -2818,14 +2782,6 @@
 
                     <button
                         class="sort-chip"
-                        data-sort="new"
-                        type="button"
-                    >
-                        New
-                    </button>
-
-                    <button
-                        class="sort-chip"
                         data-sort="random"
                         type="button"
                     >
@@ -2972,21 +2928,32 @@
 
             <div
                 class="commit-info"
+                aria-label="Current source revision"
                 aria-live="polite"
             >
-                <div
-                    class="commit-name"
-                    id="commitStatus"
-                    title="Latest commit"
-                >
-                    Checking latest commit…
+                <div class="commit-heading">
+                    <span class="commit-indicator" aria-hidden="true"></span>
+                    <span>Current build</span>
+                    <span class="commit-label">Source revision</span>
                 </div>
 
-                <div
-                    class="commit-time"
-                    id="commitTime"
+                <a
+                    class="commit-card"
+                    id="commitLink"
+                    href="https://github.com/aceyash-dev/Typace/commits/main"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="View current Typace commit on GitHub"
                 >
-                    Checking commit time…
+                    <span class="commit-sha" id="commitStatus">Loading revision…</span>
+                    <span class="commit-message" id="commitMessage">Fetching deployment metadata</span>
+                    <span class="commit-open" aria-hidden="true">↗</span>
+                </a>
+
+                <div class="commit-meta">
+                    <time class="commit-time" id="commitTime">Checking commit time…</time>
+                    <span class="commit-meta-separator" aria-hidden="true">·</span>
+                    <span class="commit-source" id="commitSource">Verifying source</span>
                 </div>
             </div>
 
@@ -3302,9 +3269,6 @@
         "https://typace.ace-base.cc/fonts/";
 
     const BATCH_SIZE = 20;
-
-    const NEW_FONT_WINDOW_MS =
-        50 * 60 * 60 * 1000;
 
     const DEFAULT_SPECIMEN =
         "The Quick Brown Fox Jumps Over The Lazy Dog";
@@ -3625,62 +3589,13 @@
 
             category:
                 raw.category ||
-                "display",
+                "unknown",
 
             // Typace publishes regular/normal font files only.
             weight: "400",
 
             style: "normal"
         };
-    }
-
-    /* ========================================================
-       NEW FONT
-    ======================================================== */
-
-    function getFontCreatedTimestamp(font) {
-        const created =
-            Date.parse(
-                font?.createdAt || ""
-            );
-
-        const updated =
-            Date.parse(
-                font?.updatedAt || ""
-            );
-
-        const createdTime =
-            Number.isFinite(created)
-                ? created
-                : 0;
-
-        const updatedTime =
-            Number.isFinite(updated)
-                ? updated
-                : 0;
-
-        return Math.max(
-            createdTime,
-            updatedTime
-        );
-    }
-
-    function isFontNew(font) {
-        if (font?.isNew === true) {
-            return true;
-        }
-
-        const timestamp =
-            getFontCreatedTimestamp(font);
-
-        if (!timestamp) {
-            return false;
-        }
-
-        return (
-            Date.now() - timestamp <=
-            NEW_FONT_WINDOW_MS
-        );
     }
 
     /* ========================================================
@@ -3985,9 +3900,6 @@
         const family =
             getFamily(font);
 
-        const newFont =
-            isFontNew(font);
-
         card.innerHTML = `
             <div>
 
@@ -3998,21 +3910,7 @@
                             font.name
                         )}
                     </div>
-
-                    ${
-                        newFont
-                            ? `
-                                <span
-                                    class="font-new-badge"
-                                >
-                                    New
-                                </span>
-                            `
-                            : `
-                            `
-                    }
-
-                </div>
+</div>
 
                 <div
                     class="font-specimen"
@@ -4161,12 +4059,7 @@
 
                     const categoryAliases = {
                         sans: "sans-serif",
-                        serif: "serif",
-                        mono: "monospace",
-                        monospace: "monospace",
-                        hand: "handwritten",
-                        handwritten: "handwritten",
-                        display: "display"
+                        serif: "serif"
                     };
 
                     const categoryQuery =
@@ -4226,29 +4119,6 @@
                         }
                     )
             );
-        }
-
-        if (state.sort === "new") {
-            result = result
-                .map((font, index) => ({
-                    font,
-                    index,
-                    isNew: isFontNew(font),
-                    timestamp:
-                        getFontCreatedTimestamp(font)
-                }))
-                .sort((a, b) => {
-                    if (a.isNew !== b.isNew) {
-                        return a.isNew ? -1 : 1;
-                    }
-
-                    if (a.timestamp !== b.timestamp) {
-                        return b.timestamp - a.timestamp;
-                    }
-
-                    return a.index - b.index;
-                })
-                .map(item => item.font);
         }
 
         if (state.sort === "random") {
@@ -5530,148 +5400,82 @@
        LATEST COMMIT
     ======================================================== */
 
-    const commitStatus =
-        $("#commitStatus");
-
-    const commitTime =
-        $("#commitTime");
+    const commitStatus = $("#commitStatus");
+    const commitMessage = $("#commitMessage");
+    const commitTime = $("#commitTime");
+    const commitLink = $("#commitLink");
+    const commitSource = $("#commitSource");
 
     function relativeTime(date) {
-        const timestamp =
-            new Date(date).getTime();
+        const timestamp = new Date(date).getTime();
+        if (!Number.isFinite(timestamp)) return null;
 
-        if (!Number.isFinite(timestamp)) {
-            return "Recently updated";
+        const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+        const units = [
+            ["year", 365 * 24 * 60 * 60],
+            ["month", 30 * 24 * 60 * 60],
+            ["day", 24 * 60 * 60],
+            ["hour", 60 * 60],
+            ["minute", 60],
+            ["second", 1]
+        ];
+
+        for (const [unit, size] of units) {
+            const value = Math.floor(seconds / size);
+            if (value >= 1) {
+                return value === 1 ? `1 ${unit} ago` : `${value} ${unit}s ago`;
+            }
         }
 
-        const seconds =
-            Math.max(
-                0,
-                Math.floor(
-                    (Date.now() - timestamp) /
-                    1000
-                )
-            );
-
-        if (seconds < 60) {
-            return "Updated just now";
-        }
-
-        const minutes =
-            Math.floor(seconds / 60);
-
-        if (minutes < 60) {
-            return `Updated ${minutes} ${
-                minutes === 1
-                    ? "minute"
-                    : "minutes"
-            } ago`;
-        }
-
-        const hours =
-            Math.floor(minutes / 60);
-
-        if (hours < 24) {
-            return `Updated ${hours} ${
-                hours === 1
-                    ? "hour"
-                    : "hours"
-            } ago`;
-        }
-
-        const days =
-            Math.floor(hours / 24);
-
-        if (days < 30) {
-            return `Updated ${days} ${
-                days === 1
-                    ? "day"
-                    : "days"
-            } ago`;
-        }
-
-        const months =
-            Math.floor(days / 30);
-
-        if (months < 12) {
-            return `Updated ${months} ${
-                months === 1
-                    ? "month"
-                    : "months"
-            } ago`;
-        }
-
-        const years =
-            Math.floor(days / 365);
-
-        return `Updated ${years} ${
-            years === 1
-                ? "year"
-                : "years"
-        } ago`;
+        return "just now";
     }
 
     async function loadLatestCommit() {
-        if (!commitStatus) {
-            return;
-        }
+        if (!commitStatus || !commitLink) return;
 
         try {
-            const response =
-                await fetch(
-                    "/api/commit",
-                    {
-                        headers: {
-                            Accept:
-                                "application/json"
-                        },
-                        cache: "no-store"
-                    }
-                );
+            const response = await fetch("/api/commit", {
+                headers: { Accept: "application/json" },
+                cache: "no-store"
+            });
 
-            if (!response.ok) {
-                throw new Error(
-                    `HTTP ${response.status}`
-                );
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const commit = await response.json();
+            if (!/^[a-f0-9]{7,40}$/i.test(commit.sha || "") ||
+                !commit.shortSha || !commit.message || !commit.url) {
+                throw new Error("Commit metadata is incomplete");
             }
 
-            const commit =
-                await response.json();
-
-            if (
-                !commit.shortSha ||
-                !commit.message
-            ) {
-                throw new Error(
-                    "Commit metadata missing"
-                );
-            }
-
-            commitStatus.textContent =
-                commit.shortSha +
-                " · " +
-                commit.message;
+            commitStatus.textContent = commit.shortSha;
+            commitMessage.textContent = commit.message;
+            commitLink.href = commit.url;
+            commitLink.title = `Commit ${commit.sha}`;
 
             if (commitTime) {
-                commitTime.textContent =
-                    commit.date
-                        ? relativeTime(commit.date)
-                        : "Current deployment";
+                const relative = commit.date ? relativeTime(commit.date) : null;
+                commitTime.textContent = relative || "Commit date unavailable";
+                if (commit.date) {
+                    commitTime.dateTime = commit.date;
+                    commitTime.title = new Date(commit.date).toLocaleString();
+                } else {
+                    commitTime.removeAttribute("datetime");
+                    commitTime.removeAttribute("title");
+                }
             }
 
+            if (commitSource) {
+                commitSource.textContent = commit.source === "deployment"
+                    ? "Deployed revision"
+                    : "Latest repository revision";
+            }
         } catch (error) {
-            console.warn(
-                "Typace commit API error:",
-                error
-            );
-
-            commitStatus.textContent =
-                "Latest commit unavailable";
-
-            if (commitTime) {
-                commitTime.textContent =
-                    "Commit time unavailable";
-            }
+            console.warn("Typace commit API error:", error);
+            commitStatus.textContent = "Unavailable";
+            if (commitMessage) commitMessage.textContent = "Could not load source revision";
+            if (commitTime) commitTime.textContent = "Commit time unavailable";
+            if (commitSource) commitSource.textContent = "Status unavailable";
+            commitLink.href = "https://github.com/aceyash-dev/Typace";
         }
     }
 

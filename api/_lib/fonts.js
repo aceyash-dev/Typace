@@ -8,89 +8,52 @@ export const FONT_TYPES = {
     ".woff2": { type: "woff2", format: "woff2" }
 };
 
-const NEW_FONT_WINDOW_MS = 10 * 24 * 60 * 60 * 1000;
-const GITHUB_REPOSITORY = "aceyash-dev/Typace";
-const historyCache = new Map();
 const categoryCache = new Map();
 
-function inferCategory(name) {
-    const value = String(name).toLowerCase();
-
-    if (/(^|[^a-z])(mono|monospace|typewriter|terminal|code)([^a-z]|$)/.test(value)) {
-        return "monospace";
-    }
-
-    if (/(^|[^a-z])(script|hand|handwritten|handwriting|brush|calligraphy|signature|marker|cursive)([^a-z]|$)/.test(value)) {
-        return "handwritten";
-    }
-
-    if (/(^|[^a-z])(serif|slab|roman|bookman|antiqua)([^a-z]|$)/.test(value)) {
-        return "serif";
-    }
-
-    if (/(^|[^a-z])(sans|grotesk|grotesque|humanist|geometric)([^a-z]|$)/.test(value)) {
-        return "sans-serif";
-    }
-
-    return "display";
-}
-
 async function readPanose(filePath) {
-    if (categoryCache.has(filePath)) {
-        return categoryCache.get(filePath);
-    }
+    if (categoryCache.has(filePath)) return categoryCache.get(filePath);
 
     const promise = (async () => {
+        let handle;
         try {
-            const buffer = await fs.readFile(filePath);
+            handle = await fs.open(filePath, "r");
+            const header = Buffer.alloc(12);
+            const firstRead = await handle.read(header, 0, header.length, 0);
+            if (firstRead.bytesRead !== header.length) return null;
 
-            if (buffer.length < 12 || buffer.toString("ascii", 0, 4) === "ttcf") {
-                return null;
-            }
+            const signature = header.toString("hex", 0, 4);
+            if (!["00010000", "4f54544f", "74727565", "74797031"].includes(signature)) return null;
 
-            const numTables = buffer.readUInt16BE(4);
+            const tableCount = header.readUInt16BE(4);
+            if (tableCount < 1 || tableCount > 4096) return null;
 
-            for (let index = 0; index < numTables; index++) {
-                const offset = 12 + index * 16;
+            const directory = Buffer.alloc(tableCount * 16);
+            const directoryRead = await handle.read(directory, 0, directory.length, 12);
+            if (directoryRead.bytesRead !== directory.length) return null;
 
-                if (offset + 16 > buffer.length) {
-                    break;
-                }
+            for (let index = 0; index < tableCount; index++) {
+                const offset = index * 16;
+                if (directory.toString("ascii", offset, offset + 4) !== "OS/2") continue;
 
-                const tag = buffer.toString("ascii", offset, offset + 4);
+                const tableOffset = directory.readUInt32BE(offset + 8);
+                const tableLength = directory.readUInt32BE(offset + 12);
+                if (tableLength < 42 || tableOffset + 42 > 0xffffffff) return null;
 
-                if (tag !== "OS/2") {
-                    continue;
-                }
+                const os2 = Buffer.alloc(42);
+                const tableRead = await handle.read(os2, 0, os2.length, tableOffset);
+                if (tableRead.bytesRead !== os2.length) return null;
 
-                const tableOffset = buffer.readUInt32BE(offset + 8);
-                const tableLength = buffer.readUInt32BE(offset + 12);
-
-                if (tableOffset + 42 > buffer.length || tableLength < 42) {
-                    return null;
-                }
-
-                const familyType = buffer[tableOffset + 32];
-                const serifStyle = buffer[tableOffset + 33];
-
-                if (familyType !== 2) {
-                    return null;
-                }
-
-                if ([11, 12, 13, 15].includes(serifStyle)) {
-                    return "sans-serif";
-                }
-
-                if ([2, 3, 4, 5, 6, 7, 8, 9, 10, 14].includes(serifStyle)) {
-                    return "serif";
-                }
-
+                if (os2[32] !== 2) return null;
+                const serifStyle = os2[33];
+                if ([11, 12, 13].includes(serifStyle)) return "sans-serif";
+                if ([2, 3, 4, 5, 6, 7, 8, 9, 10].includes(serifStyle)) return "serif";
                 return null;
             }
         } catch {
             return null;
+        } finally {
+            if (handle) await handle.close().catch(() => {});
         }
-
         return null;
     })();
 
@@ -98,68 +61,16 @@ async function readPanose(filePath) {
     return promise;
 }
 
-async function getFontCategory(filePath, name) {
-    return (
-        await readPanose(filePath) ||
-        inferCategory(name)
-    );
-}
-
-function githubHeaders() {
-    const token =
-        process.env.GITHUB_PAT ||
-        process.env.GITHUB_TOKEN;
-
-    return {
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-    };
-}
-
-async function getGitHubFontDate(file) {
-    if (historyCache.has(file)) {
-        return historyCache.get(file);
-    }
-
-    const promise = (async () => {
-        const encodedPath = file
-            .split("/")
-            .map(encodeURIComponent)
-            .join("/");
-
-        const url =
-            `https://api.github.com/repos/${GITHUB_REPOSITORY}/commits?path=fonts/${encodedPath}&per_page=1`;
-
-        const response = await fetch(url, {
-            headers: githubHeaders(),
-            cache: "no-store"
-        });
-
-        if (!response.ok) {
-            return null;
-        }
-
-        const commits = await response.json();
-        const commit = Array.isArray(commits) ? commits[0] : null;
-
-        return (
-            commit?.commit?.author?.date ||
-            commit?.commit?.committer?.date ||
-            null
-        );
-    })().catch(() => null);
-
-    historyCache.set(file, promise);
-    return promise;
+async function getFontCategory(filePath) {
+    return (await readPanose(filePath)) || "unknown";
 }
 
 export function normalize(value = "") {
     return String(value)
-        .toLowerCase()
         .normalize("NFKD")
-        .replace(/[\\u0300-\\u036f]/g, "")
-        .replace(/\\.(ttf|otf|woff2?|)$/i, "")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/\.(ttf|otf|woff2?)$/i, "")
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
 }
@@ -202,53 +113,18 @@ async function getFontMetadata(entry) {
     const extension = path.extname(fileName).toLowerCase();
     const metadata = FONT_TYPES[extension];
     const name = fileName.slice(0, -extension.length).trim();
-    const stats = await fs.stat(absolutePath);
-
-    const filesystemCreated = Number.isFinite(stats.birthtimeMs)
-        ? stats.birthtimeMs
-        : 0;
-
-    const filesystemUpdated = Number.isFinite(stats.mtimeMs)
-        ? stats.mtimeMs
-        : 0;
-
-    const githubDate = await getGitHubFontDate(relativePath);
-    const githubTime = githubDate ? Date.parse(githubDate) : 0;
-
-    const updatedTime =
-        githubTime ||
-        filesystemUpdated ||
-        filesystemCreated;
-
-    const createdTime =
-        githubTime ||
-        filesystemCreated ||
-        filesystemUpdated;
-
-    const isNew =
-        createdTime > 0 &&
-        Date.now() - createdTime <= NEW_FONT_WINDOW_MS;
-
     return {
         name,
         file: relativePath.split(path.sep).join("/"),
         type: metadata.type,
         format: metadata.format,
-        category: await getFontCategory(
-            absolutePath,
-            name
-        ),
+        category: await getFontCategory(absolutePath),
         url: `/fonts/${relativePath
             .split(path.sep)
             .map(encodeURIComponent)
             .join("/")}`,
-        createdAt: createdTime
-            ? new Date(createdTime).toISOString()
-            : null,
-        updatedAt: updatedTime
-            ? new Date(updatedTime).toISOString()
-            : null,
-        ...(isNew ? { isNew: true } : {})
+        createdAt: null,
+        updatedAt: null
     };
 }
 
@@ -256,29 +132,32 @@ export async function listFonts() {
     const fontsDirectory = path.join(process.cwd(), "fonts");
     const entries = await readFontFiles(fontsDirectory);
 
-    const fonts = await Promise.all(
-        entries.map(getFontMetadata)
-    );
+    const fonts = [];
+    const batchSize = 16;
 
-    return fonts.sort(
-        (a, b) =>
-            (Date.parse(b.createdAt || "") || 0) -
-            (Date.parse(a.createdAt || "") || 0)
-    );
+    for (let index = 0; index < entries.length; index += batchSize) {
+        const batch = entries.slice(index, index + batchSize);
+        fonts.push(...await Promise.all(batch.map(getFontMetadata)));
+    }
+
+    return fonts.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 }
 
 export function findFont(fonts, slug) {
-    const target = normalize(
-        decodeURIComponent(slug || "")
-    );
+    let decoded = "";
+    try {
+        decoded = decodeURIComponent(Array.isArray(slug) ? slug[0] || "" : slug || "");
+    } catch {
+        return null;
+    }
 
-    return (
-        fonts.find(font =>
-            normalize(font.name) === target ||
-            normalize(font.file) === target ||
-            normalize(
-                font.file.replace(/\\.[^.]+$/, "")
-            ) === target
-        ) || null
-    );
+    const target = normalize(decoded);
+    if (!target) return null;
+
+    return fonts.find(font => {
+        const filename = String(font.file || "").split("/").pop() || "";
+        return normalize(font.name) === target ||
+            normalize(filename) === target ||
+            normalize(font.file) === target;
+    }) || null;
 }
