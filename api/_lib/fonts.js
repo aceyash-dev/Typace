@@ -9,6 +9,10 @@ export const FONT_TYPES = {
 };
 
 const categoryCache = new Map();
+const CATALOG_CACHE_TTL_MS = 30_000;
+let cachedCatalog = null;
+let cachedCatalogAt = 0;
+let catalogPromise = null;
 
 async function readPanose(filePath) {
     if (categoryCache.has(filePath)) return categoryCache.get(filePath);
@@ -128,10 +132,9 @@ async function getFontMetadata(entry) {
     };
 }
 
-export async function listFonts() {
+async function buildCatalog() {
     const fontsDirectory = path.join(process.cwd(), "fonts");
     const entries = await readFontFiles(fontsDirectory);
-
     const fonts = [];
     const batchSize = 16;
 
@@ -141,6 +144,31 @@ export async function listFonts() {
     }
 
     return fonts.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+}
+
+export async function listFonts() {
+    if (cachedCatalog && Date.now() - cachedCatalogAt < CATALOG_CACHE_TTL_MS) {
+        return cachedCatalog;
+    }
+
+    if (!catalogPromise) {
+        catalogPromise = buildCatalog()
+            .then(fonts => {
+                cachedCatalog = fonts;
+                cachedCatalogAt = Date.now();
+                return fonts;
+            })
+            .catch(error => {
+                cachedCatalog = null;
+                cachedCatalogAt = 0;
+                throw error;
+            })
+            .finally(() => {
+                catalogPromise = null;
+            });
+    }
+
+    return catalogPromise;
 }
 
 export function findFont(fonts, slug) {
