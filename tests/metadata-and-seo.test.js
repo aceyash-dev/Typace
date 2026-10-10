@@ -246,3 +246,13 @@ test("font display controls expose their selected state to assistive technology"
     assert.match(html, /data-view="peeks"[\s\S]*?aria-pressed="false"/);
     assert.match(html, /button\.setAttribute\("aria-pressed", String\(active\)\)/);
 });
+
+test("font preview bento layout is mobile-first and isolated from About", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(html, /#previewHero\s*\{\s*display:\s*grid;\s*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+    assert.match(html, /@media\s*\(min-width:\s*760px\)\s*\{\s*#previewHero\s*\{\s*grid-template-columns:/);
+    assert.doesNotMatch(html, /\.preview-hero\s*>\s*\.preview-display/);
+    assert.doesNotMatch(html, /\.preview-hero\s*>\s*\.preview-controls/);
+    assert.match(html, /\.preview-header\s*\{\s*display:\s*flex/);
+    assert.match(html, /#previewOverlay\s+\.preview-header\s*\{\s*display:\s*grid/);
+});
