@@ -1582,117 +1582,87 @@
         }
 
         .preview-header {
-            display: flex;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
             align-items: center;
-
-            gap: .6rem;
-
+            gap: .7rem;
             margin-bottom: 1rem;
         }
 
         .back-button {
             display: inline-flex;
             align-items: center;
-
-            gap: .25rem;
-
-            min-height: 42px;
-
-            padding: .3rem .8rem;
-
+            justify-content: center;
+            gap: .3rem;
+            min-height: 44px;
+            padding: .45rem .85rem;
             border: 1px solid var(--border);
             border-radius: 999px;
-
             background: var(--surface);
             color: var(--text);
-
             font-size: .8rem;
-
             box-shadow: var(--shadow);
-
-            transition:
-                transform .25s var(--spring),
-                border-color .18s ease,
-                box-shadow .25s ease;
+            transition: transform .2s var(--spring), border-color .18s ease, box-shadow .2s ease;
         }
 
         .back-button:hover {
-            transform:
-                translateX(-2px)
-                translateY(-2px);
-
+            transform: translateY(-2px);
             border-color: var(--accent);
-
             box-shadow: var(--shadow-hover);
         }
 
-        .back-button:active {
-            transform: scale(.93);
-        }
-
-        .back-button svg {
-            width: 17px;
-            height: 17px;
-        }
+        .back-button:active { transform: scale(.96); }
+        .back-button svg { width: 17px; height: 17px; flex: 0 0 auto; }
 
         .preview-title {
             min-width: 0;
-
-            flex: 1;
-
             overflow-wrap: anywhere;
-            word-break: break-word;
-
             text-align: left;
-
-            font-size:
-                clamp(1.05rem, 4vw, 1.45rem);
-
-            font-weight: 700;
+            font-size: clamp(1rem, 3.5vw, 1.4rem);
+            font-weight: 750;
+            line-height: 1.2;
         }
 
         .download-button {
             display: inline-flex;
             align-items: center;
-
-            gap: .3rem;
-
-            min-height: 42px;
-
-            padding: .3rem .9rem;
-
+            justify-content: center;
+            gap: .45rem;
+            min-height: 44px;
+            padding: .55rem 1rem;
             border-radius: 999px;
-
             background: var(--accent);
             color: #fff;
-
-            font-size: .75rem;
-            font-weight: 600;
-
-            box-shadow:
-                0 5px 18px var(--accent-soft);
-
-            transition:
-                transform .25s var(--spring),
-                box-shadow .25s ease;
+            font-size: .78rem;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 5px 18px var(--accent-soft);
+            transition: transform .2s var(--spring), box-shadow .2s ease;
         }
 
         .download-button:hover {
-            transform:
-                translateY(-2px)
-                scale(1.025);
-
-            box-shadow:
-                0 8px 25px var(--accent-soft);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-soft);
         }
 
-        .download-button:active {
-            transform: scale(.92);
-        }
+        .download-button:active { transform: scale(.96); }
+        .download-button svg { width: 16px; height: 16px; flex: 0 0 auto; }
 
-        .download-button svg {
-            width: 16px;
-            height: 16px;
+        @media (max-width: 520px) {
+            .preview-header {
+                grid-template-columns: auto minmax(0, 1fr);
+                gap: .55rem;
+            }
+
+            .preview-title { font-size: 1.05rem; }
+
+            .preview-header .download-button {
+                grid-column: 1 / -1;
+                width: 100%;
+                min-height: 48px;
+                justify-content: center;
+                margin-top: .1rem;
+            }
         }
 
         .scroll-top {
