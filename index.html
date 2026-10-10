@@ -1582,11 +1582,16 @@
         }
 
         .preview-header {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            margin-bottom: 1rem;
+        }
+
+        #previewOverlay .preview-header {
             display: grid;
             grid-template-columns: auto minmax(0, 1fr) auto;
-            align-items: center;
             gap: .7rem;
-            margin-bottom: 1rem;
         }
 
         .back-button {
@@ -1616,6 +1621,7 @@
 
         .preview-title {
             min-width: 0;
+            flex: 1;
             overflow-wrap: anywhere;
             text-align: left;
             font-size: clamp(1rem, 3.5vw, 1.4rem);
@@ -1649,14 +1655,14 @@
         .download-button svg { width: 16px; height: 16px; flex: 0 0 auto; }
 
         @media (max-width: 520px) {
-            .preview-header {
+            #previewOverlay .preview-header {
                 grid-template-columns: auto minmax(0, 1fr);
                 gap: .55rem;
             }
 
-            .preview-title { font-size: 1.05rem; }
+            #previewOverlay .preview-title { font-size: 1.05rem; }
 
-            .preview-header .download-button {
+            #previewOverlay .preview-header .download-button {
                 grid-column: 1 / -1;
                 width: 100%;
                 min-height: 48px;
@@ -1695,25 +1701,30 @@
         ===================================================== */
 
         .preview-hero {
-            display: grid;
-            grid-template-columns: minmax(0, 1.35fr) minmax(220px, .85fr);
-            align-items: start;
-            gap: .9rem;
             padding: clamp(.85rem, 3vw, 1.35rem);
             border: 1px solid var(--border);
             border-radius: clamp(22px, 5vw, 34px);
-            background:
-                radial-gradient(ellipse at 95% 0%, var(--accent-soft), transparent 42%),
-                var(--surface);
+            background: var(--surface);
             box-shadow: var(--shadow);
             overflow: hidden;
         }
 
-        .preview-hero > .preview-name {
+        /* Bento layout is exclusive to the font preview, not About. */
+        #previewHero {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            align-items: start;
+            gap: .9rem;
+            background:
+                radial-gradient(ellipse at 95% 0%, var(--accent-soft), transparent 42%),
+                var(--surface);
+        }
+
+        #previewHero > .preview-name {
             grid-column: 1 / -1;
         }
 
-        .preview-hero > .preview-display {
+        #previewHero > .preview-display {
             grid-column: 1 / -1;
             width: 100%;
             min-width: 0;
@@ -1721,12 +1732,12 @@
             border-radius: 22px;
         }
 
-        .preview-hero > .preview-edit-hint {
+        #previewHero > .preview-edit-hint {
             grid-column: 1 / -1;
             margin-top: -.35rem;
         }
 
-        .preview-hero > .preview-backgrounds {
+        #previewHero > .preview-backgrounds {
             grid-column: 1 / -1;
             display: flex;
             flex-wrap: wrap;
@@ -1738,7 +1749,7 @@
             background: color-mix(in srgb, var(--surface) 84%, var(--bg));
         }
 
-        .preview-hero > .preview-controls {
+        #previewHero > .preview-controls {
             grid-column: 1 / -1;
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1749,7 +1760,7 @@
             background: color-mix(in srgb, var(--surface) 88%, var(--bg));
         }
 
-        .preview-hero .control {
+        #previewHero .control {
             min-width: 0;
             padding: .8rem;
             border: 1px solid var(--border);
@@ -1758,42 +1769,42 @@
         }
 
         @media (min-width: 760px) {
-            .preview-hero {
+            #previewHero {
                 grid-template-columns: minmax(0, 1.4fr) minmax(240px, .8fr);
                 gap: 1rem;
             }
 
-            .preview-hero > .preview-display {
+            #previewHero > .preview-display {
                 grid-column: 1;
                 grid-row: span 2;
                 align-self: stretch;
                 min-height: 280px;
             }
 
-            .preview-hero > .preview-edit-hint,
-            .preview-hero > .preview-backgrounds,
-            .preview-hero > .preview-controls {
+            #previewHero > .preview-edit-hint,
+            #previewHero > .preview-backgrounds,
+            #previewHero > .preview-controls {
                 grid-column: 2;
             }
 
-            .preview-hero > .preview-edit-hint {
+            #previewHero > .preview-edit-hint {
                 grid-row: 2;
                 margin-top: -.6rem;
             }
 
-            .preview-hero > .preview-backgrounds {
+            #previewHero > .preview-backgrounds {
                 grid-row: 3;
                 align-self: start;
             }
 
-            .preview-hero > .preview-controls {
+            #previewHero > .preview-controls {
                 grid-row: 4;
                 grid-template-columns: minmax(0, 1fr);
             }
         }
 
         @media (max-width: 520px) {
-            .preview-hero > .preview-controls {
+            #previewHero > .preview-controls {
                 grid-template-columns: minmax(0, 1fr);
             }
         }
