@@ -2420,6 +2420,72 @@
         }
 
         /* =====================================================
+           INTERACTION POLISH
+        ===================================================== */
+
+        :where(button, a, input, [role="button"], [contenteditable="true"]) {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :where(button, a, input, [role="button"], [contenteditable="true"]):focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 4px;
+        }
+
+        .social-link {
+            min-height: 58px;
+        }
+
+        .social-link:focus-visible,
+        .font-card:focus-visible {
+            box-shadow: 0 0 0 6px var(--accent-soft);
+        }
+
+        .retry-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            margin-top: .85rem;
+            padding: .65rem 1rem;
+            border: 1px solid var(--accent);
+            border-radius: 999px;
+            background: var(--accent);
+            color: #fff;
+            font-size: .8rem;
+            font-weight: 700;
+            transition: transform .2s var(--spring), box-shadow .2s ease;
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .retry-button:active {
+            transform: scale(.97);
+        }
+
+        .font-list[aria-busy="true"] {
+            opacity: .82;
+        }
+
+        .preview-overlay[aria-hidden="true"] {
+            pointer-events: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+            }
+        }
+
+        /* =====================================================
            FOCUS
         ===================================================== */
 
@@ -2856,6 +2922,7 @@
                     class="view-button active"
                     data-view="cards"
                     type="button"
+                    aria-pressed="true"
                 >
                     Cards
                 </button>
@@ -2864,6 +2931,7 @@
                     class="view-button"
                     data-view="peeks"
                     type="button"
+                    aria-pressed="false"
                 >
                     Peeks
                 </button>
@@ -3006,6 +3074,7 @@
                     href="https://aero.aryankaushik.space/d/tabgl"
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label="Join Dock community (opens in a new tab)"
                 >
                     <span class="social-name">
                         Join Dock
@@ -4304,6 +4373,8 @@
                     ? "font"
                     : "fonts"
             }`;
+        stats.setAttribute("aria-live", "polite");
+        stats.setAttribute("aria-atomic", "true");
 
         fontList.classList.toggle(
             "peeks",
@@ -4315,8 +4386,21 @@
         ) {
             loadStatus.textContent = "";
 
-            fontList.innerHTML =
-                emptyState();
+            fontList.innerHTML = emptyState();
+
+            if (state.search.trim()) {
+                const clearButton = document.createElement("button");
+                clearButton.type = "button";
+                clearButton.className = "retry-button";
+                clearButton.textContent = "Clear search";
+                clearButton.addEventListener("click", () => {
+                    searchInput.value = "";
+                    state.search = "";
+                    render(true);
+                    searchInput.focus({ preventScroll: true });
+                });
+                fontList.querySelector(".empty")?.append(clearButton);
+            }
 
             return;
         }
@@ -4581,12 +4665,11 @@
                     state.view =
                         nextView;
 
-                    $$(".view-button")
+                    $(".view-button")
                         .forEach(item => {
-                            item.classList.toggle(
-                                "active",
-                                item === button
-                            );
+                            const active = item === button;
+                            item.classList.toggle("active", active);
+                            item.setAttribute("aria-pressed", String(active));
                         });
 
                     updateViewSlider(
@@ -4617,13 +4700,11 @@
         state.view =
             savedView;
 
-        $$(".view-button")
+        $(".view-button")
             .forEach(button => {
-                button.classList.toggle(
-                    "active",
-                    button.dataset.view ===
-                        state.view
-                );
+                const active = button.dataset.view === state.view;
+                button.classList.toggle("active", active);
+                button.setAttribute("aria-pressed", String(active));
             });
     }
 
@@ -4688,44 +4769,33 @@
        OVERLAY HELPERS
     ======================================================== */
 
-    function openOverlay(
-        overlay
-    ) {
-        overlay.classList.add(
-            "active"
-        );
+    let overlayReturnFocus = null;
 
-        overlay.setAttribute(
-            "aria-hidden",
-            "false"
-        );
+    function openOverlay(overlay) {
+        overlayReturnFocus = document.activeElement;
+        overlay.classList.add("active");
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
 
-        document.body.style.overflow =
-            "hidden";
+        const firstFocusable = overlay.querySelector(
+            "button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex='-1'])"
+        );
+        firstFocusable?.focus({ preventScroll: true });
     }
 
-    function closeOverlay(
-        overlay
-    ) {
-        overlay.classList.remove(
-            "active"
-        );
-
-        overlay.setAttribute(
-            "aria-hidden",
-            "true"
-        );
+    function closeOverlay(overlay) {
+        overlay.classList.remove("active");
+        overlay.setAttribute("aria-hidden", "true");
 
         if (
-            !previewOverlay.classList.contains(
-                "active"
-            ) &&
-            !aboutOverlay.classList.contains(
-                "active"
-            )
+            !previewOverlay.classList.contains("active") &&
+            !aboutOverlay.classList.contains("active")
         ) {
-            document.body.style.overflow =
-                "";
+            document.body.style.overflow = "";
+            if (overlayReturnFocus instanceof HTMLElement && overlayReturnFocus.isConnected) {
+                overlayReturnFocus.focus({ preventScroll: true });
+            }
+            overlayReturnFocus = null;
         }
     }
 
@@ -5120,68 +5190,65 @@
        COPY
     ======================================================== */
 
-    async function copyText(
-        text,
-        button,
-        original
-    ) {
-        if (!text) {
+    async function copyText(text, button, original) {
+        if (!text || !button) return;
+
+        let copied = false;
+        try {
+            if (navigator.clipboard?.writeText && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                copied = true;
+            }
+        } catch (error) {
+            console.warn("Clipboard API unavailable; using fallback:", error);
+        }
+
+        if (!copied) copied = fallbackCopy(text);
+
+        if (!copied) {
+            button.textContent = "Copy failed";
+            button.setAttribute("aria-label", "Copy failed. Select and copy the text manually.");
+            setTimeout(() => {
+                button.textContent = original;
+                button.removeAttribute("aria-label");
+            }, 1800);
             return;
         }
 
-        try {
-            await navigator.clipboard.writeText(
-                text
-            );
-        } catch {
-            fallbackCopy(text);
-        }
-
-        button.textContent =
-            "Copied";
-
-        button.classList.add(
-            "copied"
-        );
+        button.textContent = "Copied";
+        button.classList.add("copied");
+        button.setAttribute("aria-live", "polite");
 
         setTimeout(() => {
-            button.textContent =
-                original;
-
-            button.classList.remove(
-                "copied"
-            );
-        }, 1200);
+            button.textContent = original;
+            button.classList.remove("copied");
+            button.removeAttribute("aria-live");
+        }, 1400);
     }
 
     function fallbackCopy(text) {
-        const textarea =
-            document.createElement(
-                "textarea"
-            );
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.setAttribute("aria-hidden", "true");
+        textarea.style.position = "fixed";
+        textarea.style.top = "0";
+        textarea.style.left = "-9999px";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
 
-        textarea.value =
-            text;
-
-        textarea.style.position =
-            "fixed";
-
-        textarea.style.opacity =
-            "0";
-
-        document.body.appendChild(
-            textarea
-        );
-
-        textarea.select();
-
+        let copied = false;
         try {
-            document.execCommand(
-                "copy"
-            );
+            textarea.focus({ preventScroll: true });
+            textarea.select();
+            copied = document.execCommand("copy");
+        } catch {
+            copied = false;
         } finally {
             textarea.remove();
         }
+
+        return copied;
     }
 
     copyCdn.addEventListener(
@@ -5282,48 +5349,55 @@
        KEYBOARD
     ======================================================== */
 
-    document.addEventListener(
-        "keydown",
-        event => {
-            if (
-                event.key !== "Escape"
-            ) {
+    document.addEventListener("keydown", event => {
+        const activeOverlay = previewOverlay.classList.contains("active")
+            ? previewOverlay
+            : aboutOverlay.classList.contains("active")
+                ? aboutOverlay
+                : null;
+
+        if (!activeOverlay) return;
+
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeOverlay(activeOverlay);
+            return;
+        }
+
+        if (event.key === "Tab") {
+            const focusable = [...activeOverlay.querySelectorAll(
+                "button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
+            )].filter(element => element.getClientRects().length > 0);
+
+            if (!focusable.length) {
+                event.preventDefault();
                 return;
             }
 
-            if (
-                previewOverlay.classList.contains(
-                    "active"
-                )
-            ) {
-                closeOverlay(
-                    previewOverlay
-                );
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
 
-                return;
-            }
-
-            if (
-                aboutOverlay.classList.contains(
-                    "active"
-                )
-            ) {
-                closeOverlay(
-                    aboutOverlay
-                );
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
             }
         }
-    );
+    });
 
     /* ========================================================
        API
     ======================================================== */
 
     async function loadFonts() {
+        if (state.loading) return;
         state.loading = true;
+        fontList.setAttribute("aria-busy", "true");
 
         loadStatus.innerHTML = `
-            <span class="spinner"></span>
+            <span class="spinner" aria-hidden="true"></span>
             Loading fonts…
         `;
 
@@ -5381,34 +5455,28 @@
             );
 
         } catch (error) {
-            console.error(
-                "Typace font API error:",
-                error
+            console.error("Typace font API error:", error);
+            state.loading = false;
+
+            fontList.className = `font-list ${state.view === "peeks" ? "peeks" : ""}`;
+            fontList.setAttribute("aria-busy", "false");
+            fontList.innerHTML = emptyState(
+                "Fonts couldn't load",
+                "The font index didn't respond. Check your connection, then try again."
             );
 
-            state.loading = false;
+            const retryButton = document.createElement("button");
+            retryButton.type = "button";
+            retryButton.className = "retry-button";
+            retryButton.textContent = "Try again";
+            retryButton.addEventListener("click", loadFonts);
+            fontList.querySelector(".empty")?.append(retryButton);
 
-            fontList.className =
-                `font-list ${
-                    state.view === "peeks"
-                        ? "peeks"
-                        : ""
-                }`;
-
-            fontList.innerHTML =
-                emptyState(
-                    "Fonts couldn't load",
-                    "The font index didn't respond. Check the API and try again."
-                );
-
-            stats.textContent =
-                "Unable to load fonts";
-
-            loadStatus.textContent =
-                "";
-
+            stats.textContent = "Unable to load fonts";
+            loadStatus.textContent = "";
         } finally {
             state.loading = false;
+            fontList.setAttribute("aria-busy", "false");
         }
     }
 
