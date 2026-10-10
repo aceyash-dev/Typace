@@ -1695,19 +1695,107 @@
         ===================================================== */
 
         .preview-hero {
-            padding:
-                clamp(1rem, 4vw, 1.8rem);
-
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(220px, .85fr);
+            align-items: start;
+            gap: .9rem;
+            padding: clamp(.85rem, 3vw, 1.35rem);
             border: 1px solid var(--border);
-
-            border-radius:
-                clamp(22px, 5vw, 34px);
-
-            background: var(--surface);
-
+            border-radius: clamp(22px, 5vw, 34px);
+            background:
+                radial-gradient(ellipse at 95% 0%, var(--accent-soft), transparent 42%),
+                var(--surface);
             box-shadow: var(--shadow);
-
             overflow: hidden;
+        }
+
+        .preview-hero > .preview-name {
+            grid-column: 1 / -1;
+        }
+
+        .preview-hero > .preview-display {
+            grid-column: 1 / -1;
+            width: 100%;
+            min-width: 0;
+            min-height: clamp(180px, 28vw, 270px);
+            border-radius: 22px;
+        }
+
+        .preview-hero > .preview-edit-hint {
+            grid-column: 1 / -1;
+            margin-top: -.35rem;
+        }
+
+        .preview-hero > .preview-backgrounds {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: .45rem;
+            padding: .65rem;
+            margin-top: 0;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: color-mix(in srgb, var(--surface) 84%, var(--bg));
+        }
+
+        .preview-hero > .preview-controls {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .7rem;
+            padding: .85rem;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: color-mix(in srgb, var(--surface) 88%, var(--bg));
+        }
+
+        .preview-hero .control {
+            min-width: 0;
+            padding: .8rem;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--surface);
+        }
+
+        @media (min-width: 760px) {
+            .preview-hero {
+                grid-template-columns: minmax(0, 1.4fr) minmax(240px, .8fr);
+                gap: 1rem;
+            }
+
+            .preview-hero > .preview-display {
+                grid-column: 1;
+                grid-row: span 2;
+                align-self: stretch;
+                min-height: 280px;
+            }
+
+            .preview-hero > .preview-edit-hint,
+            .preview-hero > .preview-backgrounds,
+            .preview-hero > .preview-controls {
+                grid-column: 2;
+            }
+
+            .preview-hero > .preview-edit-hint {
+                grid-row: 2;
+                margin-top: -.6rem;
+            }
+
+            .preview-hero > .preview-backgrounds {
+                grid-row: 3;
+                align-self: start;
+            }
+
+            .preview-hero > .preview-controls {
+                grid-row: 4;
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        @media (max-width: 520px) {
+            .preview-hero > .preview-controls {
+                grid-template-columns: minmax(0, 1fr);
+            }
         }
 
         .preview-overlay.active .preview-hero {
