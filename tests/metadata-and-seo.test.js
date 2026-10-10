@@ -214,3 +214,35 @@ test("catalog endpoint returns 429 after ten requests from one IP", async () => 
     assert.equal(response.headers["RateLimit-Remaining"], "0");
     assert.ok(Number(response.headers["Retry-After"]) >= 1);
 });
+
+
+test("Join Dock points to the configured community and has safe new-tab attributes", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(html, /href="https:\\/\\/aero\\.aryankaushik\\.space\\/d\\/tabgl"/);
+    assert.match(html, /aria-label="Join Dock community \\(opens in a new tab\\)"/);
+    assert.match(html, /rel="noopener noreferrer"/);
+    assert.doesNotMatch(html, /Help us keep Typace ad-free|Support ↗/);
+});
+
+test("overlays support focus restoration and keyboard focus containment", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(html, /overlayReturnFocus/);
+    assert.match(html, /event\.key === "Tab"/);
+    assert.match(html, /event\.key === "Escape"/);
+    assert.match(html, /focus\(\{ preventScroll: true \}\)/);
+});
+
+test("font API failures expose a retry action and copy failures are reported", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(html, /Try again/);
+    assert.match(html, /Copy failed/);
+    assert.match(html, /fallbackCopy\(text\)/);
+    assert.match(html, /Clear search/);
+});
+
+test("font display controls expose their selected state to assistive technology", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(html, /data-view="cards"[\s\S]*?aria-pressed="true"/);
+    assert.match(html, /data-view="peeks"[\s\S]*?aria-pressed="false"/);
+    assert.match(html, /button\.setAttribute\("aria-pressed", String\(active\)\)/);
+});
