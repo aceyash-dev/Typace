@@ -218,8 +218,8 @@ test("catalog endpoint returns 429 after ten requests from one IP", async () => 
 
 test("Join Dock points to the configured community and has safe new-tab attributes", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /href="https:\\/\\/aero\\.aryankaushik\\.space\\/d\\/tabgl"/);
-    assert.match(html, /aria-label="Join Dock community \(opens in a new tab\)"/);
+    assert.ok(html.includes('href="https://aero.aryankaushik.space/d/tabgl"'));
+    assert.ok(html.includes('aria-label="Join Dock community (opens in a new tab)"'));
     assert.match(html, /rel="noopener noreferrer"/);
     assert.doesNotMatch(html, /Help us keep Typace ad-free|Support ↗/);
 });
