@@ -275,8 +275,9 @@ test("recently added badge belongs to font cards, About is a sheet, and views st
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     assert.match(html, /font\.isNew\s*\?\s*'<span class="new-tag" aria-label="Recently added">New<\/span>'/);
     assert.doesNotMatch(html, /data-view="peeks"[\s\S]*?<span class="new-tag"/);
-    assert.match(html, /#aboutOverlay\s+\.preview-panel\s*\{[\s\S]*?position:\s*fixed;[\s\S]*?bottom:\s*0;[\s\S]*?max-height:\s*72dvh/);
-    assert.match(html, /#aboutOverlay\.active\s+\.preview-panel\s*\{\s*transform:\s*translate3d\(0,\s*0,\s*0\)/);
+    assert.match(html, /#aboutOverlay\s*\{[\s\S]*?align-items:\s*flex-end/);
+    assert.match(html, /#aboutOverlay\s+\.preview-panel\s*\{[\s\S]*?position:\s*relative;[\s\S]*?max-height:\s*72dvh/);
+    assert.match(html, /#aboutOverlay\.active\s+\.preview-panel\s*\{\s*transform:\s*translateY\(0\)/);
     assert.match(html, /\.font-list\.peeks\s+\.font-card/);
     assert.match(html, /setThemeBase\(theme\);[\s\S]*?setTimeout\(\(\)\s*=>\s*\{\s*html\.classList\.remove\("theme-transition"\);\s*\},\s*150\)/);
 });
