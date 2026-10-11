@@ -1,0 +1,5 @@
+Contact: https://ace-base.cc/
+Expires: 2027-10-11T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://typace.ace-base.cc/.well-known/security.txt
+Policy: https://typace.ace-base.cc/terms
