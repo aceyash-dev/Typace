@@ -290,9 +290,9 @@ test("font loading failures are retryable and card skeletons always settle", asy
 
 test("preview uses a request token to prevent stale font-load races", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /let previewRequestId = 0/);
-    assert.match(html, /requestId !== previewRequestId \|\| state\.previewFont !== font/);
-    assert.match(html, /state\.previewFace = null/);
+    assert.ok(html.includes("let previewRequestId = 0"));
+    assert.ok(html.includes("requestId !== previewRequestId || state.previewFont !== font"));
+    assert.ok(html.includes("state.previewFace = null"));
 });
 
 test("overlays cannot stack and preview download avoids needless new tabs", async () => {
