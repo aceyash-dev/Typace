@@ -821,6 +821,20 @@
             color: #fff;
         }
 
+        /* Keep the active pill visibly rendered even if slider initialization fails. */
+        .view-button.active::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            border-radius: inherit;
+            background: var(--accent);
+        }
+
+        .view-button.active {
+            isolation: isolate;
+        }
+
         /* =====================================================
            SLIDING VIEW TAB
         ===================================================== */
@@ -5464,74 +5478,49 @@
         if (state.loading) return;
         state.loading = true;
         fontList.setAttribute("aria-busy", "true");
-
         loadStatus.innerHTML = `
             <span class="spinner" aria-hidden="true"></span>
             Loading fonts…
         `;
 
         try {
-            const response =
-                await fetch(
-                    API_URL,
-                    {
-                        headers: {
-                            Accept:
-                                "application/json"
-                        },
-                        cache:
-                            "no-store"
-                    }
-                );
+            const response = await fetch(API_URL, {
+                headers: { Accept: "application/json" },
+                cache: "no-store"
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-            if (!response.ok) {
-                throw new Error(
-                    `HTTP ${response.status}`
-                );
+            const data = await response.json();
+            const rawFonts = Array.isArray(data)
+                ? data
+                : Array.isArray(data?.fonts)
+                    ? data.fonts
+                    : Array.isArray(data?.data)
+                        ? data.data
+                        : [];
+
+            const fonts = rawFonts
+                .map(normalizeFont)
+                .filter(font => font && font.file);
+
+            if (!fonts.length) {
+                throw new Error("Font API returned no usable font records");
             }
 
-            const data =
-                await response.json();
-
-            const rawFonts =
-                Array.isArray(data)
-                    ? data
-                    : Array.isArray(
-                        data.fonts
-                    )
-                        ? data.fonts
-                        : Array.isArray(
-                            data.data
-                        )
-                            ? data.data
-                            : [];
-
-            state.fonts =
-                rawFonts
-                    .map(normalizeFont)
-                    .filter(
-                        font =>
-                            font &&
-                            font.file
-                    );
-
+            state.fonts = fonts;
             state.loading = false;
-
             render(true);
-
-            requestAnimationFrame(
-                updateActiveSliders
-            );
-
+            requestAnimationFrame(updateActiveSliders);
         } catch (error) {
             console.error("Typace font API error:", error);
-            state.loading = false;
-
+            state.fonts = [];
+            state.filtered = [];
+            state.rendered = 0;
             fontList.className = `font-list ${state.view === "peeks" ? "peeks" : ""}`;
             fontList.setAttribute("aria-busy", "false");
             fontList.innerHTML = emptyState(
                 "Fonts couldn't load",
-                "The font index didn't respond. Check your connection, then try again."
+                "The font list failed to initialize. Check your connection and retry."
             );
 
             const retryButton = document.createElement("button");
@@ -5540,7 +5529,6 @@
             retryButton.textContent = "Try again";
             retryButton.addEventListener("click", loadFonts);
             fontList.querySelector(".empty")?.append(retryButton);
-
             stats.textContent = "Unable to load fonts";
             loadStatus.textContent = "";
         } finally {
@@ -5569,10 +5557,8 @@
        START
     ======================================================== */
 
-    requestAnimationFrame(
-        updateActiveSliders
-    );
-
+    // Start the catalog request before any non-critical late-page initialization.
+    requestAnimationFrame(updateActiveSliders);
     loadFonts();
 
     /* ========================================================
