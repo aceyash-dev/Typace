@@ -1,4 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import Icon from "./components/Icon.jsx";
+import FontCard from "./components/FontCard.jsx";
+import PreviewDialog from "./components/PreviewDialog.jsx";
+import { copyText, formatCount, normalize, usableFont } from "./lib/fonts.js";
 
 const API = "/api/fonts";
 const CATEGORIES = [
@@ -7,187 +12,6 @@ const CATEGORIES = [
   { value: "sans-serif", label: "Sans serif" },
   { value: "unknown", label: "Unclassified" }
 ];
-const fontLoadPromises = new Map();
-
-function Icon({ name, className = "" }) {
-  return <i aria-hidden="true" className={"hgi hgi-stroke hgi-" + name + (className ? " " + className : "")} />;
-}
-
-function normalize(value) {
-  return String(value || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
-
-function familyFor(font) {
-  return "Typace-" + normalize(font.file || font.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
-
-function usableFont(value) {
-  if (!value || typeof value !== "object") return false;
-  if (typeof value.name !== "string" || typeof value.file !== "string") return false;
-  if (!/^(ttf|otf|woff|woff2)$/i.test(String(value.type || ""))) return false;
-  return typeof value.url === "string" && value.url.startsWith("/fonts/") && !value.url.includes("..");
-}
-
-function fontUrl(font) {
-  return new URL(font.url, window.location.origin).href;
-}
-
-function loadFontFace(font) {
-  if (!usableFont(font) || !("FontFace" in window)) return Promise.resolve(false);
-  const family = familyFor(font);
-  const existing = fontLoadPromises.get(family);
-  if (existing) return existing;
-  const source = 'url("' + fontUrl(font).replace(/"/g, "%22") + '") format("' + String(font.format || "truetype") + '")';
-  const promise = new FontFace(family, source, { display: "swap" }).load().then((loaded) => {
-    document.fonts.add(loaded);
-    return true;
-  }).catch(() => {
-    fontLoadPromises.delete(family);
-    return false;
-  });
-  fontLoadPromises.set(family, promise);
-  return promise;
-}
-
-function useVisibleFont(font, enabled = true) {
-  const ref = useRef(null);
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    if (!enabled || !ref.current || !usableFont(font)) return undefined;
-    let active = true;
-    let observer;
-    const load = () => {
-      loadFontFace(font).then((result) => {
-        if (active) setLoaded(result);
-      });
-    };
-    if ("IntersectionObserver" in window) {
-      observer = new IntersectionObserver((entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          observer.disconnect();
-          load();
-        }
-      }, { rootMargin: "180px" });
-      observer.observe(ref.current);
-    } else {
-      load();
-    }
-    return () => {
-      active = false;
-      if (observer) observer.disconnect();
-    };
-  }, [font, enabled]);
-  return { ref, loaded };
-}
-
-async function copyText(value) {
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(value);
-      return true;
-    }
-  } catch {
-    // Fall through to the selection-based fallback.
-  }
-  const field = document.createElement("textarea");
-  field.value = value;
-  field.setAttribute("readonly", "");
-  field.style.position = "fixed";
-  field.style.opacity = "0";
-  document.body.appendChild(field);
-  field.select();
-  let copied = false;
-  try { copied = document.execCommand("copy"); } catch { copied = false; }
-  field.remove();
-  return copied;
-}
-
-function formatCount(value) {
-  return Number(value || 0).toLocaleString();
-}
-
-function FontCard({ font, onPreview, onCopy, copied }) {
-  const { ref, loaded } = useVisibleFont(font);
-  const family = familyFor(font);
-  const specimenStyle = loaded ? { fontFamily: '"' + family + '", sans-serif' } : undefined;
-  return (
-    <article className="font-card" ref={ref}>
-      <div className="font-card-top">
-        <span className="font-format">{String(font.type || "font").toUpperCase()}</span>
-        {font.isNew ? <span className="new-pill">NEW</span> : <span className="font-category">{font.category || "unknown"}</span>}
-      </div>
-      <button className="specimen-button" type="button" onClick={() => onPreview(font)} aria-label={"Preview " + font.name}>
-        <span className="specimen" style={specimenStyle}>Aa</span>
-        <span className="specimen-caption">The quick brown fox jumps over the lazy dog.</span>
-      </button>
-      <div className="font-card-bottom">
-        <div className="font-card-name">
-          <h2>{font.name}</h2>
-          <p>{font.file}</p>
-        </div>
-        <div className="font-card-actions">
-          <button className="icon-button" type="button" onClick={() => onCopy(font)} aria-label={"Copy CSS for " + font.name} title={copied ? "Copied" : "Copy CSS"}>
-            <Icon name={copied ? "checkmark-circle-02" : "copy-01"} />
-          </button>
-          <a className="icon-button" href={fontUrl(font)} download={String(font.file).split("/").pop()} aria-label={"Download " + font.name} title="Download font">
-            <Icon name="download-01" />
-          </a>
-          <button className="icon-button open-button" type="button" onClick={() => onPreview(font)} aria-label={"Open " + font.name + " preview"} title="Open preview">
-            <Icon name="arrow-up-right-01" />
-          </button>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function PreviewDialog({ font, onClose, onCopy, copied }) {
-  const dialogRef = useRef(null);
-  const [sample, setSample] = useState("Aa Bb Cc 0123");
-  const [size, setSize] = useState(64);
-  const [fontReady, setFontReady] = useState(false);
-  const family = font ? familyFor(font) : "";
-  useEffect(() => {
-    if (!font || !dialogRef.current) return undefined;
-    const dialog = dialogRef.current;
-    if (!dialog.open) dialog.showModal();
-    let active = true;
-    setFontReady(false);
-    loadFontFace(font).then((result) => { if (active) setFontReady(result); });
-    return () => {
-      active = false;
-      if (dialog.open) dialog.close();
-    };
-  }, [font]);
-  if (!font) return null;
-  return (
-    <dialog className="preview-dialog" ref={dialogRef} onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === dialogRef.current) onClose(); }} aria-labelledby="preview-title">
-      <div className="preview-shell">
-        <div className="preview-head">
-          <div>
-            <span className="eyebrow">FONT PREVIEW</span>
-            <h2 id="preview-title">{font.name}</h2>
-            <p>{font.file} <span className="dot-separator">·</span> {String(font.type).toUpperCase()}</p>
-          </div>
-          <button className="icon-button close-button" type="button" onClick={onClose} aria-label="Close preview"><Icon name="cancel-01" /></button>
-        </div>
-        <div className="preview-stage">
-          <div className="preview-stage-meta"><span>{fontReady ? "FONT LOADED" : "LIVE SPECIMEN"}</span><span>{size}px</span></div>
-          <div className="preview-sample" style={{ fontFamily: fontReady ? '"' + family + '", sans-serif' : "inherit", fontSize: size + "px" }} aria-live="polite">{sample || " "}</div>
-          <label className="sample-label" htmlFor="sample-text">Your specimen</label>
-          <input id="sample-text" className="sample-input" value={sample} maxLength={180} onChange={(event) => setSample(event.target.value)} placeholder="Type something…" />
-          <label className="size-label" htmlFor="font-size"><span>Preview size</span><output>{size}px</output></label>
-          <input id="font-size" className="size-slider" type="range" min="24" max="112" step="2" value={size} onChange={(event) => setSize(Number(event.target.value))} />
-        </div>
-        <div className="preview-actions">
-          <button className="button button-primary" type="button" onClick={() => onCopy(font)}><Icon name={copied ? "checkmark-circle-02" : "copy-01"} /> {copied ? "CSS copied" : "Copy CSS"}</button>
-          <a className="button button-secondary" href={fontUrl(font)} download={String(font.file).split("/").pop()}><Icon name="download-01" /> Download</a>
-          <a className="text-link" href={"/api/fonts/" + encodeURIComponent(font.name)} target="_blank" rel="noreferrer">API record <Icon name="arrow-up-right-01" /></a>
-        </div>
-      </div>
-    </dialog>
-  );
-}
 
 export default function App() {
   const [fonts, setFonts] = useState([]);
@@ -211,7 +35,7 @@ export default function App() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
   const [commit, setCommit] = useState(null);
-  const searchRef = useRef(null);
+  const searchRef = useRef(null);\n  const reduceMotion = useReducedMotion();
 
   async function loadCatalog(signal) {
     setLoading(true);
@@ -324,7 +148,7 @@ export default function App() {
       </header>
 
       <main>
-        <section className="hero" aria-labelledby="hero-title">
+        <motion.section className="hero" aria-labelledby="hero-title" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
           <div className="hero-copy">
             <p className="eyebrow"><span className="eyebrow-line" /> THE TYPE PLAYGROUND</p>
             <h1 id="hero-title">Make every<br /><span>letter feel</span> <em>right.</em></h1>
