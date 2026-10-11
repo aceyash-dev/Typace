@@ -268,9 +268,9 @@ test("catalog loader surfaces unusable responses and active view state remains v
 
 test("catalog starts before non-critical controls and Peeks retains its New tag", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    const catalogStart = html.indexOf("queueMicrotask(() => {\\n        loadFonts();\\n    });");
-    const icons = html.indexOf("/* ========================================================\\n       ICONS");
+    const catalogStart = html.indexOf("queueMicrotask(() => {\n        loadFonts();\n    });");
+    const icons = html.indexOf("/* ========================================================\n       ICONS");
     assert.ok(catalogStart >= 0 && catalogStart < icons, "catalog must start before optional UI initialization");
-    assert.match(html, /data-view="peeks"[\\s\\S]*?<span class="new-tag" aria-label="New feature">New<\\/span>/);
-    assert.match(html, /\.new-tag\\s*\\{[\\s\\S]*?background:\\s*var\\(--accent\\)/);
+    assert.match(html, /data-view="peeks"[\s\S]*?<span class="new-tag" aria-label="New feature">New<\/span>/);
+    assert.match(html, /\.new-tag\s*\{[\s\S]*?background:\s*var\(--accent\)/);
 });
