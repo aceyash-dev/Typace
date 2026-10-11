@@ -7,6 +7,11 @@ Typace is a font library and font delivery service by [The Ace Base](https://ace
 - Website: https://typace.ace-base.cc/
 - Browse fonts: https://typace.ace-base.cc/browse
 - Developer resources: https://typace.ace-base.cc/developers
+- Privacy: https://typace.ace-base.cc/privacy
+- Terms of use: https://typace.ace-base.cc/terms
+- Cookie policy and preferences: https://typace.ace-base.cc/cookies
+- Security disclosure policy: https://typace.ace-base.cc/security
+- Security contact file: https://typace.ace-base.cc/.well-known/security.txt
 - Font catalog: https://typace.ace-base.cc/api/fonts
 - Search API: https://typace.ace-base.cc/api/search?q=Spectral
 - API health: https://typace.ace-base.cc/api/health
@@ -24,7 +29,7 @@ Requires Node.js 24.x (matches the Vercel runtime).
 - npm run build
 - npm test
 
-The React/Vite production build is written to dist. The public font files in fonts/ are served as static assets and are not bundled or rewritten by the UI build. Grandstander and the existing Hugeicons icon font are retained.
+The React/Vite production build is written to dist. The public font files in fonts/ are served as static assets and are not bundled or rewritten by the UI build. Grandstander and the existing Hugeicons icon font are retained. The home page presents six representative specimens; `/browse` contains the full searchable catalogue. Optional Google Tag Manager analytics are loaded only after explicit consent through the cookie preference UI.
 
 ## API and AI clients
 
