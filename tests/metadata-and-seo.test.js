@@ -256,3 +256,11 @@ test("font preview bento layout is mobile-first and isolated from About", async 
     assert.match(html, /\.preview-header\s*\{\s*display:\s*flex/);
     assert.match(html, /#previewOverlay\s+\.preview-header\s*\{\s*display:\s*grid/);
 });
+
+
+test("catalog loader surfaces unusable responses and active view state remains visible without slider JS", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(html, /Font API returned no usable font records/);
+    assert.match(html, /The font list failed to initialize\. Check your connection and retry\./);
+    assert.match(html, /\.view-button\.active::before\s*\{[\s\S]*?background:\s*var\(--accent\)/);
+});
