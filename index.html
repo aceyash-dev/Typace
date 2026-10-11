@@ -2854,27 +2854,29 @@
             #previewOverlay .resource-card:first-child { grid-column: auto; }
         }
 
-        /* Keep About independent from the full-screen font preview panel. */
+        /* About is a bottom sheet; preview remains a separate full-screen overlay. */
         #aboutOverlay {
-            position: fixed;
-            inset: 0;
-            display: block;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
             overflow: hidden;
+            padding: 0;
         }
 
         #aboutOverlay .preview-panel {
-            position: fixed;
-            inset: auto 0 0;
-            width: min(100%, 760px);
+            position: relative;
+            inset: auto;
+            flex: 0 1 760px;
+            width: 100%;
             height: auto !important;
             max-height: 72dvh;
-            margin: 0 auto;
+            margin: 0;
             overflow-y: auto;
             border: 1px solid var(--border);
             border-bottom: 0;
             border-radius: 28px 28px 0 0;
             background: var(--surface);
-            transform: translate3d(0, calc(100% + 24px), 0);
+            transform: translateY(calc(100% + 24px));
             transition: transform .22s cubic-bezier(.2, .8, .2, 1);
             padding:
                 .85rem max(1rem, 3vw)
@@ -2882,7 +2884,7 @@
         }
 
         #aboutOverlay.active .preview-panel {
-            transform: translate3d(0, 0, 0);
+            transform: translateY(0);
         }
 
         @media (prefers-reduced-motion: reduce) {
