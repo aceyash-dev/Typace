@@ -17,7 +17,8 @@ const CATEGORIES = [
 
 export default function App() {
   const isBrowse = window.location.pathname === "/browse" || window.location.pathname.startsWith("/browse/");
-  const legalRoute = { "/privacy": "privacy", "/terms": "terms", "/cookies": "cookies" }[window.location.pathname];
+  const routeFormat = ({ "/browse/woff2": "woff2", "/browse/woff": "woff", "/browse/ttf": "ttf", "/browse/otf": "otf" })[window.location.pathname] || "all";
+  const legalRoute = { "/privacy": "privacy", "/terms": "terms", "/cookies": "cookies", "/security": "security" }[window.location.pathname];
   const [fonts, setFonts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -96,15 +97,16 @@ export default function App() {
     const needle = normalize(query).trim();
     const results = fonts.filter((font) => {
       const matchesCategory = category === "all" || font.category === category;
+      const matchesFormat = routeFormat === "all" || String(font.type).toLowerCase() === routeFormat;
       const haystack = normalize([font.name, font.file, font.type, font.format, font.category].join(" "));
-      return matchesCategory && (!needle || haystack.includes(needle));
+      return matchesCategory && matchesFormat && (!needle || haystack.includes(needle));
     });
     results.sort((a, b) => {
       const compare = String(a.name).localeCompare(String(b.name), undefined, { sensitivity: "base" });
       return sort === "za" ? -compare : compare;
     });
     return results;
-  }, [fonts, query, category, sort]);
+  }, [fonts, query, category, sort, routeFormat]);
 
   async function handleCopy(font) {
     try {
@@ -211,7 +213,7 @@ export default function App() {
       <footer className="site-footer">
         <a className="footer-brand" href="/"><img className="footer-brand-image" src="/icon.png" alt="" width="30" height="30" /><span>typace</span></a>
         <p>Made for type that has something to say.</p>
-        <div className="footer-links"><a href="/developers">Developers</a><a href="/api/fonts">Catalog API</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/cookies">Cookie policy</a><a href="#" onClick={(event) => { event.preventDefault(); window.dispatchEvent(new Event("typace:cookie-settings")); }}>Cookie settings</a><a href="/llms.txt">Docs for AI tools</a></div>
+        <div className="footer-links"><a href="/developers">Developers</a><a href="/api/fonts">Catalog API</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/cookies">Cookie policy</a><a href="/security">Security</a><a href="#" onClick={(event) => { event.preventDefault(); window.dispatchEvent(new Event("typace:cookie-settings")); }}>Cookie settings</a><a href="/llms.txt">Docs for AI tools</a></div>
         <span className="build-meta">{commit ? "BUILD " + commit.shortSha : "FONT LIBRARY"} <span aria-hidden="true">·</span> <a href="/api/commit">STATUS</a></span>
       </footer>
       <PreviewDialog font={selectedFont} onClose={() => setSelectedFont(null)} onCopy={handleCopy} copied={selectedFont ? copiedFont === selectedFont.file : false} />
