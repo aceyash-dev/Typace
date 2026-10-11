@@ -821,6 +821,28 @@
             color: #fff;
         }
 
+        .new-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-inline-start: .3rem;
+            padding: .13rem .38rem;
+            border-radius: 999px;
+            background: var(--accent);
+            color: #fff;
+            font-size: .58rem;
+            font-weight: 800;
+            line-height: 1.25;
+            letter-spacing: .035em;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+
+        .view-button.active .new-tag {
+            background: #fff;
+            color: var(--accent);
+        }
+
         /* Keep the active pill visibly rendered even if slider initialization fails. */
         .view-button.active::before {
             content: "";
@@ -3017,6 +3039,7 @@
                     aria-pressed="false"
                 >
                     Peeks
+                    <span class="new-tag" aria-label="New feature">New</span>
                 </button>
 
             </div>
@@ -3562,6 +3585,12 @@
 
     const copyUsage =
         $("#copyUsage");
+
+    // Load the catalog as soon as its required DOM references exist.
+    // This keeps unrelated control initialization from blocking the entire app.
+    queueMicrotask(() => {
+        loadFonts();
+    });
 
     /* ========================================================
        ICONS
@@ -5557,9 +5586,8 @@
        START
     ======================================================== */
 
-    // Start the catalog request before any non-critical late-page initialization.
+    // Finish non-critical slider setup; the catalog load starts above.
     requestAnimationFrame(updateActiveSliders);
-    loadFonts();
 
     /* ========================================================
        LATEST COMMIT
