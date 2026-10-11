@@ -8,7 +8,10 @@ const pages = [
     { path: "/browse/woff", changefreq: "weekly", priority: "0.8" },
     { path: "/browse/ttf", changefreq: "weekly", priority: "0.8" },
     { path: "/browse/otf", changefreq: "weekly", priority: "0.8" },
-    { path: "/developers", changefreq: "monthly", priority: "0.8" }
+    { path: "/developers", changefreq: "monthly", priority: "0.8" },
+    { path: "/privacy", changefreq: "yearly", priority: "0.3" },
+    { path: "/terms", changefreq: "yearly", priority: "0.3" },
+    { path: "/cookies", changefreq: "yearly", priority: "0.3" }
 ];
 
 function escapeXml(value) {
