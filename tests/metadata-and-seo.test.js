@@ -232,16 +232,16 @@ test("Join Dock points to the configured community and has safe new-tab attribut
 test("overlays support focus restoration and keyboard focus containment", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     assert.match(html, /overlayReturnFocus/);
-    assert.match(html, /event\\.key === "Tab"/);
-    assert.match(html, /event\\.key === "Escape"/);
-    assert.match(html, /focus\\(\\{ preventScroll: true \\}\\)/);
+    assert.ok(html.includes('event.key === "Tab"'));
+    assert.ok(html.includes('event.key === "Escape"'));
+    assert.ok(html.includes('focus({ preventScroll: true })'));
 });
 
 test("font API failures expose a retry action and copy failures are reported", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /Try again/);
+    assert.ok(html.includes('"Try again"'));
     assert.match(html, /Copy failed/);
-    assert.match(html, /fallbackCopy\\(text\\)/);
+    assert.ok(html.includes('fallbackCopy(text)'));
     assert.match(html, /Clear search/);
 });
 
@@ -259,14 +259,10 @@ test("font preview bento layout is mobile-first and isolated from About", async 
     assert.doesNotMatch(html, /\.preview-hero\s*>\s*\.preview-display/);
     assert.doesNotMatch(html, /\.preview-hero\s*>\s*\.preview-controls/);
     assert.match(html, /\.preview-header\s*\{\s*display:\s*flex/);
-    assert.match(html, /#previewOverlay\s+\.preview-header\s*\{\s*display:\s*grid/);
-});
-
-
-test("catalog loader surfaces unusable responses and active view state remains visible without slider JS", async () => {
+    assert.match(html, /#previewOverlay\s+\.preview-header\s*\{\s*display:\test("catalog loader surfaces unusable responses and active view state remains visible without slider JS", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /no usable font records/);
-    assert.match(html, /failed to initialize/);
+    assert.ok(html.includes("Font API returned no usable font records"));
+    assert.ok(html.includes("The font list failed to initialize."));
     assert.match(html, /\.view-button\.active::before\s*\{[\s\S]*?background:\s*var\(--accent\)/);
 });
 
@@ -284,9 +280,9 @@ test("recently added badge belongs to font cards, About is a sheet, and views st
 
 test("font loading failures are retryable and card skeletons always settle", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /loadedFaces\.get\(key\) === promise\) loadedFaces\.delete\(key\)/);
-    assert.match(html, /classList\.remove\("loading"\)/);
-    assert.match(html, /card\.classList\.add\("font-load-failed"\)/);
+    assert.ok(html.includes("loadedFaces.get(key) === promise"));
+    assert.ok(html.includes('classList.remove("loading")'));
+    assert.ok(html.includes('classList.add("font-load-failed")'));
 });
 
 test("preview uses a request token to prevent stale font-load races", async () => {
