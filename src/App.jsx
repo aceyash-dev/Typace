@@ -163,7 +163,7 @@ export default function App() {
             <div className="art-baseline"><span>ABCDEFGHIJKLMNOPQRSTUVWXYZ</span><span>0123456789</span></div>
           </div>
           <div className="hero-footnote"><span>01 / DISCOVER</span><span>DESIGNED FOR THE CURIOUS</span><span>SCROLL TO EXPLORE ↓</span></div>
-        </section>
+        </motion.section>
 
         <section className="library-section" id="library" aria-labelledby="library-title">
           <div className="section-heading">
