@@ -291,3 +291,40 @@ test("AI documentation describes health, OpenAPI, rate limits, and honest font m
     assert.match(full, /Do not retry 429 responses in a tight loop/);
     assert.match(full, /licensing/);
 });
+
+
+test("landing page showcases six representative fonts and separates the full library", async () => {
+    const app = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+    assert.match(app, /const isBrowse = window\.location\.pathname === "\/browse"/);
+    assert.match(app, /const featuredFonts = useMemo/);
+    assert.match(app, /filtered\.slice\(0, visibleCount\) : featuredFonts/);
+    assert.match(app, /href="\/browse"/);
+    assert.match(app, /CURATED SPECIMENS \/ 06/);
+});
+
+test("optional analytics is gated behind explicit cookie consent", async () => {
+    const consent = await readFile(new URL("../src/components/CookieConsent.jsx", import.meta.url), "utf8");
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(consent, /Reject optional/);
+    assert.match(consent, /Accept analytics/);
+    assert.match(consent, /typace-cookie-consent-v1/);
+    assert.match(consent, /activateAnalytics\(\)/);
+    assert.match(consent, /googletagmanager\.com\/gtm\.js/);
+    assert.doesNotMatch(html, /googletagmanager\.com\/gtm\.js/, "analytics must not load from the HTML shell before consent");
+});
+
+test("privacy, terms, cookie, security, and disclosure files are present", async () => {
+    const legal = await readFile(new URL("../src/components/LegalPage.jsx", import.meta.url), "utf8");
+    const app = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+    const vite = await readFile(new URL("../vite.config.js", import.meta.url), "utf8");
+    const security = await readFile(new URL("../security.txt", import.meta.url), "utf8");
+    const sitemap = await readFile(new URL("../api/sitemap.js", import.meta.url), "utf8");
+    for (const page of ["privacy", "terms", "cookies", "security"]) {
+        assert.match(legal, new RegExp(page + ":"));
+        assert.match(app, new RegExp('"/' + page + '"'));
+        assert.match(sitemap, new RegExp('path: "/' + page + '"'));
+    }
+    assert.match(vite, /security\.txt/);
+    assert.match(security, /Canonical: https:\/\/typace\.ace-base\.cc\/.well-known\/security\.txt/);
+    assert.match(security, /Policy: https:\/\/typace\.ace-base\.cc\/security/);
+});
