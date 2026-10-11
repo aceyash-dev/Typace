@@ -4215,21 +4215,16 @@
         const specimen =
             $(".font-specimen", card);
 
-        loadFont(font)
-            .then(face => {
-                if (!face) {
-                    return;
-                }
-
-                specimen.style.fontFamily =
-                    escapeCSSFamily(
-                        family
-                    );
-
-                card.classList.remove(
-                    "loading"
-                );
-            });
+        loadFont(font).then(face => {
+            // A failed face must not leave the card in its animated skeleton state.
+            card.classList.remove("loading");
+            if (face && specimen.isConnected) {
+                specimen.style.fontFamily = escapeCSSFamily(family);
+            } else if (!face) {
+                card.classList.add("font-load-failed");
+                card.setAttribute("aria-label", `Preview ${font.name}; font sample unavailable`);
+            }
+        });
 
         card.addEventListener(
             "click",
