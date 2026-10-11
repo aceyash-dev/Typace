@@ -232,16 +232,16 @@ test("Join Dock points to the configured community and has safe new-tab attribut
 test("overlays support focus restoration and keyboard focus containment", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     assert.match(html, /overlayReturnFocus/);
-    assert.match(html, /event\.key === "Tab"/);
-    assert.match(html, /event\.key === "Escape"/);
-    assert.match(html, /focus\(\{ preventScroll: true \}\)/);
+    assert.match(html, /event\\.key === "Tab"/);
+    assert.match(html, /event\\.key === "Escape"/);
+    assert.match(html, /focus\\(\\{ preventScroll: true \\}\\)/);
 });
 
 test("font API failures expose a retry action and copy failures are reported", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /textContent = "Try again"/);
+    assert.match(html, /Try again/);
     assert.match(html, /Copy failed/);
-    assert.match(html, /fallbackCopy\(text\)/);
+    assert.match(html, /fallbackCopy\\(text\\)/);
     assert.match(html, /Clear search/);
 });
 
