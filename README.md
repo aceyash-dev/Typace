@@ -17,7 +17,7 @@ Typace is a font library and font delivery service by [The Ace Base](https://ace
 
 ## Development
 
-Requires Node.js 20.19 or newer.
+Requires Node.js 24.x (matches the Vercel runtime).
 
 - npm install
 - npm run dev
