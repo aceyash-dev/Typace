@@ -1590,9 +1590,10 @@
         }
 
         #aboutOverlay .preview-panel {
-            position: absolute;
-            inset-inline: 0;
+            position: fixed;
+            left: 50%;
             bottom: 0;
+            inset-inline: auto;
             width: min(100%, 760px);
             height: auto !important;
             max-height: 72dvh;
@@ -1605,13 +1606,13 @@
             border-radius: 28px 28px 0 0;
             background: var(--surface);
             box-shadow: 0 -18px 60px rgba(0, 0, 0, .14);
-            transform: translate3d(0, 105%, 0);
+            transform: translate3d(-50%, 105%, 0);
             transition: transform .2s cubic-bezier(.2, .8, .2, 1);
             overscroll-behavior: contain;
         }
 
         #aboutOverlay.active .preview-panel {
-            transform: translate3d(0, 0, 0);
+            transform: translate3d(-50%, 0, 0);
         }
 
         #aboutOverlay .preview-header {
@@ -1654,11 +1655,11 @@
         }
 
         #aboutOverlay .preview-panel {
-            transform: translate3d(0, 105%, 0);
+            transform: translate3d(-50%, 105%, 0);
         }
 
         #aboutOverlay.active .preview-panel {
-            transform: translate3d(0, 0, 0);
+            transform: translate3d(-50%, 0, 0);
         }
 
         .preview-header {
