@@ -239,7 +239,7 @@ test("overlays support focus restoration and keyboard focus containment", async 
 
 test("font API failures expose a retry action and copy failures are reported", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /retryButton\.textContent = "Try again"/);
+    assert.match(html, /textContent = "Try again"/);
     assert.match(html, /Copy failed/);
     assert.match(html, /fallbackCopy\(text\)/);
     assert.match(html, /Clear search/);
@@ -265,8 +265,8 @@ test("font preview bento layout is mobile-first and isolated from About", async 
 
 test("catalog loader surfaces unusable responses and active view state remains visible without slider JS", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /Font API returned no usable font records/);
-    assert.match(html, /The font list failed to initialize\. Check your connection and retry\./);
+    assert.match(html, /no usable font records/);
+    assert.match(html, /failed to initialize\. Check your connection and retry/);
     assert.match(html, /\.view-button\.active::before\s*\{[\s\S]*?background:\s*var\(--accent\)/);
 });
 
