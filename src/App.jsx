@@ -108,6 +108,11 @@ export default function App() {
     return results;
   }, [fonts, query, category, sort, routeFormat]);
 
+  const featuredFonts = useMemo(() => {
+    if (filtered.length <= 6) return filtered;
+    return Array.from({ length: 6 }, (_, index) => filtered[Math.round(index * (filtered.length - 1) / 5)]);
+  }, [filtered]);
+
   async function handleCopy(font) {
     try {
       const response = await fetch("/api/css/" + encodeURIComponent(font.name), { headers: { Accept: "text/css" } });
@@ -195,7 +200,7 @@ export default function App() {
           {!loading && !error && filtered.length === 0 && <div className="empty-state"><Icon name="search-remove" /><h3>No fonts found.</h3><p>Try a shorter search or clear the filters.</p><button className="button button-secondary" type="button" onClick={() => { setQuery(""); setCategory("all"); }}>Reset filters</button></div>}
           {!loading && !error && filtered.length > 0 && <>
             <div className={"font-grid " + (view === "list" ? "font-list-view" : "")}>
-              {filtered.slice(0, isBrowse ? visibleCount : 6).map((font) => <FontCard key={font.file} font={font} onPreview={setSelectedFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
+              {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => <FontCard key={font.file} font={font} onPreview={setSelectedFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
             </div>
             {isBrowse && visibleCount < filtered.length && <div className="load-more-wrap"><button className="button button-secondary load-more" type="button" onClick={() => setVisibleCount((count) => Math.min(count + 24, filtered.length))}>Load more fonts <Icon name="arrow-down-01" /><span>{formatCount(filtered.length - visibleCount)} remaining</span></button></div>}
           </>}
