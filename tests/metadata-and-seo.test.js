@@ -231,18 +231,18 @@ test("Join Dock points to the configured community and has safe new-tab attribut
 
 test("overlays support focus restoration and keyboard focus containment", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /overlayReturnFocus/);
+    assert.ok(html.includes("overlayReturnFocus"));
     assert.ok(html.includes('event.key === "Tab"'));
     assert.ok(html.includes('event.key === "Escape"'));
-    assert.ok(html.includes('focus({ preventScroll: true })'));
+    assert.ok(html.includes("focus({ preventScroll: true })"));
 });
 
 test("font API failures expose a retry action and copy failures are reported", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     assert.ok(html.includes('"Try again"'));
-    assert.match(html, /Copy failed/);
-    assert.ok(html.includes('fallbackCopy(text)'));
-    assert.match(html, /Clear search/);
+    assert.ok(html.includes("Copy failed"));
+    assert.ok(html.includes("fallbackCopy(text)"));
+    assert.ok(html.includes("Clear search"));
 });
 
 test("font display controls expose their selected state to assistive technology", async () => {
@@ -273,13 +273,14 @@ test("catalog loader surfaces unusable responses and active view state remains v
 test("recently added badge belongs to font cards, About is a sheet, and views stay isolated", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     assert.match(html, /font\.isNew\s*\?\s*'<span class="new-tag" aria-label="Recently added">New<\/span>'/);
-    assert.match(html, /Recently added/);
+    assert.ok(html.includes("aria-label=\"Recently added\""));
     assert.match(html, /#aboutOverlay\s*\{[\s\S]*?align-items:\s*flex-end/);
     assert.match(html, /#aboutOverlay\s+\.preview-panel\s*\{[\s\S]*?position:\s*relative;[\s\S]*?max-height:\s*72dvh/);
     assert.match(html, /#aboutOverlay\.active\s+\.preview-panel\s*\{\s*transform:\s*translateY\(0\)/);
     assert.match(html, /\.font-list\.peeks\s+\.font-card/);
     assert.match(html, /setThemeBase\(theme\);[\s\S]*?setTimeout\(\(\)\s*=>\s*\{\s*html\.classList\.remove\("theme-transition"\);\s*\},\s*150\)/);
 });
+
 
 test("font loading failures are retryable and card skeletons always settle", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
