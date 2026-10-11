@@ -10,6 +10,50 @@ export const FONT_TYPES = {
 
 const categoryCache = new Map();
 const CATALOG_CACHE_TTL_MS = 30_000;
+
+// This explicit batch was added in the 2026-10-09 font import.
+// Keep "New" tied to actual catalog additions, not to the current view mode.
+const RECENT_FONT_BATCH_AT = Date.parse("2026-10-09T18:20:59Z");
+const RECENT_FONT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const RECENT_FONT_FILES = new Set([
+    "Akrobat.ttf",
+    "BEDANE.otf",
+    "Bionix.otf",
+    "Blocksmith.otf",
+    "Braga.ttf",
+    "Brunson.ttf",
+    "Camden.ttf",
+    "Canosa Light.otf",
+    "Cocogoose.ttf",
+    "Coolvetica.otf",
+    "Curetro.ttf",
+    "Didot.otf",
+    "Divergentes.ttf",
+    "Fritz.ttf",
+    "Geograph.ttf",
+    "Glitchcraft.otf",
+    "HEINAN-Outline.otf",
+    "Hesthiya.otf",
+    "Hexaplex.otf",
+    "Highrise.otf",
+    "Ksana.otf",
+    "LJDS Sans.ttf",
+    "LT Superior.otf",
+    "Midland Luxury.otf",
+    "Neugrooms.ttf",
+    "Popten.otf",
+    "QUICK ZIP.otf",
+    "Rokey.otf",
+    "Sampoty.ttf",
+    "Shillia.ttf",
+    "Sierra Danielle.otf",
+    "Skrine.otf",
+    "Stretch.otf",
+    "Surgena.ttf",
+    "Tropical Avenue.otf",
+    "Urbanist.ttf"
+]);
+
 let cachedCatalog = null;
 let cachedCatalogAt = 0;
 let catalogPromise = null;
@@ -128,7 +172,10 @@ async function getFontMetadata(entry) {
             .map(encodeURIComponent)
             .join("/")}`,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        isNew: Date.now() - RECENT_FONT_BATCH_AT >= 0 &&
+            Date.now() - RECENT_FONT_BATCH_AT < RECENT_FONT_WINDOW_MS &&
+            RECENT_FONT_FILES.has(relativePath.split(path.sep).join("/").split("/").pop())
     };
 }
 
