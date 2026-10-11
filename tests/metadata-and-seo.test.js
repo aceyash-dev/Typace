@@ -222,13 +222,28 @@ test("React shell keeps Grandstander and Hugeicons and removes the legacy inline
     assert.doesNotMatch(html, /function loadFonts\(\)|let previewRequestId/);
 });
 
-test("React app shows revamp status and retains catalog, preview, download, and API actions", async () => {
+test("React app composes reusable UI modules and retains catalog actions", async () => {
     const app = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
-    for (const text of ["Revamp in Progress", "The catalog did not load.", "Try again", "PreviewDialog", "Download", "/api/css/", "/api/fonts/", "/api/openapi.json", "/llms.txt"]) {
+    const card = await readFile(new URL("../src/components/FontCard.jsx", import.meta.url), "utf8");
+    const preview = await readFile(new URL("../src/components/PreviewDialog.jsx", import.meta.url), "utf8");
+    for (const text of ["Revamp in Progress", "The catalog did not load.", "Try again", "PreviewDialog", "/api/css/", "/api/openapi.json", "/llms.txt"]) {
         assert.ok(app.includes(text), "missing UI contract: " + text);
     }
+    assert.match(card, /Download font/);
+    assert.match(card, /motion\.article/);
+    assert.match(preview, /\/api\/fonts\//);
     assert.match(app, /aria-live="polite"/);
     assert.match(app, /aria-pressed=/);
+});
+
+test("React UI behavior is separated into reusable components, hooks, and utilities", async () => {
+    const icon = await readFile(new URL("../src/components/Icon.jsx", import.meta.url), "utf8");
+    const hook = await readFile(new URL("../src/hooks/useVisibleFont.js", import.meta.url), "utf8");
+    const utilities = await readFile(new URL("../src/lib/fonts.js", import.meta.url), "utf8");
+    assert.match(icon, /export default function Icon/);
+    assert.match(hook, /IntersectionObserver/);
+    assert.match(utilities, /export function usableFont/);
+    assert.match(utilities, /export async function copyText/);
 });
 
 test("React styles are responsive, accessible, and honor reduced-motion preferences", async () => {
@@ -245,6 +260,7 @@ test("Vite build scripts and modern React dependencies are configured", async ()
     assert.equal(pkg.scripts.test, "node --test");
     assert.ok(pkg.dependencies.react);
     assert.ok(pkg.dependencies["react-dom"]);
+    assert.ok(pkg.dependencies.motion);
     assert.ok(pkg.devDependencies.vite);
     assert.ok(pkg.devDependencies["@vitejs/plugin-react"]);
 });
