@@ -35,7 +35,8 @@ export default function App() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
   const [commit, setCommit] = useState(null);
-  const searchRef = useRef(null);\n  const reduceMotion = useReducedMotion();
+  const searchRef = useRef(null);
+  const reduceMotion = useReducedMotion();
 
   async function loadCatalog(signal) {
     setLoading(true);
