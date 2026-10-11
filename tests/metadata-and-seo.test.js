@@ -36,7 +36,10 @@ test("live catalog uses honest categories and does not publish invented dates", 
         assert.ok(["serif", "sans-serif", "unknown"].includes(font.category));
         assert.equal(font.createdAt, null);
         assert.equal(font.updatedAt, null);
+        assert.equal(typeof font.isNew, "boolean");
     }
+    assert.equal(fonts.find(font => font.file === "Akrobat.ttf")?.isNew, true);
+    assert.equal(fonts.find(font => font.file === "Aboreto.ttf")?.isNew, false);
     assert.deepEqual(
         fonts.map(font => font.name),
         [...fonts.map(font => font.name)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
@@ -266,11 +269,12 @@ test("catalog loader surfaces unusable responses and active view state remains v
 });
 
 
-test("catalog starts before non-critical controls and Peeks retains its New tag", async () => {
+test("recently added badge belongs to font cards, About is a sheet, and views stay isolated", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    const catalogStart = html.indexOf("queueMicrotask(() => {\n        loadFonts();\n    });");
-    const icons = html.indexOf("/* ========================================================\n       ICONS");
-    assert.ok(catalogStart >= 0 && catalogStart < icons, "catalog must start before optional UI initialization");
-    assert.match(html, /data-view="peeks"[\s\S]*?<span class="new-tag" aria-label="New feature">New<\/span>/);
-    assert.match(html, /\.new-tag\s*\{[\s\S]*?background:\s*var\(--accent\)/);
+    assert.match(html, /font\.isNew\s*\?\s*'<span class="new-tag" aria-label="Recently added">New<\/span>'/);
+    assert.doesNotMatch(html, /data-view="peeks"[\s\S]*?<span class="new-tag"/);
+    assert.match(html, /#aboutOverlay\s*\{[\s\S]*?align-items:\s*flex-end/);
+    assert.match(html, /#aboutOverlay\.active\s+\.preview-panel\s*\{\s*transform:\s*translate3d\(0,\s*0,\s*0\)/);
+    assert.match(html, /\.font-list\.peeks\s+\.font-card/);
+    assert.match(html, /setThemeBase\(theme\);[\s\S]*?setTimeout\(\(\)\s*=>\s*\{\s*html\.classList\.remove\("theme-transition"\);\s*\},\s*150\)/);
 });
