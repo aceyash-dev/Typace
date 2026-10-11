@@ -3734,21 +3734,18 @@
     ======================================================== */
 
     function getPreferredTheme() {
-        const saved =
-            localStorage.getItem(
-                "typace-theme"
-            );
-
-        if (
-            saved === "dark" ||
-            saved === "light"
-        ) {
-            return saved;
+        // Storage can be blocked (private browsing, embedded contexts, or strict
+        // browser settings). Theme selection should never prevent app startup.
+        let saved = null;
+        try {
+            saved = localStorage.getItem("typace-theme");
+        } catch {
+            // Fall back to the operating-system preference.
         }
 
-        return window.matchMedia(
-            "(prefers-color-scheme: dark)"
-        ).matches
+        if (saved === "dark" || saved === "light") return saved;
+
+        return window.matchMedia("(prefers-color-scheme: dark)").matches
             ? "dark"
             : "light";
     }
