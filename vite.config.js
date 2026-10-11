@@ -12,7 +12,8 @@ const staticFiles = [
   "humans.txt",
   "robots.txt",
   "llms.txt",
-  "llms-full.txt"
+  "llms-full.txt",
+  "security.txt"
 ];
 
 const preservePublicAssets = {
@@ -27,6 +28,10 @@ const preservePublicAssets = {
       const source = resolve(root, file);
       if (existsSync(source)) copyFileSync(source, resolve(dist, file));
     }
+    const securityDirectory = resolve(dist, ".well-known");
+    mkdirSync(securityDirectory, { recursive: true });
+    const securitySource = resolve(root, "security.txt");
+    if (existsSync(securitySource)) copyFileSync(securitySource, resolve(securityDirectory, "security.txt"));
   }
 };
 
