@@ -1159,3 +1159,36 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .sheet-scrim, .preview-sheet { animation: none; }
 }
+
+/* Cookie preferences follow the same sheet interaction pattern */
+.cookie-scrim { position: fixed; z-index: 1198; inset: 0; background: rgba(48,37,29,.38); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.cookie-preferences {
+  position: fixed;
+  z-index: 1199;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: min(640px, 100%);
+  max-height: min(88dvh, 780px);
+  margin: 0 auto;
+  overflow: auto;
+  border-radius: 18px 18px 0 0;
+  padding: 22px clamp(18px, 4vw, 30px) max(24px, env(safe-area-inset-bottom));
+  transform: none;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.78), 0 -18px 65px rgba(48,37,29,.18);
+  animation: sheet-rise-in .22s cubic-bezier(.2,.8,.2,1) both;
+}
+.cookie-preferences::before {
+  content: "";
+  display: block;
+  width: 38px;
+  height: 4px;
+  margin: -10px auto 20px;
+  border-radius: 99px;
+  background: var(--line);
+}
+@media (min-width: 760px) {
+  .cookie-preferences { right: 24px; bottom: 24px; left: auto; width: min(540px, calc(100% - 48px)); border: 1px solid var(--line); border-radius: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .cookie-preferences { animation: none; } }
