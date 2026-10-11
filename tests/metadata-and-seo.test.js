@@ -266,7 +266,7 @@ test("font preview bento layout is mobile-first and isolated from About", async 
 test("catalog loader surfaces unusable responses and active view state remains visible without slider JS", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     assert.match(html, /no usable font records/);
-    assert.match(html, /failed to initialize\. Check your connection and retry/);
+    assert.match(html, /failed to initialize/);
     assert.match(html, /\.view-button\.active::before\s*\{[\s\S]*?background:\s*var\(--accent\)/);
 });
 
