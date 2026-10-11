@@ -144,6 +144,12 @@ test("OpenAPI endpoint supports CORS preflight", () => {
     assert.equal(response.headers["Cache-Control"], "no-store");
 });
 
+test("theme initialization tolerates storage access being blocked", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(html, /function getPreferredTheme\(\)\s*\{[\s\S]*?try\s*\{\s*saved\s*=\s*localStorage\.getItem\("typace-theme"\)\s*;\s*\}\s*catch\s*\{/);
+    assert.match(html, /Theme still works when storage is unavailable/);
+});
+
 test("date-dependent New sort and badges are not advertised without reliable dates", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     assert.doesNotMatch(html, /data-sort="new"/);
