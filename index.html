@@ -1585,19 +1585,21 @@
         }
 
         #aboutOverlay {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
+            display: block;
+            overflow: hidden;
         }
 
         #aboutOverlay .preview-panel {
+            position: absolute;
+            inset-inline: 0;
+            bottom: 0;
             width: min(100%, 760px);
-            height: auto;
-            max-height: min(88dvh, 780px);
+            height: auto !important;
+            max-height: 72dvh;
+            margin-inline: auto;
             padding:
-                calc(.9rem + env(safe-area-inset-top, 0px))
-                max(1rem, 3vw)
-                calc(1.1rem + env(safe-area-inset-bottom, 0px));
+                .85rem max(1rem, 3vw)
+                calc(1rem + env(safe-area-inset-bottom, 0px));
             border: 1px solid var(--border);
             border-bottom: 0;
             border-radius: 28px 28px 0 0;
