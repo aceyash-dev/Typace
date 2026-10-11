@@ -27,11 +27,21 @@ const pages = {
     number: "03", title: "Cookie policy", subtitle: "What is stored, what is optional, and how to change your mind.",
     sections: [
       ["What the site uses", "Typace currently uses browser local storage for functional preferences. This is not technically the same as an HTTP cookie, but browser storage is described here because it serves a similar preference-persistence purpose."],
-      ["Essential preferences", "The key ty pace-theme stores your light/dark theme choice. The key typace-cookie-consent-v1 stores your consent choice and its update time. These are used to remember your settings; the site does not require an account to browse fonts."],
+      ["Essential preferences", "The key typace-theme stores your light/dark theme choice. The key typace-cookie-consent-v1 stores your consent choice and its update time. These are used to remember your settings; the site does not require an account to browse fonts."],
       ["Optional analytics", "Google Tag Manager (container GTM-KWB6T7ZN) is not loaded before you opt in to analytics. If you accept, Google Tag Manager may load tags configured for that container, which can use cookies or similar technologies. The exact analytics cookies depend on the active tag configuration. Rejecting analytics prevents this optional loader from being activated by the Typace consent UI."],
       ["Third-party fonts and icons", "Grandstander is requested from Google Fonts and the Hugeicons icon font is requested from Hugeicons. These are external resource requests and can expose standard connection metadata to the providers. They are loaded for site presentation, independently of the optional analytics choice."],
       ["Change or withdraw consent", "Use Cookie settings in the footer to accept or reject optional analytics at any time. Your choice is stored in local storage. If you clear site data or use a different browser or device, the banner may appear again. If analytics was previously loaded, withdrawal signals denied analytics consent to the data layer; it cannot retroactively erase information already collected by a third party."],
       ["Browser controls", "You can clear site storage or block it in your browser. Some preferences may then reset. This policy describes the current implementation and will be updated if the site's storage or analytics practices change."]
+    ]
+  },
+  security: {
+    number: "04", title: "Security", subtitle: "A responsible path for reporting security issues in the public Typace service.",
+    sections: [
+      ["Scope", "This policy covers the public Typace website, its published API endpoints, and the publicly available font catalogue operated at typace.ace-base.cc."],
+      ["How to report", "Please contact The Ace Base through its official website at https://ace-base.cc/ and include the affected URL, impact, reproducible steps, and a safe proof of concept. Avoid sending secrets or personal data in the report."],
+      ["Testing boundaries", "Only test systems you are authorized to test. Do not access, alter, or delete other users' data; disrupt availability; perform social engineering; or download more data than needed to demonstrate a finding. Stop if you encounter data that does not belong to you."],
+      ["Disclosure and response", "Please give the operator a reasonable opportunity to investigate and remediate before public disclosure. Acknowledgement, response times, compensation, and a bug bounty are not guaranteed by this policy."],
+      ["Service protections", "Automated requests may be rate-limited. Do not attempt to bypass limits or use testing that could degrade the public service. For urgent abuse or availability issues, describe the operational impact in your report."]
     ]
   }
 };
