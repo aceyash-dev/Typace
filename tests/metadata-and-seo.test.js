@@ -38,7 +38,9 @@ test("live catalog uses honest categories and does not publish invented dates", 
         assert.equal(font.updatedAt, null);
         assert.equal(typeof font.isNew, "boolean");
     }
-    assert.equal(fonts.find(font => font.file === "Akrobat.ttf")?.isNew, true);
+    const batchAge = Date.now() - Date.parse("2026-10-09T18:20:59Z");
+    const batchIsRecent = batchAge >= 0 && batchAge < 7 * 24 * 60 * 60 * 1000;
+    assert.equal(fonts.find(font => font.file === "Akrobat.ttf")?.isNew, batchIsRecent);
     assert.equal(fonts.find(font => font.file === "Aboreto.ttf")?.isNew, false);
     assert.deepEqual(
         fonts.map(font => font.name),
