@@ -52,7 +52,8 @@ export default function handler(req, res) {
                         category: { type: "string", enum: ["serif", "sans-serif", "unknown"] },
                         url: { type: "string", format: "uri-reference" },
                         createdAt: { type: "string", format: "date-time", nullable: true },
-                        updatedAt: { type: "string", format: "date-time", nullable: true }
+                        updatedAt: { type: "string", format: "date-time", nullable: true },
+                        isNew: { type: "boolean", description: "True only for files in the current recently added batch." }
                     }
                 },
                 Commit: {
