@@ -281,3 +281,24 @@ test("recently added badge belongs to font cards, About is a sheet, and views st
     assert.match(html, /\.font-list\.peeks\s+\.font-card/);
     assert.match(html, /setThemeBase\(theme\);[\s\S]*?setTimeout\(\(\)\s*=>\s*\{\s*html\.classList\.remove\("theme-transition"\);\s*\},\s*150\)/);
 });
+
+test("font loading failures are retryable and card skeletons always settle", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(html, /loadedFaces\.get\(key\) === promise\) loadedFaces\.delete\(key\)/);
+    assert.match(html, /card\.classList\.remove\("loading"\)/);
+    assert.match(html, /card\.classList\.add\("font-load-failed"\)/);
+});
+
+test("preview uses a request token to prevent stale font-load races", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(html, /let previewRequestId = 0/);
+    assert.match(html, /requestId !== previewRequestId \|\| state\.previewFont !== font/);
+    assert.match(html, /state\.previewFace = null/);
+});
+
+test("overlays cannot stack and preview download avoids needless new tabs", async () => {
+    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+    assert.match(html, /Opening one overlay closes the other/);
+    assert.match(html, /other\.setAttribute\("aria-hidden", "true"\)/);
+    assert.doesNotMatch(html, /link\.target = "_blank"/);
+});
