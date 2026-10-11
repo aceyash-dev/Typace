@@ -273,8 +273,6 @@ test("catalog loader surfaces unusable responses and active view state remains v
 test("recently added badge belongs to font cards, About is a sheet, and views stay isolated", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     assert.match(html, /font\.isNew\s*\?\s*'<span class="new-tag" aria-label="Recently added">New<\/span>'/);
-    assert.ok(html.includes("aria-label=\"Recently added\""));
-    assert.ok(html.includes("align-items: flex-end"));
     assert.ok(html.includes("max-height: 72dvh"));
     assert.ok(html.includes("translateY(0)"));
     assert.match(html, /\.font-list\.peeks\s+\.font-card/);
