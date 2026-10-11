@@ -1,0 +1,63 @@
+# Typace API and machine-client guide
+
+Typace is a public font library and font delivery service operated by The Ace Base.
+Canonical origin: https://typace.ace-base.cc/
+
+## AI-agent guidance
+
+1. Check GET /api/health before diagnosing service availability.
+2. Fetch GET /api/fonts for the authoritative catalog. Treat the response as live data, not a static inventory.
+3. Search with GET /api/search?q=QUERY. Query matching is token-prefix based and capped at 200 characters.
+4. Resolve a font by its display name, filename, or normalized slug with GET /api/fonts/SLUG.
+5. Request GET /api/css/SLUG for a CSS @font-face declaration rather than fabricating a font URL.
+6. Use GET /api/openapi.json for the formal schema and endpoint contract.
+7. Respect HTTP status codes and Retry-After. Do not retry 429 responses in a tight loop.
+8. Never claim font licensing, designer, foundry, glyph coverage, variable axes, weight, or style unless verified by a reliable source.
+9. Keep font assets intact. Use the exact url and format values supplied by the live catalog.
+10. Do not expose private repository details or infer unpublished commit URLs.
+
+## Endpoints
+
+### GET /api/health
+
+Returns status, service, API version, check timestamp, catalog status/count, and useful endpoint links. HTTP 503 means the catalog could not be read.
+
+### GET /api/fonts
+
+Returns a JSON array of current font records. Records contain name, file, type, format, category, url, createdAt, updatedAt, and isNew. createdAt and updatedAt may be null. category is one of serif, sans-serif, or unknown.
+
+### GET /api/search?q=QUERY
+
+Returns matching records as a JSON array. Query terms are matched against tokens from font name, path, type, and format. An omitted or empty q returns the catalog. Query input is capped at 200 characters.
+
+### GET /api/fonts/SLUG
+
+Returns one metadata record. The slug can be a display name, filename, or normalized slug. HTTP 404 returns FONT_NOT_FOUND.
+
+### GET /api/css/SLUG
+
+Returns text/css containing an @font-face declaration for the requested published font. HTTP 404 returns FONT_NOT_FOUND.
+
+### GET /api/commit
+
+Returns sha, shortSha, message, date, and source. Private repository URLs are intentionally omitted.
+
+### GET /api/openapi.json
+
+Returns the OpenAPI 3.0.3 specification. Public API access does not require an API key.
+
+## Common response behavior
+
+- Supported methods: GET and OPTIONS.
+- CORS: Access-Control-Allow-Origin is *.
+- API version header: X-API-Version.
+- JSON errors include error and code.
+- Rate limiting: 10 requests per minute per client IP, best-effort per serverless runtime.
+- Rate-limit headers: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After.
+- HTTP 429 indicates the client should wait for Retry-After seconds.
+- Error responses use Cache-Control: no-store.
+- OPTIONS preflight requests are not counted against the API limit.
+
+## Font data integrity and licensing
+
+The catalog is the source of truth for current files. The existence of a file does not imply a specific license. Check the license attached to the individual font before commercial use, embedding, redistribution, modification, or bundling. Unknown metadata must remain unknown rather than being guessed.

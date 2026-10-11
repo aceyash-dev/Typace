@@ -2,26 +2,34 @@
 
 Typace is a font library and font delivery service by [The Ace Base](https://ace-base.cc/).
 
-## Use Typace
+## Website and documentation
 
 - Website: https://typace.ace-base.cc/
 - Browse fonts: https://typace.ace-base.cc/browse
 - Developer resources: https://typace.ace-base.cc/developers
-- Live font catalog: https://typace.ace-base.cc/api/fonts
+- Font catalog: https://typace.ace-base.cc/api/fonts
 - Search API: https://typace.ace-base.cc/api/search?q=Spectral
-- Current commit metadata: https://typace.ace-base.cc/api/commit
+- API health: https://typace.ace-base.cc/api/health
 - OpenAPI: https://typace.ace-base.cc/api/openapi.json
-- Machine-readable documentation: https://typace.ace-base.cc/llms.txt
-- Documentation: https://docs.ace-base.cc/projects/typace
+- AI-readable documentation: https://typace.ace-base.cc/llms.txt
+- Full AI-readable API guide: https://typace.ace-base.cc/llms-full.txt
+- Human documentation: https://docs.ace-base.cc/projects/typace
 
-Available font formats depend on the live catalog. Use the catalog API as the source of truth for current assets. Categories are only returned when supported by font metadata; unknown categories and unavailable source dates are not guessed. Verify the license attached to each font before use.
+## Development
 
-## Source
+Requires Node.js 20.19 or newer.
 
-This repository contains the Typace web interface, API routes, discovery pages, and published font assets. Font asset URLs are binary resources, not necessarily HTML pages.
+- npm install
+- npm run dev
+- npm run build
+- npm test
 
-Current font availability should be verified against the live catalog API rather than inferred from this README.
+The React/Vite production build is written to dist. The public font files in fonts/ are served as static assets and are not bundled or rewritten by the UI build. Grandstander and the existing Hugeicons icon font are retained.
 
-## API rate limits
+## API and AI clients
 
-The JSON and CSS API endpoints allow up to **10 requests per minute per client IP**. Responses include `RateLimit-Limit`, `RateLimit-Remaining`, and `RateLimit-Reset` headers. Excess requests receive HTTP `429` with a `Retry-After` header and a machine-readable `RATE_LIMIT_EXCEEDED` error. CORS preflight requests are not counted. The current in-memory limiter is per serverless runtime, so it is best-effort across Vercel instances rather than a globally coordinated quota; use a shared edge/KV limiter for strict cross-instance enforcement.
+The live GET /api/fonts response is the authoritative list of published font assets. Use the catalog's url and format values. Available formats depend on the live catalog. Categories can be unknown and source dates can be null; do not invent metadata or infer licensing.
+
+All API endpoints are public and support GET and OPTIONS. JSON errors include machine-readable error and code fields. Rate-limited responses return HTTP 429 and Retry-After. The current in-memory rate limiter is best-effort per serverless runtime, not a globally coordinated quota. See /llms.txt and /llms-full.txt for machine-client guidance.
+
+Verify the license attached to each font before commercial use, embedding, redistribution, modification, or bundling.

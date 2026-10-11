@@ -1,36 +1,49 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { normalize, findFont, listFonts } from "../api/_lib/fonts.js";
-import handler from "../api/openapi.json.js";
+import { checkRateLimit } from "../api/_lib/rate-limit.js";
+import openapiHandler from "../api/openapi.json.js";
 import sitemapHandler from "../api/sitemap.js";
 import commitHandler, { normalizeCommit } from "../api/commit.js";
 import fontsHandler from "../api/fonts.js";
 import searchHandler from "../api/search.js";
 import fontHandler from "../api/fonts/[slug].js";
 import cssHandler from "../api/css/[slug].js";
-import { readFile } from "node:fs/promises";
-import { checkRateLimit } from "../api/_lib/rate-limit.js";
+import healthHandler from "../api/health.js";
 
-test("normalize removes accents, punctuation, and supported extensions", () => {
+function mockResponse() {
+    return {
+        statusCode: 0,
+        body: null,
+        headers: {},
+        setHeader(name, value) { this.headers[name] = value; return this; },
+        status(code) { this.statusCode = code; return this; },
+        json(body) { this.body = body; return this; },
+        send(body) { this.body = body; return this; },
+        end() { return this; }
+    };
+}
+
+test("font normalization removes accents, punctuation, and supported extensions", () => {
     assert.equal(normalize("Café Font.ttf"), "cafe-font");
     assert.equal(normalize("Ace Script.woff2"), "ace-script");
 });
 
-test("findFont matches display names and safely handles malformed encoded slugs", () => {
+test("font lookup matches display names and safely rejects malformed slugs", () => {
     const fonts = [
         { name: "Ace Script", file: "fonts/Ace Script.otf", type: "otf" },
         { name: "Space Grotesk", file: "fonts/Space Grotesk.ttf", type: "ttf" }
     ];
-
     assert.equal(findFont(fonts, "Ace%20Script.otf").name, "Ace Script");
     assert.equal(findFont(fonts, "space-grotesk").name, "Space Grotesk");
     assert.equal(findFont(fonts, "%E0%A4%A"), null);
     assert.equal(findFont(fonts, ""), null);
 });
 
-test("live catalog uses honest categories and does not publish invented dates", async () => {
+test("live catalog is sorted and never invents classifications or source dates", async () => {
     const fonts = await listFonts();
-    assert.ok(fonts.length > 0, "expected at least one published font");
+    assert.ok(fonts.length > 0);
     assert.equal(fonts.some(font => /misans\.ttf$/i.test(font.file)), false);
     for (const font of fonts) {
         assert.ok(["serif", "sans-serif", "unknown"].includes(font.category));
@@ -42,18 +55,16 @@ test("live catalog uses honest categories and does not publish invented dates", 
     const batchIsRecent = batchAge >= 0 && batchAge < 7 * 24 * 60 * 60 * 1000;
     assert.equal(fonts.find(font => font.file === "Akrobat.ttf")?.isNew, batchIsRecent);
     assert.equal(fonts.find(font => font.file === "Aboreto.ttf")?.isNew, false);
-    assert.deepEqual(
-        fonts.map(font => font.name),
-        [...fonts.map(font => font.name)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
-    );
+    assert.deepEqual(fonts.map(font => font.name), [...fonts.map(font => font.name)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })));
 });
 
-test("OpenAPI contract documents the real category values and API paths", () => {
+test("OpenAPI documents current API paths, schema values, and machine-client health", () => {
     const response = mockResponse();
-    handler({ method: "GET" }, response);
+    openapiHandler({ method: "GET" }, response);
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.openapi, "3.0.3");
     assert.deepEqual(response.body.components.schemas.Font.properties.category.enum, ["serif", "sans-serif", "unknown"]);
+    assert.ok(response.body.paths["/api/health"]);
     assert.ok(response.body.paths["/api/fonts"]);
     assert.ok(response.body.paths["/api/search"]);
     assert.ok(response.body.paths["/api/css/{slug}"]);
@@ -62,7 +73,7 @@ test("OpenAPI contract documents the real category values and API paths", () => 
     assert.equal("url" in response.body.components.schemas.Commit.properties, false);
 });
 
-test("sitemap contains canonical discovery pages, not binary font assets", () => {
+test("sitemap exposes canonical discovery pages, not binary font assets", () => {
     const response = mockResponse();
     sitemapHandler({ method: "GET" }, response);
     assert.equal(response.statusCode, 200);
@@ -71,32 +82,24 @@ test("sitemap contains canonical discovery pages, not binary font assets", () =>
     assert.match(response.body, /<urlset xmlns=/);
 });
 
-function mockResponse() {
-    return {
-        statusCode: 0,
-        body: null,
-        headers: {},
-        setHeader(name, value) {
-            this.headers[name] = value;
-            return this;
-        },
-        status(code) {
-            this.statusCode = code;
-            return this;
-        },
-        json(body) {
-            this.body = body;
-            return this;
-        },
-        send(body) {
-            this.body = body;
-            return this;
-        },
-        end() {
-            return this;
-        }
-    };
-}
+test("health endpoint returns catalog diagnostics and machine-readable headers", async () => {
+    const response = mockResponse();
+    await healthHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.201" } }, response);
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.status, "ok");
+    assert.equal(response.body.service, "typace-api");
+    assert.ok(response.body.catalog.count > 0);
+    assert.equal(response.headers["X-API-Version"], "1.1.0");
+    assert.match(response.headers["Access-Control-Expose-Headers"], /Retry-After/);
+});
+
+test("health endpoint rejects unsupported methods", async () => {
+    const response = mockResponse();
+    await healthHandler({ method: "POST", headers: { "x-real-ip": "198.51.100.202" } }, response);
+    assert.equal(response.statusCode, 405);
+    assert.equal(response.body.code, "METHOD_NOT_ALLOWED");
+    assert.equal(response.headers.Allow, "GET, OPTIONS");
+});
 
 test("commit endpoint rejects unsupported methods without a network request", async () => {
     const response = mockResponse();
@@ -113,7 +116,7 @@ test("commit endpoint supports CORS preflight", async () => {
     assert.equal(response.headers["Access-Control-Allow-Methods"], "GET, OPTIONS");
 });
 
-test("catalog and search endpoints return consistent method errors", async () => {
+test("catalog and search endpoints reject unsupported methods consistently", async () => {
     for (const handler of [fontsHandler, searchHandler]) {
         const response = mockResponse();
         await handler({ method: "POST", query: {} }, response);
@@ -138,22 +141,10 @@ test("font metadata and CSS endpoints reject unsupported methods consistently", 
 
 test("OpenAPI endpoint supports CORS preflight", () => {
     const response = mockResponse();
-    handler({ method: "OPTIONS" }, response);
+    openapiHandler({ method: "OPTIONS" }, response);
     assert.equal(response.statusCode, 204);
     assert.equal(response.headers["Access-Control-Allow-Methods"], "GET, OPTIONS");
     assert.equal(response.headers["Cache-Control"], "no-store");
-});
-
-test("theme initialization tolerates storage access being blocked", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /function getPreferredTheme\(\)\s*\{[\s\S]*?try\s*\{\s*saved\s*=\s*localStorage\.getItem\("typace-theme"\)\s*;\s*\}\s*catch\s*\{/);
-    assert.match(html, /Theme still works when storage is unavailable/);
-});
-
-test("date-dependent New sort and badges are not advertised without reliable dates", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.doesNotMatch(html, /data-sort="new"/);
-    assert.doesNotMatch(html, /isFontNew|getFontCreatedTimestamp|font-new-badge|font-old-badge/);
 });
 
 test("commit metadata normalizes valid timestamps and rejects invalid dates", () => {
@@ -166,7 +157,6 @@ test("commit metadata normalizes valid timestamps and rejects invalid dates", ()
     assert.equal(valid.message, "Release");
     assert.equal(valid.date, "2026-10-09T12:00:00.000Z");
     assert.equal("url" in valid, false);
-
     const invalid = normalizeCommit({
         sha: "0123456789abcdef0123456789abcdef01234567",
         message: "Release",
@@ -175,50 +165,36 @@ test("commit metadata normalizes valid timestamps and rejects invalid dates", ()
     assert.equal(invalid.date, null);
 });
 
-test("search matches token prefixes instead of arbitrary substrings", async () => {
+test("search matches token prefixes rather than arbitrary substrings", async () => {
     const response = mockResponse();
-    await searchHandler({ method: "GET", query: { q: "Ace" } }, response);
+    await searchHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.203" }, query: { q: "Ace" } }, response);
     assert.equal(response.statusCode, 200);
     assert.ok(response.body.some(font => font.name === "Ace Script"));
     assert.equal(response.body.some(font => font.name === "Space Grotesk"), false);
 });
 
-test("About build metadata is text-only and Support is replaced by Join Dock", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /id="commitCard"/);
-    assert.doesNotMatch(html, /id="commitLink"|commitLink\.href|commit\.url/);
-    assert.match(html, /Join Dock/);
-    assert.match(html, /https:\/\/aero\.aryankaushik\.space\/d\/tabgl/);
-    assert.doesNotMatch(html, /Help us keep Typace ad-free|Support ↗/);
-    assert.match(html, /BENTO PREVIEW LAYOUT/);
-});
-
-test("API rate limiter allows ten requests per IP and blocks the eleventh", () => {
-    const req = { headers: { "x-real-ip": "198.51.100.42" } };
+test("rate limiter allows ten requests per IP and blocks the eleventh", () => {
+    const req = { headers: { "x-real-ip": "198.51.100.204" } };
     const start = 1_800_000_000_000;
     for (let index = 0; index < 10; index++) {
         const result = checkRateLimit(req, start + index);
         assert.equal(result.allowed, true);
         assert.equal(result.limit, 10);
     }
-
     const blocked = checkRateLimit(req, start + 10);
     assert.equal(blocked.allowed, false);
     assert.equal(blocked.remaining, 0);
     assert.equal(blocked.retryAfter, 60);
-
-    const afterWindow = checkRateLimit(req, start + 60_001);
-    assert.equal(afterWindow.allowed, true);
+    assert.equal(checkRateLimit(req, start + 60_001).allowed, true);
 });
 
 test("catalog endpoint returns 429 after ten requests from one IP", async () => {
-    const ip = "198.51.100.77";
+    const ip = "198.51.100.205";
     let response;
     for (let index = 0; index < 11; index++) {
         response = mockResponse();
         await fontsHandler({ method: "GET", headers: { "x-real-ip": ip }, query: {} }, response);
     }
-
     assert.equal(response.statusCode, 429);
     assert.equal(response.body.code, "RATE_LIMIT_EXCEEDED");
     assert.equal(response.headers["RateLimit-Limit"], "10");
@@ -226,83 +202,48 @@ test("catalog endpoint returns 429 after ten requests from one IP", async () => 
     assert.ok(Number(response.headers["Retry-After"]) >= 1);
 });
 
-
-test("Join Dock points to the configured community and has safe new-tab attributes", async () => {
+test("React shell keeps Grandstander and Hugeicons and removes the legacy inline app", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.ok(html.includes('href="https://aero.aryankaushik.space/d/tabgl"'));
-    assert.ok(html.includes('aria-label="Join Dock community (opens in a new tab)"'));
-    assert.match(html, /rel="noopener noreferrer"/);
-    assert.doesNotMatch(html, /Help us keep Typace ad-free|Support ↗/);
+    assert.match(html, /fonts\.googleapis\.com\/css2\?family=Grandstander/);
+    assert.match(html, /use\.hugeicons\.com\/font\/icons\.css/);
+    assert.match(html, /src="\/src\/main\.jsx"/);
+    assert.match(html, /id="root"/);
+    assert.doesNotMatch(html, /function loadFonts\(\)|let previewRequestId/);
 });
 
-test("overlays support focus restoration and keyboard focus containment", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.ok(html.includes("overlayReturnFocus"));
-    assert.ok(html.includes('event.key === "Tab"'));
-    assert.ok(html.includes('event.key === "Escape"'));
-    assert.ok(html.includes("focus({ preventScroll: true })"));
+test("React app shows revamp status and retains catalog, preview, download, and API actions", async () => {
+    const app = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+    for (const text of ["Revamp in Progress", "The catalog did not load.", "Try again", "PreviewDialog", "Download", "/api/css/", "/api/fonts/", "/api/openapi.json", "/llms.txt"]) {
+        assert.ok(app.includes(text), "missing UI contract: " + text);
+    }
+    assert.match(app, /aria-live="polite"/);
+    assert.match(app, /aria-pressed=/);
 });
 
-test("font API failures expose a retry action and copy failures are reported", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.ok(html.includes('"Try again"'));
-    assert.ok(html.includes("Copy failed"));
-    assert.ok(html.includes("fallbackCopy(text)"));
-    assert.ok(html.includes("Clear search"));
+test("React styles are responsive, accessible, and honor reduced-motion preferences", async () => {
+    const css = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+    assert.match(css, /@media \(max-width: 700px\)/);
+    assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+    assert.match(css, /--display-font: "Grandstander"/);
+    assert.match(css, /:focus-visible/);
 });
 
-test("font display controls expose their selected state to assistive technology", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /data-view="cards"[\s\S]*?aria-pressed="true"/);
-    assert.match(html, /data-view="peeks"[\s\S]*?aria-pressed="false"/);
-    assert.match(html, /button\.setAttribute\("aria-pressed", String\(active\)\)/);
+test("Vite build scripts and modern React dependencies are configured", async () => {
+    const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+    assert.equal(pkg.scripts.build, "vite build");
+    assert.equal(pkg.scripts.test, "node --test");
+    assert.ok(pkg.dependencies.react);
+    assert.ok(pkg.dependencies["react-dom"]);
+    assert.ok(pkg.devDependencies.vite);
+    assert.ok(pkg.devDependencies["@vitejs/plugin-react"]);
 });
 
-test("font preview bento layout is mobile-first and isolated from About", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /#previewHero\s*\{\s*display:\s*grid;\s*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
-    assert.match(html, /@media\s*\(min-width:\s*760px\)\s*\{\s*#previewHero\s*\{\s*grid-template-columns:/);
-    assert.doesNotMatch(html, /\.preview-hero\s*>\s*\.preview-display/);
-    assert.doesNotMatch(html, /\.preview-hero\s*>\s*\.preview-controls/);
-    assert.match(html, /\.preview-header\s*\{\s*display:\s*flex/);
-    assert.match(html, /#previewOverlay\s+\.preview-header\s*\{\s*display:\s*grid/);
-});
-
-test("catalog loader surfaces unusable responses and active view state remains visible without slider JS", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.ok(html.includes("Font API returned no usable font records"));
-    assert.ok(html.includes("The font list failed to initialize."));
-    assert.match(html, /\.view-button\.active::before\s*\{[\s\S]*?background:\s*var\(--accent\)/);
-});
-
-
-test("recently added badge belongs to font cards, About is a sheet, and views stay isolated", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /font\.isNew\s*\?\s*'<span class="new-tag" aria-label="Recently added">New<\/span>'/);
-    assert.ok(html.includes("max-height: 72dvh"));
-    assert.ok(html.includes("translateY(0)"));
-    assert.match(html, /\.font-list\.peeks\s+\.font-card/);
-    assert.match(html, /setThemeBase\(theme\);[\s\S]*?setTimeout\(\(\)\s*=>\s*\{\s*html\.classList\.remove\("theme-transition"\);\s*\},\s*150\)/);
-});
-
-
-test("font loading failures are retryable and card skeletons always settle", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.ok(html.includes("loadedFaces.get(key) === promise"));
-    assert.ok(html.includes('classList.remove("loading")'));
-    assert.ok(html.includes('classList.add("font-load-failed")'));
-});
-
-test("preview uses a request token to prevent stale font-load races", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.ok(html.includes("let previewRequestId = 0"));
-    assert.ok(html.includes("requestId !== previewRequestId || state.previewFont !== font"));
-    assert.ok(html.includes("state.previewFace = null"));
-});
-
-test("overlays cannot stack and preview download avoids needless new tabs", async () => {
-    const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.ok(html.includes("Do not let the full-screen preview and About sheet overlap."));
-    assert.ok(html.includes('other.setAttribute("aria-hidden", "true")'));
-    assert.ok(!html.includes('link.target = "_blank"'));
+test("AI documentation describes health, OpenAPI, rate limits, and honest font metadata", async () => {
+    const llms = await readFile(new URL("../llms.txt", import.meta.url), "utf8");
+    const full = await readFile(new URL("../llms-full.txt", import.meta.url), "utf8");
+    assert.match(llms, /\/api\/health/);
+    assert.match(llms, /\/api\/openapi\.json/);
+    assert.match(llms, /Retry-After/);
+    assert.match(full, /Do not retry 429 responses in a tight loop/);
+    assert.match(full, /licensing/);
 });

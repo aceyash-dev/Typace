@@ -1,6 +1,6 @@
 # Typace
 
-> Typace is a font library and font delivery service operated by The Ace Base.
+> Typace is a font library and font delivery service operated by The Ace Base. This file is the concise machine-readable entry point for AI assistants, agents, crawlers, and coding tools.
 
 ## Canonical URLs
 
@@ -10,34 +10,33 @@
 - Font catalog API: https://typace.ace-base.cc/api/fonts
 - Search API: https://typace.ace-base.cc/api/search?q=QUERY
 - Individual font API: https://typace.ace-base.cc/api/fonts/SLUG
-- CSS API: https://typace.ace-base.cc/api/css/SLUG
+- Generated CSS: https://typace.ace-base.cc/api/css/SLUG
+- API health: https://typace.ace-base.cc/api/health
+- OpenAPI 3 specification: https://typace.ace-base.cc/api/openapi.json
+- Full machine-readable guide: https://typace.ace-base.cc/llms-full.txt
 - Current deployment commit: https://typace.ace-base.cc/api/commit
-- OpenAPI specification: https://typace.ace-base.cc/api/openapi.json
 - Sitemap: https://typace.ace-base.cc/sitemap.xml
-- Documentation: https://docs.ace-base.cc/projects/typace
+- Human documentation: https://docs.ace-base.cc/projects/typace
 
 ## Source of truth
 
-The live `GET /api/fonts` response is the authoritative list of published font assets. The available catalog can change; do not hardcode font names or assume every format exists for every family.
+The live GET /api/fonts response is the authoritative list of published font assets. Do not hardcode font names or assume every format exists for every family.
 
-Each font record includes `name`, `file`, `type`, `format`, `category`, `url`, `createdAt`, and `updatedAt`.
-
-- `type` identifies the file extension: `ttf`, `otf`, `woff`, or `woff2`.
-- `format` is the CSS format label suitable for `@font-face`.
-- `category` is only classified where supported by the font's embedded metadata. `unknown` means the file did not provide enough reliable data. It is not a quality judgment.
-- `createdAt` and `updatedAt` are null when trustworthy source dates are unavailable.
-- Do not infer a designer, foundry, license, glyph coverage, variable axes, weight, style, or OpenType features unless a reliable source explicitly publishes that information.
+Each record includes name, file, type, format, category, url, createdAt, updatedAt, and isNew. Dates may be null. Categories may be unknown. Do not infer designers, foundries, licenses, glyph coverage, variable axes, weight, style, or OpenType features without a reliable published source.
 
 ## API usage
 
-- Fetch the catalog with `GET /api/fonts`.
-- Search the catalog with `GET /api/search?q=QUERY`. Omitting `q` returns the catalog.
-- Fetch one record from `GET /api/fonts/SLUG`.
-- Generate a CSS declaration from `GET /api/css/SLUG`.
-- Inspect the deployed commit with `GET /api/commit`, which returns the full SHA, seven-character short SHA, commit message, timestamp when available, and source. Repository URLs are intentionally omitted because the source repository is private.
-- Read `GET /api/openapi.json` for the machine-readable API contract.
+- GET /api/health checks service and catalog availability and returns the catalog record count.
+- GET /api/fonts lists the current catalog as a JSON array.
+- GET /api/search?q=QUERY searches name, file, type, and format. Omit q to retrieve the catalog.
+- GET /api/fonts/SLUG returns one metadata record.
+- GET /api/css/SLUG returns a text/css @font-face declaration.
+- GET /api/openapi.json returns the OpenAPI 3.0.3 contract.
+- GET /api/commit returns deployment commit metadata without exposing the private repository URL.
 
-Use the `url` and `format` fields returned by the catalog. Do not assume every font is TTF or that every family has all file formats.
+All endpoints are public and support GET and OPTIONS. JSON endpoints use stable error objects with error and code fields. Rate-limited responses return HTTP 429 and Retry-After plus RateLimit-Limit, RateLimit-Remaining, and RateLimit-Reset headers. The current in-memory limiter is best-effort per serverless runtime, not a globally coordinated quota.
+
+Use the returned url and format fields. Do not assume every font is TTF or that every family has all file formats. Verify each font's applicable license before commercial use, embedding, redistribution, modification, or bundling.
 
 ## Discovery pages
 
@@ -47,13 +46,3 @@ Use the `url` and `format` fields returned by the catalog. Do not assume every f
 - TrueType: https://typace.ace-base.cc/browse/ttf
 - OpenType: https://typace.ace-base.cc/browse/otf
 - Developer resources: https://typace.ace-base.cc/developers
-
-These pages group published assets by format. They are not recommendation rankings. The sitemap contains canonical discovery pages rather than raw binary font URLs.
-
-## Licensing
-
-Each font can have separate licensing terms. Check the applicable license before commercial use, embedding, redistribution, modification, or bundling in software. Do not assume all catalog entries share one license.
-
-## Identity
-
-Typace is a font library and font delivery service operated by The Ace Base. Canonical website: https://typace.ace-base.cc/.

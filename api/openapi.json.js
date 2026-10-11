@@ -2,7 +2,8 @@ import { enforceRateLimit } from "./_lib/rate-limit.js";
 export default function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
+    res.setHeader("X-API-Version", "1.1.0");    res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
     res.setHeader("X-Content-Type-Options", "nosniff");
     if (req.method === "OPTIONS") {
         res.setHeader("Cache-Control", "no-store");
@@ -33,7 +34,8 @@ export default function handler(req, res) {
             version: "1.1.0",
             description: "Public font discovery, search, metadata, and CSS delivery API. Unknown classifications and unavailable source dates are not guessed. API requests are limited to 10 per minute per IP; excess requests return HTTP 429 with Retry-After."
         },
-        servers: [{ url: "https://typace.ace-base.cc" }],
+        servers: [{ url: "https://typace.ace-base.cc", description: "Production API" }],
+        externalDocs: { description: "AI and machine-client guide", url: "https://typace.ace-base.cc/llms-full.txt" },
         tags: [
             { name: "Catalog", description: "Discover published font assets." },
             { name: "Search", description: "Search the current font catalog." },
@@ -68,6 +70,26 @@ export default function handler(req, res) {
                         source: { type: "string", enum: ["deployment", "github"] }
                     }
                 },
+                Health: {
+                    type: "object",
+                    required: ["status", "service", "apiVersion"],
+                    properties: {
+                        status: { type: "string", enum: ["ok", "degraded"] },
+                        service: { type: "string", example: "typace-api" },
+                        apiVersion: { type: "string", example: "1.1.0" },
+                        checkedAt: { type: "string", format: "date-time" },
+                        catalog: {
+                            type: "object",
+                            properties: {
+                                status: { type: "string", enum: ["ok"] },
+                                count: { type: "integer", minimum: 0 }
+                            }
+                        },
+                        links: { type: "object", additionalProperties: { type: "string" } },
+                        error: { type: "string" },
+                        code: { type: "string" }
+                    }
+                },
                 Error: {
                     type: "object",
                     required: ["error"],
@@ -79,11 +101,25 @@ export default function handler(req, res) {
             }
         },
         paths: {
+            "/api/health": {
+                get: {
+                    tags: ["Catalog"],
+                    operationId: "getHealth",
+                    summary: "Check API and font catalog availability",
+                    responses: {
+                        "200": ok("API and catalog are available", { "$ref": "#/components/schemas/Health" }),
+                        "405": ok("Method not allowed", errorRef),
+                        "429": ok("Rate limit exceeded", errorRef),
+                        "503": ok("Catalog is unavailable", { "$ref": "#/components/schemas/Health" })
+                    }
+                }
+            },
             "/api/fonts": {
                 get: {
                     tags: ["Catalog"],
                     operationId: "listFonts",
                     summary: "List published fonts",
+                    description: "Returns the current authoritative catalog as a JSON array. Use /api/search for query matching.",
                     responses: {
                         "200": ok("Current catalog", { type: "array", items: fontRef }),
                         "429": ok("Rate limit exceeded", errorRef),
@@ -110,6 +146,7 @@ export default function handler(req, res) {
                     tags: ["Search"],
                     operationId: "searchFonts",
                     summary: "Search the font catalog",
+                    description: "Returns a JSON array; q is capped at 200 characters and matching uses token prefixes. Omit q to return the catalog.",
                     parameters: [{ name: "q", in: "query", description: "Search terms matched against name, path, type, and format. Omit to return the full catalog.", schema: { type: "string" } }],
                     responses: {
                         "200": ok("Matching font records", { type: "array", items: fontRef }),
