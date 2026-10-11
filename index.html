@@ -298,30 +298,30 @@
         html.theme-transition body,
         html.theme-transition body * {
             transition:
-                background-color .58s cubic-bezier(.22, 1, .36, 1),
-                color .42s cubic-bezier(.22, 1, .36, 1),
-                border-color .42s cubic-bezier(.22, 1, .36, 1),
-                box-shadow .52s cubic-bezier(.22, 1, .36, 1) !important;
+                background-color .12s ease-out,
+                color .12s ease-out,
+                border-color .12s ease-out,
+                box-shadow .12s ease-out !important;
         }
 
         html.theme-transition .font-specimen,
         html.theme-transition .preview-display,
         html.theme-transition .resource-code {
             transition:
-                background-color .58s cubic-bezier(.22, 1, .36, 1),
-                color .48s cubic-bezier(.22, 1, .36, 1),
-                border-color .42s cubic-bezier(.22, 1, .36, 1),
-                box-shadow .52s cubic-bezier(.22, 1, .36, 1),
-                transform .3s var(--spring) !important;
+                background-color .12s ease-out,
+                color .12s ease-out,
+                border-color .12s ease-out,
+                box-shadow .12s ease-out,
+                transform .12s ease-out !important
         }
 
         html.theme-transition .brand-logo,
         html.theme-transition .icon-button svg,
         html.theme-transition .search-icon svg {
             transition:
-                filter .42s cubic-bezier(.22, 1, .36, 1),
+                filter .12s ease-out,
                 opacity .25s ease,
-                transform .3s var(--spring) !important;
+                transform .12s ease-out !important
         }
 
         html.theme-transition .font-card,
@@ -338,11 +338,11 @@
         html.theme-transition .font-name-input,
         html.theme-transition .background-button {
             transition:
-                background-color .58s cubic-bezier(.22, 1, .36, 1),
-                color .42s cubic-bezier(.22, 1, .36, 1),
-                border-color .42s cubic-bezier(.22, 1, .36, 1),
-                box-shadow .52s cubic-bezier(.22, 1, .36, 1),
-                transform .3s var(--spring) !important;
+                background-color .12s ease-out,
+                color .12s ease-out,
+                border-color .12s ease-out,
+                box-shadow .12s ease-out,
+                transform .12s ease-out !important
         }
 
         /* =====================================================
@@ -1228,7 +1228,7 @@
             overflow: hidden;
         }
 
-        .peeks .font-card {
+        .font-list.peeks .font-card {
             min-height: 190px;
 
             padding:
@@ -1250,7 +1250,7 @@
                 transform .25s var(--spring);
         }
 
-        .peeks .font-card:hover {
+        .font-list.peeks .font-card:hover {
             transform: none;
 
             background: var(--surface-soft);
@@ -1260,7 +1260,7 @@
             box-shadow: none;
         }
 
-        .peeks .font-card:active {
+        .font-list.peeks .font-card:active {
             transform: scale(.965);
         }
 
@@ -1281,7 +1281,7 @@
             letter-spacing: -.025em;
         }
 
-        .peeks .font-specimen {
+        .font-list.peeks .font-specimen {
             order: 1;
 
             display: flex;
@@ -1303,13 +1303,13 @@
             letter-spacing: -.06em;
         }
 
-        .peeks .font-card:hover .font-specimen {
+        .font-list.peeks .font-card:hover .font-specimen {
             transform:
                 translateY(-2px)
                 scale(1.025);
         }
 
-        .peeks .font-card-bottom {
+        .font-list.font-list.peeks .font-card-bottom {
             order: 3;
 
             justify-content: center;
@@ -1317,18 +1317,18 @@
             margin-top: .65rem;
         }
 
-        .peeks .font-meta {
+        .font-list.peeks .font-meta {
             display: none;
         }
 
-        .peeks .preview-label {
+        .font-list.peeks .preview-label {
             color: var(--muted);
 
             font-size: .6rem;
             font-weight: 500;
         }
 
-        .peeks .preview-label svg {
+        .font-list.font-list.peeks .preview-label svg {
             width: 12px;
             height: 12px;
         }
@@ -1586,6 +1586,47 @@
         .preview-overlay.active {
             opacity: 1;
             visibility: visible;
+            pointer-events: auto;
+        }
+
+        #aboutOverlay {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        #aboutOverlay .preview-panel {
+            width: min(100%, 760px);
+            height: auto;
+            max-height: min(88dvh, 780px);
+            padding:
+                calc(.9rem + env(safe-area-inset-top, 0px))
+                max(1rem, 3vw)
+                calc(1.1rem + env(safe-area-inset-bottom, 0px));
+            border: 1px solid var(--border);
+            border-bottom: 0;
+            border-radius: 28px 28px 0 0;
+            background: var(--surface);
+            box-shadow: 0 -18px 60px rgba(0, 0, 0, .14);
+            transform: translate3d(0, 105%, 0);
+            transition: transform .2s cubic-bezier(.2, .8, .2, 1);
+            overscroll-behavior: contain;
+        }
+
+        #aboutOverlay.active .preview-panel {
+            transform: translate3d(0, 0, 0);
+        }
+
+        #aboutOverlay .preview-header {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            padding-bottom: .75rem;
+            background: var(--surface);
+        }
+
+        #aboutOverlay .preview-hero {
+            padding-bottom: .25rem;
         }
 
         .preview-panel {
@@ -1612,9 +1653,15 @@
         }
 
         .preview-overlay.active .preview-panel {
-            transform:
-                translateY(0)
-                scale(1);
+            transform: translateY(0) scale(1);
+        }
+
+        #aboutOverlay .preview-panel {
+            transform: translate3d(0, 105%, 0);
+        }
+
+        #aboutOverlay.active .preview-panel {
+            transform: translate3d(0, 0, 0);
         }
 
         .preview-header {
@@ -2621,7 +2668,7 @@
                 min-height: 270px;
             }
 
-            .peeks .font-card {
+            .font-list.peeks .font-card {
                 min-height: 220px;
             }
         }
@@ -2676,11 +2723,11 @@
                     clamp(1.8rem, 9vw, 2.8rem);
             }
 
-            .peeks .font-card {
+            .font-list.peeks .font-card {
                 min-height: 175px;
             }
 
-            .peeks .font-specimen {
+            .font-list.peeks .font-specimen {
                 min-height: 85px;
 
                 font-size:
@@ -3039,7 +3086,6 @@
                     aria-pressed="false"
                 >
                     Peeks
-                    <span class="new-tag" aria-label="New feature">New</span>
                 </button>
 
             </div>
@@ -3677,10 +3723,11 @@
             theme === "dark"
         );
 
-        localStorage.setItem(
-            "typace-theme",
-            theme
-        );
+        try {
+            localStorage.setItem("typace-theme", theme);
+        } catch {
+            // Theme still works when storage is unavailable.
+        }
 
         themeButton.innerHTML =
             theme === "dark"
@@ -3708,28 +3755,15 @@
                 "(prefers-reduced-motion: reduce)"
             ).matches;
 
-        if (
-            animate &&
-            !reducedMotion
-        ) {
-            html.classList.add(
-                "theme-transition"
-            );
-
-            requestAnimationFrame(() => {
-                setThemeBase(theme);
-            });
-
-            setTimeout(() => {
-                html.classList.remove(
-                    "theme-transition"
-                );
-            }, 650);
-
-            return;
-        }
-
+        // Apply theme colors synchronously; animate only the short visual transition.
         setThemeBase(theme);
+
+        if (animate && !reducedMotion) {
+            html.classList.add("theme-transition");
+            window.setTimeout(() => {
+                html.classList.remove("theme-transition");
+            }, 150);
+        }
     }
 
     themeButton.addEventListener(
@@ -4129,10 +4163,9 @@
                 <div class="font-name-row">
 
                     <div class="font-name">
-                        ${escapeHTML(
-                            font.name
-                        )}
+                        ${escapeHTML(font.name)}
                     </div>
+                    ${font.isNew ? '<span class="new-tag" aria-label="Recently added">New</span>' : ""}
 </div>
 
                 <div
@@ -4788,10 +4821,11 @@
                         button
                     );
 
-                    localStorage.setItem(
-                        "typace-view",
-                        state.view
-                    );
+                    try {
+                        localStorage.setItem("typace-view", state.view);
+                    } catch {
+                        // View switching must not depend on storage access.
+                    }
 
                     renderView(
                         direction
