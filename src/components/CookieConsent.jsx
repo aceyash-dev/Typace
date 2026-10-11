@@ -16,6 +16,8 @@ function readConsent() {
 function activateAnalytics() {
   if (document.querySelector('script[data-typace-analytics="true"]')) return;
   window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+  window.gtag("consent", "default", { analytics_storage: "granted", ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" });
   window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
   const script = document.createElement("script");
   script.async = true;
@@ -42,13 +44,8 @@ export default function CookieConsent() {
     if (consent?.analytics) {
       activateAnalytics();
     } else if (window.dataLayer) {
-      window.dataLayer.push({
-        event: "consent_update",
-        analytics_storage: "denied",
-        ad_storage: "denied",
-        ad_user_data: "denied",
-        ad_personalization: "denied"
-      });
+      window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+      window.gtag("consent", "update", { analytics_storage: "denied", ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" });
     }
   }, [consent]);
 
