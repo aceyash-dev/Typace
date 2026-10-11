@@ -3,6 +3,8 @@ import { motion, useReducedMotion } from "motion/react";
 import Icon from "./components/Icon.jsx";
 import FontCard from "./components/FontCard.jsx";
 import PreviewDialog from "./components/PreviewDialog.jsx";
+import CookieConsent from "./components/CookieConsent.jsx";
+import LegalPage from "./components/LegalPage.jsx";
 import { copyText, formatCount, normalize, usableFont } from "./lib/fonts.js";
 
 const API = "/api/fonts";
@@ -14,6 +16,8 @@ const CATEGORIES = [
 ];
 
 export default function App() {
+  const isBrowse = window.location.pathname === "/browse" || window.location.pathname.startsWith("/browse/");
+  const legalRoute = { "/privacy": "privacy", "/terms": "terms", "/cookies": "cookies" }[window.location.pathname];
   const [fonts, setFonts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -120,8 +124,10 @@ export default function App() {
     }
   }
 
+  if (legalRoute) return <><LegalPage page={legalRoute} /><CookieConsent /></>;
+
   return (
-    <div className="app-shell">
+    <div className={"app-shell" + (isBrowse ? " browse-page" : " home-page")}>
       <header className="site-header">
         <a className="brand" href="/" aria-label="Typace home">
           <img className="brand-image" src="/icon.png" alt="" width="38" height="38" />
@@ -129,7 +135,7 @@ export default function App() {
           <span className="brand-beta">BETA</span>
         </a>
         <nav className="main-nav" aria-label="Main navigation">
-          <a className="nav-active" href="#library">Library</a>
+          <a className={isBrowse ? "nav-active" : ""} href="/browse">Library</a>
           <a href="/developers">Developers</a>
           <a href="/api/openapi.json">API docs</a>
         </nav>
@@ -137,12 +143,12 @@ export default function App() {
           <button className="theme-toggle" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} title="Toggle theme">
             <Icon name={theme === "dark" ? "sun-03" : "moon-02"} />
           </button>
-          <a className="header-cta" href="#library">Browse fonts <Icon name="arrow-down-01" /></a>
+          <a className="header-cta" href="/browse">Browse library <Icon name="arrow-up-right-01" /></a>
         </div>
       </header>
 
       <main>
-        <motion.section className="hero" aria-labelledby="hero-title" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
+        {!isBrowse && <motion.section className="hero" aria-labelledby="hero-title" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
           <div className="hero-copy">
             <p className="eyebrow"><span className="eyebrow-line" /> THE FONT CATALOG</p>
             <h1 id="hero-title">Type with<br /><span>full</span> <em>volume.</em></h1>
@@ -154,14 +160,16 @@ export default function App() {
             <span className="hero-stamp" aria-hidden="true">TYPE<br />KA<br />TASHAN</span>
             <span className="hero-corner-label" aria-hidden="true">TYPOGRAPHY / 001</span>
           </div>
-        </motion.section>
+        </motion.section>}
 
-        <section className="library-section" id="library" aria-labelledby="library-title">
+        {isBrowse && <section className="browse-intro"><p className="eyebrow">TYPOGRAPHY INDEX / 001</p><h1>Every typeface.<br /><em>One library.</em></h1><p>Search the collection, test specimens, copy CSS, or download the source file.</p></section>}
+
+        <section className={"library-section" + (isBrowse ? " full-library" : " featured-library")} id="library" aria-labelledby="library-title">
           <div className="section-heading">
-            <div><p className="eyebrow">THE LIBRARY</p><h2 id="library-title">Pick a <em>typeface.</em></h2></div>
-            <p className="section-note">Search by name or format. Preview, copy the CSS, and download the original file.</p>
+            <div><p className="eyebrow">{isBrowse ? "THE COMPLETE INDEX" : "CURATED SPECIMENS / 06"}</p><h2 id="library-title">{isBrowse ? <>Find your <em>type.</em></> : <>A few good <em>typefaces.</em></>}</h2></div>
+            {isBrowse ? <p className="section-note">Search by name or format. Preview, copy the CSS, and download the original file.</p> : <a className="all-fonts-link" href="/browse">View all {formatCount(fonts.length)} fonts <Icon name="arrow-up-right-01" /></a>}
           </div>
-          <div className="library-toolbar">
+          {isBrowse && <div className="library-toolbar">
             <label className="search-box">
               <Icon name="search-01" />
               <span className="sr-only">Search fonts</span>
@@ -174,22 +182,24 @@ export default function App() {
               <button type="button" className={view === "grid" ? "active" : ""} onClick={() => setView("grid")} aria-pressed={view === "grid"} aria-label="Grid view"><Icon name="grid-view" /></button>
               <button type="button" className={view === "list" ? "active" : ""} onClick={() => setView("list")} aria-pressed={view === "list"} aria-label="List view"><Icon name="list-view" /></button>
             </div>
-          </div>
-          <div className="filter-row" role="group" aria-label="Filter by font category">
+          </div>}
+          {isBrowse && <div className="filter-row" role="group" aria-label="Filter by font category">
             {CATEGORIES.map((item) => <button key={item.value} type="button" className={"filter-chip" + (category === item.value ? " active" : "")} onClick={() => setCategory(item.value)} aria-pressed={category === item.value}>{item.label}{item.value === "all" && <span>{formatCount(fonts.length)}</span>}</button>)}
             <span className="result-count" aria-live="polite">{loading ? "Loading catalog…" : formatCount(filtered.length) + " fonts"}</span>
-          </div>
+          </div>}
 
           {loading && <div className="loading-state" role="status"><span className="loading-spinner" /><span>Setting the type…</span></div>}
           {!loading && error && <div className="error-state" role="alert"><span className="error-icon"><Icon name="alert-circle" /></span><div><h3>The catalog did not load.</h3><p>{error}</p><button className="button button-primary" type="button" onClick={() => loadCatalog()}><Icon name="refresh" /> Try again</button></div></div>}
           {!loading && !error && filtered.length === 0 && <div className="empty-state"><Icon name="search-remove" /><h3>No fonts found.</h3><p>Try a shorter search or clear the filters.</p><button className="button button-secondary" type="button" onClick={() => { setQuery(""); setCategory("all"); }}>Reset filters</button></div>}
           {!loading && !error && filtered.length > 0 && <>
             <div className={"font-grid " + (view === "list" ? "font-list-view" : "")}>
-              {filtered.slice(0, visibleCount).map((font) => <FontCard key={font.file} font={font} onPreview={setSelectedFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
+              {filtered.slice(0, isBrowse ? visibleCount : 6).map((font) => <FontCard key={font.file} font={font} onPreview={setSelectedFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
             </div>
-            {visibleCount < filtered.length && <div className="load-more-wrap"><button className="button button-secondary load-more" type="button" onClick={() => setVisibleCount((count) => Math.min(count + 24, filtered.length))}>Load more fonts <Icon name="arrow-down-01" /><span>{formatCount(filtered.length - visibleCount)} remaining</span></button></div>}
+            {isBrowse && visibleCount < filtered.length && <div className="load-more-wrap"><button className="button button-secondary load-more" type="button" onClick={() => setVisibleCount((count) => Math.min(count + 24, filtered.length))}>Load more fonts <Icon name="arrow-down-01" /><span>{formatCount(filtered.length - visibleCount)} remaining</span></button></div>}
           </>}
-        </section>
+        </section>}
+
+        {!isBrowse && <section className="showcase-note"><span className="showcase-index">02 / 02</span><div><p className="eyebrow">THE WHOLE COLLECTION</p><h2>Good type deserves<br /><em>room to roam.</em></h2></div><a className="button button-primary" href="/browse">Explore the full library <Icon name="arrow-up-right-01" /></a></section>}
 
         <section className="api-callout">
           <div className="api-callout-icon"><Icon name="code-square-01" /></div>
@@ -201,11 +211,12 @@ export default function App() {
       <footer className="site-footer">
         <a className="footer-brand" href="/"><img className="footer-brand-image" src="/icon.png" alt="" width="30" height="30" /><span>typace</span></a>
         <p>Made for type that has something to say.</p>
-        <div className="footer-links"><a href="/developers">Developers</a><a href="/api/fonts">Catalog API</a><a href="/llms.txt">Docs for AI tools</a><a href="https://aero.aryankaushik.space/d/tabgl" target="_blank" rel="noopener noreferrer">Join Dock <Icon name="arrow-up-right-01" /></a></div>
+        <div className="footer-links"><a href="/developers">Developers</a><a href="/api/fonts">Catalog API</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/cookies">Cookie policy</a><a href="#" onClick={(event) => { event.preventDefault(); window.dispatchEvent(new Event("typace:cookie-settings")); }}>Cookie settings</a><a href="/llms.txt">Docs for AI tools</a></div>
         <span className="build-meta">{commit ? "BUILD " + commit.shortSha : "FONT LIBRARY"} <span aria-hidden="true">·</span> <a href="/api/commit">STATUS</a></span>
       </footer>
       <PreviewDialog font={selectedFont} onClose={() => setSelectedFont(null)} onCopy={handleCopy} copied={selectedFont ? copiedFont === selectedFont.file : false} />
       {toast && <div className="toast" role="status"><Icon name="checkmark-circle-02" />{toast}</div>}
+      <CookieConsent />
     </div>
   );
 }
