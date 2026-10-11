@@ -3924,75 +3924,34 @@
         new Map();
 
     async function loadFont(font) {
-        const url =
-            getFontUrl(font);
+        const url = getFontUrl(font);
+        if (!url || typeof FontFace !== "function") return null;
 
-        if (!url) {
+        const family = getFamily(font);
+        const key = `${family}|${url}`;
+        const cached = loadedFaces.get(key);
+        if (cached) return cached;
+
+        const extension = String(font.extension || "").toLowerCase();
+        const format = FONT_FORMATS[extension] || font.format || "woff2";
+        const face = new FontFace(family, `url("${url}") format("${format}")`, {
+            weight: font.weight || "400",
+            style: font.style || "normal",
+            display: "swap"
+        });
+
+        // Keep concurrent callers on one request, but evict rejected/failed
+        // loads so a transient CDN/network error can be retried.
+        const promise = face.load().then(loaded => {
+            document.fonts.add(loaded);
+            return loaded;
+        }).catch(error => {
+            if (loadedFaces.get(key) === promise) loadedFaces.delete(key);
+            console.warn(`Typace: failed to load ${font.name}`, error);
             return null;
-        }
+        });
 
-        const family =
-            getFamily(font);
-
-        const key =
-            `${family}|${url}`;
-
-        if (
-            loadedFaces.has(key)
-        ) {
-            return loadedFaces.get(key);
-        }
-
-        const format =
-            FONT_FORMATS[
-                font.extension
-            ] ||
-            font.format ||
-            "woff2";
-
-        const face =
-            new FontFace(
-                family,
-                `url("${url}") format("${format}")`,
-                {
-                    weight:
-                        font.weight || "400",
-
-                    style:
-                        font.style || "normal",
-
-                    display:
-                        "swap"
-                }
-            );
-
-        const promise =
-            face.load()
-                .then(loaded => {
-                    document.fonts.add(
-                        loaded
-                    );
-
-                    return loaded;
-                })
-                .catch(error => {
-                    loadedFaces.delete(
-                        key
-                    );
-
-                    console.warn(
-                        `Typace: failed to load ${font.name}`,
-                        error
-                    );
-
-                    return null;
-                });
-
-        loadedFaces.set(
-            key,
-            promise
-        );
-
+        loadedFaces.set(key, promise);
         return promise;
     }
 
@@ -4956,13 +4915,20 @@
     let overlayReturnFocus = null;
 
     function openOverlay(overlay) {
+        // Opening one overlay closes the other so focus and scroll locking stay coherent.
+        for (const other of [previewOverlay, aboutOverlay]) {
+            if (other !== overlay && other.classList.contains("active")) {
+                other.classList.remove("active");
+                other.setAttribute("aria-hidden", "true");
+            }
+        }
         overlayReturnFocus = document.activeElement;
         overlay.classList.add("active");
         overlay.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
 
         const firstFocusable = overlay.querySelector(
-            "button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex='-1'])"
+            "button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
         );
         firstFocusable?.focus({ preventScroll: true });
     }
@@ -4971,10 +4937,8 @@
         overlay.classList.remove("active");
         overlay.setAttribute("aria-hidden", "true");
 
-        if (
-            !previewOverlay.classList.contains("active") &&
-            !aboutOverlay.classList.contains("active")
-        ) {
+        if (!previewOverlay.classList.contains("active") &&
+            !aboutOverlay.classList.contains("active")) {
             document.body.style.overflow = "";
             if (overlayReturnFocus instanceof HTMLElement && overlayReturnFocus.isConnected) {
                 overlayReturnFocus.focus({ preventScroll: true });
@@ -4983,773 +4947,58 @@
         }
     }
 
-    /* ========================================================
-       ABOUT
-    ======================================================== */
+    let previewRequestId = 0;
 
-    aboutButton.addEventListener(
-        "click",
-        () => {
-            openOverlay(
-                aboutOverlay
-            );
-        }
-    );
+    async function openPreview(font) {
+        const requestId = ++previewRequestId;
+        state.previewFont = font;
+        state.previewFace = null;
+        state.previewUrl = getFontUrl(font);
 
-    aboutBack.addEventListener(
-        "click",
-        () => {
-            closeOverlay(
-                aboutOverlay
-            );
-        }
-    );
+        previewTitle.textContent = font.name;
+        previewFontName.textContent = font.name;
+        if (previewExtension) previewExtension.textContent = font.extension || "font";
 
-    aboutOverlay.addEventListener(
-        "click",
-        event => {
-            if (
-                event.target ===
-                aboutOverlay
-            ) {
-                closeOverlay(
-                    aboutOverlay
-                );
-            }
-        }
-    );
-
-    /* ========================================================
-       PREVIEW
-    ======================================================== */
-
-    async function openPreview(
-        font
-    ) {
-        state.previewFont =
-            font;
-
-        state.previewUrl =
-            getFontUrl(font);
-
-        previewTitle.textContent =
-            font.name;
-
-        previewFontName.textContent =
-            font.name;
-
-        if (previewExtension) {
-            previewExtension.textContent =
-                font.extension || "font";
-        }
-
-        previewDisplay.textContent =
-            DEFAULT_SPECIMEN;
-
+        previewDisplay.textContent = DEFAULT_SPECIMEN;
+        previewDisplay.removeAttribute("data-font-load-error");
         setPreviewBackground("light");
-
-        $$(".background-button")
-            .forEach(button => {
-                button.classList.toggle(
-                    "active",
-                    button.dataset.background ===
-                        "light"
-                );
-            });
+        $$(".background-button").forEach(button => {
+            button.classList.toggle("active", button.dataset.background === "light");
+        });
 
         resetPreviewControls();
-
-        fontNameInput.value =
-            font.name;
-
+        fontNameInput.value = font.name;
         applyPreviewFont();
-
         updateResources();
+        openOverlay(previewOverlay);
 
-        openOverlay(
-            previewOverlay
-        );
+        const face = await loadFont(font);
+        // A slow response from the previously selected font must not overwrite
+        // the current preview after the user opens another card.
+        if (requestId !== previewRequestId || state.previewFont !== font) return;
 
-        const face =
-            await loadFont(font);
-
-        state.previewFace =
-            face;
-
-        if (
-            state.previewFont === font
-        ) {
-            if (face) {
-                applyPreviewFont();
-            }
-
-            updateResources();
+        state.previewFace = face;
+        if (face) {
+            applyPreviewFont();
+            previewDisplay.removeAttribute("data-font-load-error");
+        } else {
+            previewDisplay.setAttribute("data-font-load-error", "true");
+            previewDisplay.setAttribute("aria-description", "Font failed to load. Close this preview and try the font again.");
         }
+        updateResources();
     }
 
-    function applyPreviewFont() {
-        if (
-            !state.previewFont
-        ) {
-            return;
-        }
+    previewDownload.addEventListener("click", () => {
+        if (!state.previewFont || !state.previewUrl) return;
 
-        const font =
-            state.previewFont;
-
-        const family =
-            getFamily(font);
-
-        previewDisplay.style.fontFamily =
-            escapeCSSFamily(
-                family
-            );
-
-        previewDisplay.style.fontWeight =
-            font.weight || "400";
-
-        previewDisplay.style.fontStyle =
-            font.style || "normal";
-
-        updatePreviewStyles();
-    }
-
-    function resetPreviewControls() {
-        sizeSlider.value = "52";
-
-        sizeValue.textContent =
-            "52px";
-    }
-
-    function updatePreviewStyles() {
-        previewDisplay.style.fontSize =
-            `${sizeSlider.value}px`;
-    }
-
-    /* ========================================================
-       EDITABLE SPECIMEN
-    ======================================================== */
-
-    previewDisplay.addEventListener(
-        "input",
-        () => {
-            updateResources();
-        }
-    );
-
-    previewDisplay.addEventListener(
-        "keydown",
-        event => {
-            if (
-                event.key === "Enter"
-            ) {
-                event.preventDefault();
-
-                document.execCommand(
-                    "insertLineBreak"
-                );
-            }
-        }
-    );
-
-    /* ========================================================
-       PREVIEW CONTROLS
-    ======================================================== */
-
-    sizeSlider.addEventListener(
-        "input",
-        () => {
-            sizeValue.textContent =
-                `${sizeSlider.value}px`;
-
-            updatePreviewStyles();
-        }
-    );
-
-    let imageRequestId = 0;
-
-    function rgbToHsl(r, g, b) {
-        r /= 255; g /= 255; b /= 255;
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        const lightness = (max + min) / 2;
-        const delta = max - min;
-        if (!delta) return [0, 0, lightness];
-        const saturation = delta / (1 - Math.abs(2 * lightness - 1));
-        let hue;
-        if (max === r) hue = ((g - b) / delta) % 6;
-        else if (max === g) hue = (b - r) / delta + 2;
-        else hue = (r - g) / delta + 4;
-        return [(hue * 60 + 360) % 360, saturation, lightness];
-    }
-
-    function hslToCss(h, s, l) {
-        return "hsl(" + Math.round(h) + " " + Math.round(s * 100) + "% " + Math.round(l * 100) + "%)";
-    }
-
-    function imageTextColor(r, g, b) {
-        const [h, s, l] = rgbToHsl(r, g, b);
-        const dark = l < .5;
-        const textLightness = dark
-            ? Math.min(.96, Math.max(.72, l + .42))
-            : Math.max(.08, Math.min(.3, l - .42));
-        const textSaturation = Math.min(.95, Math.max(.45, s + .12));
-        const borderLightness = dark
-            ? Math.min(.98, l + .30)
-            : Math.max(.12, l - .25);
-
-        return {
-            text: hslToCss(h, textSaturation, textLightness),
-            border: hslToCss(h, Math.min(.8, textSaturation), borderLightness),
-            overlay: dark ? "rgba(0,0,0,.12)" : "rgba(255,255,255,.14)"
-        };
-    }
-
-    async function loadImageBackground() {
-        const requestId = ++imageRequestId;
-        const url = "https://picsum.photos/1600/1000?random=" + Date.now();
-        const image = new Image();
-        image.crossOrigin = "anonymous";
-
-        await new Promise((resolve, reject) => {
-            image.onload = resolve;
-            image.onerror = reject;
-            image.src = url;
-        });
-
-        if (requestId !== imageRequestId) return;
-
-        let r = 42;
-        let g = 38;
-        let b = 34;
-
-        try {
-            const canvas = document.createElement("canvas");
-            canvas.width = 40;
-            canvas.height = 25;
-            const context = canvas.getContext("2d", { willReadFrequently: true });
-            context.drawImage(image, 0, 0, canvas.width, canvas.height);
-            const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-            let totalR = 0;
-            let totalG = 0;
-            let totalB = 0;
-            let weightTotal = 0;
-
-            for (let i = 0; i < pixels.length; i += 16) {
-                const pr = pixels[i];
-                const pg = pixels[i + 1];
-                const pb = pixels[i + 2];
-                const [, saturation] = rgbToHsl(pr, pg, pb);
-                const weight = .5 + saturation;
-                totalR += pr * weight;
-                totalG += pg * weight;
-                totalB += pb * weight;
-                weightTotal += weight;
-            }
-
-            if (weightTotal) {
-                r = totalR / weightTotal;
-                g = totalG / weightTotal;
-                b = totalB / weightTotal;
-            }
-        } catch {
-            // Keep a readable fallback if the remote image disallows canvas sampling.
-        }
-
-        const colors = imageTextColor(r, g, b);
-        previewDisplay.classList.remove("specimen-light", "specimen-dark");
-        previewDisplay.classList.add("specimen-image");
-        previewDisplay.style.backgroundImage =
-            "linear-gradient(" + colors.overlay + ", " + colors.overlay + "), url(\"" + url + "\")";
-        previewDisplay.style.setProperty("--preview-specimen-text", colors.text);
-        previewDisplay.style.setProperty("--preview-specimen-border", colors.border);
-    }
-
-    function setPreviewBackground(background) {
-        previewDisplay.style.backgroundImage = "";
-        previewDisplay.style.removeProperty("--preview-specimen-text");
-        previewDisplay.style.removeProperty("--preview-specimen-border");
-        previewDisplay.classList.remove("specimen-light", "specimen-dark", "specimen-image");
-
-        if (background === "dark") previewDisplay.classList.add("specimen-dark");
-        else previewDisplay.classList.add("specimen-light");
-
-        if (background === "image") {
-            loadImageBackground().catch(() => setPreviewBackground("light"));
-        }
-
-        $$(".background-button").forEach(button => {
-            button.classList.toggle("active", button.dataset.background === background);
-        });
-    }
-
-    $$(".background-button").forEach(button => {
-        button.addEventListener("click", () => setPreviewBackground(button.dataset.background));
+        const link = document.createElement("a");
+        link.href = state.previewUrl;
+        link.download = state.previewFont.file?.split("/").pop() ||
+            `${state.previewFont.name}.${state.previewFont.extension || "woff2"}`;
+        link.rel = "noopener";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
     });
 
-    /* ========================================================
-       CUSTOM CSS NAME
-    ======================================================== */
-
-    fontNameInput.addEventListener(
-        "input",
-        () => {
-            updateResources();
-        }
-    );
-
-    /* ========================================================
-       CDN / USAGE
-    ======================================================== */
-
-    function getCustomFontName() {
-        const value =
-            fontNameInput.value.trim();
-
-        return (
-            value ||
-            state.previewFont?.name ||
-            "Typace Font"
-        );
-    }
-
-    function updateResources() {
-        const font =
-            state.previewFont;
-
-        if (!font) {
-            return;
-        }
-
-        const url =
-            getFontUrl(font);
-
-        const extension =
-            (
-                font.extension ||
-                "woff2"
-            ).toUpperCase();
-
-        cdnType.textContent =
-            extension;
-
-        cdnCode.textContent =
-            url;
-
-        const customName =
-            getCustomFontName();
-
-        const format =
-            FONT_FORMATS[
-                font.extension
-            ] ||
-            font.format ||
-            "woff2";
-
-        const weight =
-            font.weight || "400";
-
-        const style =
-            font.style ||
-            "normal";
-
-        usageCode.textContent =
-`@font-face {
-    font-family: "${customName}";
-    src: url("${url}") format("${format}");
-    font-weight: ${weight};
-    font-style: ${style};
-    font-display: swap;
-}
-
-.your-element {
-    font-family: "${customName}", sans-serif;
-    font-weight: ${weight};
-}`;
-
-        void previewDisplay;
-    }
-
-    /* ========================================================
-       COPY
-    ======================================================== */
-
-    async function copyText(text, button, original) {
-        if (!text || !button) return;
-
-        let copied = false;
-        try {
-            if (navigator.clipboard?.writeText && window.isSecureContext) {
-                await navigator.clipboard.writeText(text);
-                copied = true;
-            }
-        } catch (error) {
-            console.warn("Clipboard API unavailable; using fallback:", error);
-        }
-
-        if (!copied) copied = fallbackCopy(text);
-
-        if (!copied) {
-            button.textContent = "Copy failed";
-            button.setAttribute("aria-label", "Copy failed. Select and copy the text manually.");
-            setTimeout(() => {
-                button.textContent = original;
-                button.removeAttribute("aria-label");
-            }, 1800);
-            return;
-        }
-
-        button.textContent = "Copied";
-        button.classList.add("copied");
-        button.setAttribute("aria-live", "polite");
-
-        setTimeout(() => {
-            button.textContent = original;
-            button.classList.remove("copied");
-            button.removeAttribute("aria-live");
-        }, 1400);
-    }
-
-    function fallbackCopy(text) {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        textarea.setAttribute("readonly", "");
-        textarea.setAttribute("aria-hidden", "true");
-        textarea.style.position = "fixed";
-        textarea.style.top = "0";
-        textarea.style.left = "-9999px";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-
-        let copied = false;
-        try {
-            textarea.focus({ preventScroll: true });
-            textarea.select();
-            copied = document.execCommand("copy");
-        } catch {
-            copied = false;
-        } finally {
-            textarea.remove();
-        }
-
-        return copied;
-    }
-
-    copyCdn.addEventListener(
-        "click",
-        () => {
-            copyText(
-                cdnCode.textContent,
-                copyCdn,
-                "Copy CDN"
-            );
-        }
-    );
-
-    copyUsage.addEventListener(
-        "click",
-        () => {
-            copyText(
-                usageCode.textContent,
-                copyUsage,
-                "Copy Usage"
-            );
-        }
-    );
-
-    /* ========================================================
-       DOWNLOAD
-    ======================================================== */
-
-    previewDownload.addEventListener(
-        "click",
-        () => {
-            if (
-                !state.previewFont ||
-                !state.previewUrl
-            ) {
-                return;
-            }
-
-            const link =
-                document.createElement(
-                    "a"
-                );
-
-            link.href =
-                state.previewUrl;
-
-            link.download =
-                state.previewFont.file
-                    ?.split("/")
-                    .pop() ||
-                `${
-                    state.previewFont.name
-                }.${state.previewFont.extension || "woff2"}`;
-
-            link.target = "_blank";
-
-            link.rel =
-                "noopener noreferrer";
-
-            document.body.appendChild(
-                link
-            );
-
-            link.click();
-
-            link.remove();
-        }
-    );
-
-    /* ========================================================
-       CLOSE PREVIEW
-    ======================================================== */
-
-    previewBack.addEventListener(
-        "click",
-        () => {
-            closeOverlay(
-                previewOverlay
-            );
-        }
-    );
-
-    previewOverlay.addEventListener(
-        "click",
-        event => {
-            if (
-                event.target ===
-                previewOverlay
-            ) {
-                closeOverlay(
-                    previewOverlay
-                );
-            }
-        }
-    );
-
-    /* ========================================================
-       KEYBOARD
-    ======================================================== */
-
-    document.addEventListener("keydown", event => {
-        const activeOverlay = previewOverlay.classList.contains("active")
-            ? previewOverlay
-            : aboutOverlay.classList.contains("active")
-                ? aboutOverlay
-                : null;
-
-        if (!activeOverlay) return;
-
-        if (event.key === "Escape") {
-            event.preventDefault();
-            closeOverlay(activeOverlay);
-            return;
-        }
-
-        if (event.key === "Tab") {
-            const focusable = [...activeOverlay.querySelectorAll(
-                "button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
-            )].filter(element => element.getClientRects().length > 0);
-
-            if (!focusable.length) {
-                event.preventDefault();
-                return;
-            }
-
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-
-            if (event.shiftKey && document.activeElement === first) {
-                event.preventDefault();
-                last.focus();
-            } else if (!event.shiftKey && document.activeElement === last) {
-                event.preventDefault();
-                first.focus();
-            }
-        }
-    });
-
-    /* ========================================================
-       API
-    ======================================================== */
-
-    async function loadFonts() {
-        if (state.loading) return;
-        state.loading = true;
-        fontList.setAttribute("aria-busy", "true");
-        loadStatus.innerHTML = `
-            <span class="spinner" aria-hidden="true"></span>
-            Loading fonts…
-        `;
-
-        try {
-            const response = await fetch(API_URL, {
-                headers: { Accept: "application/json" },
-                cache: "no-store"
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-            const data = await response.json();
-            const rawFonts = Array.isArray(data)
-                ? data
-                : Array.isArray(data?.fonts)
-                    ? data.fonts
-                    : Array.isArray(data?.data)
-                        ? data.data
-                        : [];
-
-            const fonts = rawFonts
-                .map(normalizeFont)
-                .filter(font => font && font.file);
-
-            if (!fonts.length) {
-                throw new Error("Font API returned no usable font records");
-            }
-
-            state.fonts = fonts;
-            state.loading = false;
-            render(true);
-            requestAnimationFrame(updateActiveSliders);
-        } catch (error) {
-            console.error("Typace font API error:", error);
-            state.fonts = [];
-            state.filtered = [];
-            state.rendered = 0;
-            fontList.className = `font-list ${state.view === "peeks" ? "peeks" : ""}`;
-            fontList.setAttribute("aria-busy", "false");
-            fontList.innerHTML = emptyState(
-                "Fonts couldn't load",
-                "The font list failed to initialize. Check your connection and retry."
-            );
-
-            const retryButton = document.createElement("button");
-            retryButton.type = "button";
-            retryButton.className = "retry-button";
-            retryButton.textContent = "Try again";
-            retryButton.addEventListener("click", loadFonts);
-            fontList.querySelector(".empty")?.append(retryButton);
-            stats.textContent = "Unable to load fonts";
-            loadStatus.textContent = "";
-        } finally {
-            state.loading = false;
-            fontList.setAttribute("aria-busy", "false");
-        }
-    }
-
-    /* ========================================================
-       RESIZE
-    ======================================================== */
-
-    window.addEventListener(
-        "resize",
-        () => {
-            requestAnimationFrame(
-                updateActiveSliders
-            );
-        },
-        {
-            passive: true
-        }
-    );
-
-    /* ========================================================
-       START
-    ======================================================== */
-
-    // Finish non-critical slider setup; the catalog load starts above.
-    requestAnimationFrame(updateActiveSliders);
-
-    /* ========================================================
-       LATEST COMMIT
-    ======================================================== */
-
-    const commitStatus = $("#commitStatus");
-    const commitMessage = $("#commitMessage");
-    const commitTime = $("#commitTime");
-    const commitCard = $("#commitCard");
-    const commitSource = $("#commitSource");
-
-    function relativeTime(date) {
-        const timestamp = new Date(date).getTime();
-        if (!Number.isFinite(timestamp)) return null;
-
-        const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
-        const units = [
-            ["year", 365 * 24 * 60 * 60],
-            ["month", 30 * 24 * 60 * 60],
-            ["day", 24 * 60 * 60],
-            ["hour", 60 * 60],
-            ["minute", 60],
-            ["second", 1]
-        ];
-
-        for (const [unit, size] of units) {
-            const value = Math.floor(seconds / size);
-            if (value >= 1) {
-                return value === 1 ? `1 ${unit} ago` : `${value} ${unit}s ago`;
-            }
-        }
-
-        return "just now";
-    }
-
-    async function loadLatestCommit() {
-        if (!commitStatus || !commitCard) return;
-
-        try {
-            const response = await fetch("/api/commit", {
-                headers: { Accept: "application/json" },
-                cache: "no-store"
-            });
-
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-            const commit = await response.json();
-            if (!/^[a-f0-9]{7,40}$/i.test(commit.sha || "") ||
-                !commit.shortSha || !commit.message) {
-                throw new Error("Commit metadata is incomplete");
-            }
-
-            commitStatus.textContent = commit.shortSha;
-            commitMessage.textContent = commit.message;
-
-            if (commitTime) {
-                const relative = commit.date ? relativeTime(commit.date) : null;
-                commitTime.textContent = relative || "Commit date unavailable";
-                if (commit.date) {
-                    commitTime.dateTime = commit.date;
-                    commitTime.title = new Date(commit.date).toLocaleString();
-                } else {
-                    commitTime.removeAttribute("datetime");
-                    commitTime.removeAttribute("title");
-                }
-            }
-
-            if (commitSource) {
-                commitSource.textContent = commit.source === "deployment"
-                    ? "Deployed revision"
-                    : "Latest repository revision";
-            }
-        } catch (error) {
-            console.warn("Typace commit API error:", error);
-            commitStatus.textContent = "Unavailable";
-            if (commitMessage) commitMessage.textContent = "Build metadata unavailable";
-            if (commitTime) commitTime.textContent = "Commit time unavailable";
-            if (commitSource) commitSource.textContent = "Status unavailable";
-        }
-    }
-
-    loadLatestCommit();
-
-    setInterval(
-        loadLatestCommit,
-        60 * 1000
-    );
-
-})();
-</script>
-
-</body>
-</html>
+>
