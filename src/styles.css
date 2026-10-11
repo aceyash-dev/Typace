@@ -1,7 +1,7 @@
 :root {
   font-family: "Grandstander", cursive;
-  color: #29291f;
-  background: #f8f7f0;
+  color: #30251d;
+  background: #fff7e9;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -10,11 +10,11 @@
   --surface: #fffdf7;
   --surface-muted: #ffead6;
   --text: #30251d;
-  --muted: #67546b;
+  --muted: #78675a;
   --line: #30251d;
   --accent: #ed7418;
   --accent-dark: #b94b08;
-  --accent-soft: #ffd1e2;
+  --accent-soft: #ffead6;
   --display-font: "Grandstander", cursive;
   --radius: 8px;
   --shadow: 5px 5px 0 #30251d;
@@ -25,7 +25,7 @@
   --surface: #30251d;
   --surface-muted: #30251d;
   --text: #fff7e9;
-  --muted: #d1b6d4;
+  --muted: #f9e9d3;
   --line: #ffead6;
   --accent: #ed7418;
   --accent-dark: #ffead6;
