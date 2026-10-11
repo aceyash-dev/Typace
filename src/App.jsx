@@ -122,54 +122,44 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <div className="revamp-banner" role="status">
-        <span className="status-pulse" aria-hidden="true" />
-        <strong>Revamp in Progress</strong>
-        <span className="banner-divider" aria-hidden="true" />
-        <span>Typace is getting a fresh type system.</span>
-        <span className="banner-note">Fonts stay untouched.</span>
-      </div>
       <header className="site-header">
         <a className="brand" href="/" aria-label="Typace home">
-          <span className="brand-mark">t<span>.</span></span>
+          <img className="brand-image" src="/icon.png" alt="" width="38" height="38" />
           <span className="brand-word">typace</span>
           <span className="brand-beta">BETA</span>
         </a>
         <nav className="main-nav" aria-label="Main navigation">
           <a className="nav-active" href="#library">Library</a>
           <a href="/developers">Developers</a>
-          <a href="/llms.txt">For AI</a>
+          <a href="/api/openapi.json">API docs</a>
         </nav>
         <div className="header-actions">
           <button className="theme-toggle" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} title="Toggle theme">
             <Icon name={theme === "dark" ? "sun-03" : "moon-02"} />
           </button>
-          <a className="header-cta" href="#library">Explore fonts <Icon name="arrow-down-01" /></a>
+          <a className="header-cta" href="#library">Browse fonts <Icon name="arrow-down-01" /></a>
         </div>
       </header>
 
       <main>
         <motion.section className="hero" aria-labelledby="hero-title" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
           <div className="hero-copy">
-            <p className="eyebrow"><span className="eyebrow-line" /> THE TYPE PLAYGROUND</p>
-            <h1 id="hero-title">Make every<br /><span>letter feel</span> <em>right.</em></h1>
-            <p className="hero-description">A growing library of typefaces for interfaces, identities, and everything in between. Find your next font, try it live, and take it with you.</p>
-            <a className="hero-link" href="#library">Find your type <Icon name="arrow-down-right-01" /></a>
+            <p className="eyebrow"><span className="eyebrow-line" /> THE FONT CATALOG</p>
+            <h1 id="hero-title">Type with<br /><span>full</span> <em>volume.</em></h1>
+            <p className="hero-description">Browse the actual files. Preview a typeface, copy its CSS, or download it. Straight to the point.</p>
+            <a className="hero-link" href="#library">Browse the catalog <Icon name="arrow-down-right-01" /></a>
           </div>
-          <div className="hero-art" aria-label="Typography specimen artwork">
-            <div className="art-label art-label-top"><span>SPECIMEN NO. 001</span><span>EST. TYPE</span></div>
-            <div className="art-word art-word-one">Aa</div>
-            <div className="art-word art-word-two">Gg</div>
-            <div className="art-sticker"><span>GOOD</span><strong>TYPE</strong><span>CHANGES</span><span>EVERYTHING</span></div>
-            <div className="art-baseline"><span>ABCDEFGHIJKLMNOPQRSTUVWXYZ</span><span>0123456789</span></div>
+          <div className="hero-art">
+            <img className="hero-image" src="/og-image.png" alt="Typace typography artwork" width="1200" height="630" fetchPriority="high" />
+            <span className="hero-stamp" aria-hidden="true">TYPE<br />KA<br />TASHAN</span>
+            <span className="hero-corner-label" aria-hidden="true">TYPOGRAPHY / 001</span>
           </div>
-          <div className="hero-footnote"><span>01 / DISCOVER</span><span>DESIGNED FOR THE CURIOUS</span><span>SCROLL TO EXPLORE ↓</span></div>
         </motion.section>
 
         <section className="library-section" id="library" aria-labelledby="library-title">
           <div className="section-heading">
-            <div><p className="eyebrow">THE COLLECTION</p><h2 id="library-title">Find your <em>font.</em></h2></div>
-            <p className="section-note">Browse the catalog, test a specimen, then download or copy the CSS. No mystery meat metadata.</p>
+            <div><p className="eyebrow">THE LIBRARY</p><h2 id="library-title">Pick a <em>typeface.</em></h2></div>
+            <p className="section-note">Search by name or format. Preview, copy the CSS, and download the original file.</p>
           </div>
           <div className="library-toolbar">
             <label className="search-box">
@@ -203,15 +193,15 @@ export default function App() {
 
         <section className="api-callout">
           <div className="api-callout-icon"><Icon name="code-square-01" /></div>
-          <div className="api-callout-copy"><p className="eyebrow">BUILT FOR THE WEB</p><h2>Good type. <em>Easy integration.</em></h2><p>Use the catalog API, generate a ready-to-use <code>@font-face</code> rule, or hand the OpenAPI spec to your AI coding assistant.</p></div>
-          <div className="api-callout-links"><a href="/developers">Developer guide <Icon name="arrow-up-right-01" /></a><a href="/api/openapi.json">OpenAPI schema <Icon name="arrow-up-right-01" /></a><a href="/llms.txt">AI-readable docs <Icon name="arrow-up-right-01" /></a></div>
+          <div className="api-callout-copy"><p className="eyebrow">FOR BUILDERS</p><h2>Use the fonts. <em>Ship the work.</em></h2><p>Fetch the catalog or grab a ready-to-use <code>@font-face</code> rule from the API.</p></div>
+          <div className="api-callout-links"><a href="/developers">Developer guide <Icon name="arrow-up-right-01" /></a><a href="/api/openapi.json">API schema <Icon name="arrow-up-right-01" /></a></div>
         </section>
       </main>
 
       <footer className="site-footer">
-        <a className="footer-brand" href="/"><span className="brand-mark">t<span>.</span></span><span>typace</span></a>
-        <p>Made for people who notice the letters.</p>
-        <div className="footer-links"><a href="/developers">Developers</a><a href="/api/fonts">Catalog API</a><a href="/llms.txt">For AI</a><a href="https://aero.aryankaushik.space/d/tabgl" target="_blank" rel="noopener noreferrer">Join Dock <Icon name="arrow-up-right-01" /></a></div>
+        <a className="footer-brand" href="/"><img className="footer-brand-image" src="/icon.png" alt="" width="30" height="30" /><span>typace</span></a>
+        <p>Made for type that has something to say.</p>
+        <div className="footer-links"><a href="/developers">Developers</a><a href="/api/fonts">Catalog API</a><a href="/llms.txt">Docs for AI tools</a><a href="https://aero.aryankaushik.space/d/tabgl" target="_blank" rel="noopener noreferrer">Join Dock <Icon name="arrow-up-right-01" /></a></div>
         <span className="build-meta">{commit ? "BUILD " + commit.shortSha : "FONT LIBRARY"} <span aria-hidden="true">·</span> <a href="/api/commit">STATUS</a></span>
       </footer>
       <PreviewDialog font={selectedFont} onClose={() => setSelectedFont(null)} onCopy={handleCopy} copied={selectedFont ? copiedFont === selectedFont.file : false} />
