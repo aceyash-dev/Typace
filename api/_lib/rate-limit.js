@@ -48,6 +48,12 @@ export function checkRateLimit(req, now = Date.now()) {
 }
 
 export function enforceRateLimit(req, res) {
+    // Keep browser and AI clients informed even when this request is rejected.
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
+    res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
+    res.setHeader("X-API-Version", "1.1.0");
     const result = checkRateLimit(req);
     res.setHeader("RateLimit-Limit", String(result.limit));
     res.setHeader("RateLimit-Remaining", String(result.remaining));

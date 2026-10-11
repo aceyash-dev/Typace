@@ -1,4 +1,5 @@
 import test from "node:test";
+import { existsSync } from "node:fs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { normalize, findFont, listFonts } from "../api/_lib/fonts.js";
@@ -91,6 +92,14 @@ test("health endpoint returns catalog diagnostics and machine-readable headers",
     assert.ok(response.body.catalog.count > 0);
     assert.equal(response.headers["X-API-Version"], "1.1.0");
     assert.match(response.headers["Access-Control-Expose-Headers"], /Retry-After/);
+});
+
+test("health endpoint supports CORS preflight without a body", async () => {
+    const response = mockResponse();
+    await healthHandler({ method: "OPTIONS" }, response);
+    assert.equal(response.statusCode, 204);
+    assert.equal(response.headers["Access-Control-Allow-Origin"], "*");
+    assert.equal(response.headers["Cache-Control"], "no-store");
 });
 
 test("health endpoint rejects unsupported methods", async () => {
@@ -200,6 +209,8 @@ test("catalog endpoint returns 429 after ten requests from one IP", async () => 
     assert.equal(response.headers["RateLimit-Limit"], "10");
     assert.equal(response.headers["RateLimit-Remaining"], "0");
     assert.ok(Number(response.headers["Retry-After"]) >= 1);
+    assert.equal(response.headers["X-API-Version"], "1.1.0");
+    assert.match(response.headers["Access-Control-Expose-Headers"], /Retry-After/);
 });
 
 test("React shell keeps Grandstander and Hugeicons and removes the legacy inline app", async () => {
@@ -236,6 +247,16 @@ test("Vite build scripts and modern React dependencies are configured", async ()
     assert.ok(pkg.dependencies["react-dom"]);
     assert.ok(pkg.devDependencies.vite);
     assert.ok(pkg.devDependencies["@vitejs/plugin-react"]);
+});
+
+test("Vite build preserves the existing font binaries without modifying them", async () => {
+    const config = await readFile(new URL("../vite.config.js", import.meta.url), "utf8");
+    assert.match(config, /cpSync\(fontSource, resolve\(dist, "fonts"\)/);
+    const sourcePath = new URL("../fonts/Aboreto.ttf", import.meta.url);
+    const outputPath = new URL("../dist/fonts/Aboreto.ttf", import.meta.url);
+    if (existsSync(outputPath)) {
+        assert.deepEqual(await readFile(outputPath), await readFile(sourcePath));
+    }
 });
 
 test("AI documentation describes health, OpenAPI, rate limits, and honest font metadata", async () => {
