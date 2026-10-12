@@ -132,13 +132,13 @@ export default function App() {
       <header className="site-header">
         <a className="brand" href="/" aria-label="Typace home">
           <img className="brand-image" src="/icon.png" alt="" width="38" height="38" />
-          <span className="brand-word">typace</span>
+          <span className="brand-word">Typace</span>
           <span className="brand-beta">BETA</span>
         </a>
-        <nav className="main-nav" aria-label="Main navigation">
-          <a className={isBrowse ? "nav-active" : ""} href="/browse">Library</a>
-          <a className={isDevelopers ? "nav-active" : ""} href="/developers">Developers</a>
-          <a href={API_DOCS} target="_blank" rel="noreferrer">API docs</a>
+        <nav className="main-nav floating-nav" aria-label="Main navigation">
+          <a className={!isBrowse && !isDevelopers ? "nav-active" : ""} href="/" aria-label="Account">Account</a>
+          <a className={"nav-explore" + (isBrowse ? " nav-active" : "")} href="/browse" aria-label="Explore font library">Explore <Icon name="arrow-up-right-01" /></a>
+          <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer">Developer</a>
         </nav>
         <div className="header-actions">
           <button className="theme-toggle" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} title="Toggle theme">
@@ -212,7 +212,7 @@ export default function App() {
       </main>
 
       <footer className="site-footer">
-        <a className="footer-brand" href="/"><img className="footer-brand-image" src="/icon.png" alt="" width="30" height="30" /><span>typace</span></a>
+        <a className="footer-brand" href="/"><img className="footer-brand-image" src="/icon.png" alt="" width="30" height="30" /><span>Typace</span></a>
         <p>Made for type that has something to say.</p>
         <div className="footer-links"><a className={isDevelopers ? "nav-active" : ""} href="/developers">Developers</a><a href={API_DOCS} target="_blank" rel="noreferrer">API docs</a><a href="/api/fonts">Catalog API</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/cookies">Cookie policy</a><a href="/security">Security</a><a href="#" onClick={(event) => { event.preventDefault(); window.dispatchEvent(new Event("typace:cookie-settings")); }}>Cookie settings</a><a href="/llms.txt">Docs for AI tools</a></div>
         <span className="build-meta">{commit ? "BUILD " + commit.shortSha : "FONT LIBRARY"} <span aria-hidden="true">·</span> <a href="/api/commit">STATUS</a></span>
