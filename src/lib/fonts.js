@@ -3,7 +3,7 @@ const fontLoadPromises = new Map();
 export function normalize(value) {
   return String(value || "")
     .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\\u0300-\\u036f]/g, "")
     .toLowerCase();
 }
 
@@ -14,32 +14,58 @@ export function familyFor(font) {
 }
 
 export function usableFont(value) {
-  if (!value || typeof value !== "object") return false;
-  if (typeof value.name !== "string" || typeof value.file !== "string") return false;
+  if (!value || typeof value.name !== "string" || typeof value.file !== "string") return false;
   if (!/^(ttf|otf|woff|woff2)$/i.test(String(value.type || ""))) return false;
-  return typeof value.url === "string" && value.url.startsWith("/fonts/") && !value.url.includes("..");
+  return typeof value.url === "string" && value.url.startsWith("/fonts/") && !value.url.split("/").includes("..");
 }
 
 export function fontUrl(font) {
   return new URL(font.url, window.location.origin).href;
 }
 
+function fontFormat(font) {
+  const format = String(font.format || "").toLowerCase();
+  if (["truetype", "opentype", "woff", "woff2"].includes(format)) return format;
+  return ({ ttf: "truetype", otf: "opentype", woff: "woff", woff2: "woff2" })[String(font.type || "").toLowerCase()] || "";
+}
+
 export function loadFontFace(font) {
-  if (!usableFont(font) || !("FontFace" in window)) return Promise.resolve(false);
+  if (!usableFont(font) || !document?.fonts) return Promise.resolve(false);
   const family = familyFor(font);
   const existing = fontLoadPromises.get(family);
   if (existing) return existing;
 
-  const source = 'url("' + fontUrl(font).replace(/"/g, "%22") + '") format("' + String(font.format || "truetype") + '")';
-  const promise = new FontFace(family, source, { display: "swap" }).load()
-    .then((loaded) => {
-      document.fonts.add(loaded);
-      return true;
-    })
-    .catch(() => {
+  const url = fontUrl(font).replace(/["\\\\]/g, (character) => encodeURIComponent(character));
+  const format = fontFormat(font);
+  const src = 'url("' + url + '")' + (format ? ' format("' + format + '")' : "");
+  const promise = (async () => {
+    try {
+      if ("FontFace" in window) {
+        let loaded;
+        try {
+          loaded = await new FontFace(family, src, { display: "swap" }).load();
+        } catch (firstError) {
+          // Some browser/font combinations reject a format hint despite a valid font file.
+          loaded = await new FontFace(family, 'url("' + url + '")', { display: "swap" }).load();
+        }
+        document.fonts.add(loaded);
+      } else {
+        let style = document.querySelector('style[data-typace-font="' + family + '"]');
+        if (!style) {
+          style = document.createElement("style");
+          style.dataset.typaceFont = family;
+          style.textContent = '@font-face{font-family:"' + family + '";src:' + src + ';font-display:swap}';
+          document.head.appendChild(style);
+        }
+        await document.fonts.load('16px "' + family + '"');
+      }
+      await document.fonts.load('16px "' + family + '"');
+      return document.fonts.check('16px "' + family + '"');
+    } catch {
       fontLoadPromises.delete(family);
       return false;
-    });
+    }
+  })();
 
   fontLoadPromises.set(family, promise);
   return promise;
