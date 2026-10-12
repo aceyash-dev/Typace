@@ -60,7 +60,9 @@ export function loadFontFace(font) {
         await document.fonts.load('16px "' + family + '"');
       }
       await document.fonts.load('16px "' + family + '"');
-      return document.fonts.check('16px "' + family + '"');
+      const ready = document.fonts.check('16px "' + family + '"');
+      if (!ready) fontLoadPromises.delete(family);
+      return ready;
     } catch {
       fontLoadPromises.delete(family);
       return false;
