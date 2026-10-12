@@ -4,15 +4,18 @@ import { loadFontFace, usableFont } from "../lib/fonts.js";
 export default function useVisibleFont(font, enabled = true) {
   const ref = useRef(null);
   const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!enabled || !ref.current || !usableFont(font)) return undefined;
+    setLoaded(false);
+    setFailed(false);
     let active = true;
     let observer;
 
     const load = () => {
       loadFontFace(font).then((result) => {
-        if (active) setLoaded(result);
+        if (active) { setLoaded(result); setFailed(!result); }
       });
     };
 
@@ -34,5 +37,5 @@ export default function useVisibleFont(font, enabled = true) {
     };
   }, [font, enabled]);
 
-  return { ref, loaded };
+  return { ref, loaded, failed };
 }
