@@ -1341,3 +1341,33 @@ body {
   .browse-page .font-card .specimen-button { min-height: 104px; }
   .browse-page .font-card .specimen { font-size: clamp(48px, 12vw, 70px); }
 }
+
+
+/* Font specimen refinements: clear loading feedback and a calmer peek sheet. */
+.browse-page .font-card { display:flex; flex-direction:column; gap:8px; border-radius:8px; }
+.browse-page .font-card-top { align-items:center; min-height:22px; }
+.font-load-state { display:inline-flex; align-items:center; gap:5px; color:var(--muted); font:700 8px/1.2 system-ui,sans-serif; letter-spacing:.08em; }
+.font-load-state > span { width:5px; height:5px; border-radius:50%; background:var(--muted); }
+.font-load-state:not(.is-loaded):not(.is-failed) > span { background:var(--accent); animation:font-pulse 1.2s ease-in-out infinite; }
+.font-load-state.is-loaded > span { background:#39845c; }
+.font-load-state.is-failed > span { background:var(--accent); }
+@keyframes font-pulse { 50% { opacity:.35; } }
+.browse-page .specimen-button { flex:1; min-height:126px; padding:16px 2px; }
+.browse-page .specimen { display:block; width:100%; line-height:1.05; }
+.browse-page .specimen-caption { margin-top:12px; font-size:10px; }
+.browse-page .font-card-bottom { align-items:center; gap:8px; padding-top:12px; }
+.browse-page .font-card-name h2 { font-size:14px; letter-spacing:-.02em; }
+.browse-page .font-card-actions .icon-button { width:32px; height:32px; background:transparent; }
+.browse-page .font-card-actions .icon-button:hover { background:var(--surface-muted); }
+.preview-sheet .preview-head h2 { font-size:clamp(26px,4vw,38px); letter-spacing:-.055em; overflow-wrap:anywhere; }
+.preview-sheet .preview-head p { overflow-wrap:anywhere; }
+.preview-sheet .preview-stage { border-radius:10px; padding:clamp(18px,4vw,30px); }
+.preview-sheet .preview-stage-meta { margin-bottom:20px; }
+.preview-font-status { color:var(--muted); font-size:9px; font-weight:800; letter-spacing:.1em; }
+.preview-font-status.is-failed { color:var(--accent-dark); }
+.preview-sheet .preview-sample { min-height:1.2em; line-height:1.15; overflow-wrap:anywhere; }
+.preview-presets { display:flex; flex-wrap:wrap; gap:7px; margin-top:16px; }
+.preview-presets button { padding:7px 10px; border:1px solid var(--line); border-radius:5px; background:var(--surface); color:var(--muted); font-size:10px; cursor:pointer; }
+.preview-presets button:hover { border-color:var(--accent); color:var(--text); }
+@media(max-width:520px) { .browse-page .font-card .specimen-button { min-height:98px; } .browse-page .font-card .specimen { font-size:clamp(44px,11vw,64px); } .browse-page .font-card-actions .icon-button { width:29px; height:29px; } .browse-page .font-card-name h2 { font-size:12px; } .font-load-state { font-size:7px; } .preview-presets button { flex:1; } }
+@media(prefers-reduced-motion:reduce) { .font-load-state > span { animation:none; } }
