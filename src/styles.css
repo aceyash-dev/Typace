@@ -1458,3 +1458,15 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .main-nav.floating-nav, .main-nav.floating-nav a, .font-card .specimen-button { transition: none; }
 }
+
+.main-nav.floating-nav { opacity: 1; visibility: visible; }
+.main-nav.floating-nav.nav-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.main-nav.floating-nav.nav-visible { opacity: 1; visibility: visible; pointer-events: auto; }
+@media (max-width: 760px) {
+  .main-nav.floating-nav.nav-hidden { transform: translate(-50%, 18px); }
+  .main-nav.floating-nav.nav-visible { transform: translate(-50%, 0); }
+}
+@media (min-width: 761px) {
+  .main-nav.floating-nav.nav-hidden { transform: translate(-50%, -14px); }
+  .main-nav.floating-nav.nav-visible { transform: translate(-50%, 0); }
+}
