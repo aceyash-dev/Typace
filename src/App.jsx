@@ -91,7 +91,7 @@ export default function App() {
   const filtered = useMemo(() => {
     const needle = normalize(query).trim();
     const results = fonts.filter((font) => {
-      const matchesFormat = routeFormat === "all" || String(font.type).toLowerCase() === routeFormat;
+      const matchesFormat = (routeFormat === "all" || String(font.type).toLowerCase() === routeFormat) && (formatFilter === "all" || String(font.type).toLowerCase() === formatFilter);
       const haystack = normalize([font.name, font.file, font.type, font.format].join(" "));
       return matchesFormat && (!needle || haystack.includes(needle));
     });
@@ -163,15 +163,15 @@ export default function App() {
           </div>
         </motion.section>}
 
-        {isBrowse && <section className="browse-intro"><p className="eyebrow">TYPOGRAPHY INDEX / 001</p><h1>Every typeface.<br /><em>One library.</em></h1><p>Search the collection, test specimens, copy CSS, or download the source file.</p></section>}
+        {isBrowse && <section className="browse-intro"><p className="eyebrow">THE TYPE LIBRARY</p><h1>Find your <em>type.</em></h1><p>Preview, copy CSS, or download the original font file.</p></section>}
 
         {isDevelopers && <section className="developers-page"><p className="eyebrow">TYPOGRAPHY API / 002</p><h1>Build with <em>type.</em></h1><p className="developers-lede">Browse the API reference, fetch the catalog, and use the font files in your projects.</p><div className="developer-panels"><a className="developer-panel developer-panel-primary" href={API_DOCS} target="_blank" rel="noreferrer"><span className="developer-panel-index">01 / REFERENCE</span><Icon name="book-open-01" /><h2>API documentation</h2><p>Endpoints, request formats, responses, and integration details.</p><span className="developer-panel-link">Open API docs <Icon name="arrow-up-right-01" /></span></a><a className="developer-panel" href="/api/fonts"><span className="developer-panel-index">02 / DATA</span><Icon name="database-02" /><h2>Font catalog</h2><p>Inspect the live catalog response and available font metadata.</p><span className="developer-panel-link">View catalog JSON <Icon name="arrow-up-right-01" /></span></a><a className="developer-panel" href="/browse"><span className="developer-panel-index">03 / FILES</span><Icon name="type-01" /><h2>Browse font files</h2><p>Preview a typeface, copy its CSS, or download the original file.</p><span className="developer-panel-link">Open library <Icon name="arrow-up-right-01" /></span></a></div><div className="developer-code"><p className="eyebrow">QUICK START</p><h2>Start with the catalog endpoint.</h2><code>GET https://typace.ace-base.cc/api/fonts</code><button className="button button-secondary" type="button" onClick={() => { copyText("https://typace.ace-base.cc/api/fonts").then((ok) => setToast(ok ? "Catalog endpoint copied" : "Could not copy endpoint")); }}> <Icon name="copy-01" /> Copy endpoint</button></div></section>}
 
-        {!isDevelopers && isBrowse && <section className="browse-discovery" aria-label="Discover fonts"><a className="discovery-tile discovery-all" href="/browse"><span className="discovery-kicker">THE COLLECTION</span><strong>Find your next<br />favourite type.</strong><span className="discovery-foot">Browse every font <Icon name="arrow-up-right-01" /></span></a><a className="discovery-tile discovery-serif" href="/browse?search=serif"><span className="discovery-kicker">01 / EDITORIAL</span><strong>For words<br />with weight.</strong><span className="discovery-foot">Explore by search <Icon name="arrow-up-right-01" /></span></a><a className="discovery-tile discovery-script" href="/browse?search=script"><span className="discovery-kicker">02 / EXPRESSIVE</span><strong>A little<br />personality.</strong><span className="discovery-foot">Explore by search <Icon name="arrow-up-right-01" /></span></a></section>}
+        
 
                 {!isDevelopers && <section className={"library-section" + (isBrowse ? " full-library" : " featured-library")} id="library" aria-labelledby="library-title">
           <div className="section-heading">
-            <div><p className="eyebrow">{isBrowse ? "THE COMPLETE INDEX" : "CURATED SPECIMENS / 06"}</p><h2 id="library-title">{isBrowse ? <>Find your <em>type.</em></> : <>A few good <em>typefaces.</em></>}</h2></div>
+            <div><p className="eyebrow">{isBrowse ? "THE COLLECTION" : "CURATED SPECIMENS / 06"}</p><h2 id="library-title">{isBrowse ? <>All typefaces</> : <>A few good <em>typefaces.</em></>}</h2></div>
             {isBrowse ? <p className="section-note">Search by name or format. Preview, copy the CSS, and download the original file.</p> : <a className="all-fonts-link" href="/browse">View all {formatCount(fonts.length)} fonts <Icon name="arrow-up-right-01" /></a>}
           </div>
           {isBrowse && <div className="library-toolbar">
@@ -189,7 +189,7 @@ export default function App() {
               <button type="button" className={view === "list" ? "active" : ""} onClick={() => setView("list")} aria-pressed={view === "list"} aria-label="List view"><Icon name="list-view" /></button>
             </div>
           </div>}
-          {isBrowse && <div className="browse-result-line"><span className="result-count" aria-live="polite">{loading ? "Loading catalog…" : formatCount(filtered.length) + " fonts"}</span><span>Search by filename or file format</span></div>}
+          {isBrowse && <div className="browse-result-line"><span className="result-count" aria-live="polite">{loading ? "Loading fonts…" : formatCount(filtered.length) + (filtered.length === 1 ? " font" : " fonts")}</span>{(query || formatFilter !== "all" || routeFormat !== "all") && <button type="button" className="text-link clear-filters" onClick={() => { setQuery(""); setFormatFilter("all"); window.history.replaceState({}, "", "/browse"); }}>Clear filters <Icon name="cancel-01" /></button>}</div>}
 
           {loading && <div className="loading-state" role="status"><span className="loading-spinner" /><span>Setting the type…</span></div>}
           {!loading && error && <div className="error-state" role="alert"><span className="error-icon"><Icon name="alert-circle" /></span><div><h3>The catalog did not load.</h3><p>{error}</p><button className="button button-primary" type="button" onClick={() => loadCatalog()}><Icon name="refresh" /> Try again</button></div></div>}
@@ -204,7 +204,7 @@ export default function App() {
 
         {!isBrowse && !isDevelopers && <section className="showcase-note"><span className="showcase-index">02 / 02</span><div><p className="eyebrow">THE WHOLE COLLECTION</p><h2>Good type deserves<br /><em>room to roam.</em></h2></div><a className="button button-primary" href="/browse">Explore the full library <Icon name="arrow-up-right-01" /></a></section>}
 
-        {!isDevelopers && <section className="api-callout">
+        {!isDevelopers && !isBrowse && <section className="api-callout">
           <div className="api-callout-icon"><Icon name="code-square-01" /></div>
           <div className="api-callout-copy"><p className="eyebrow">FOR BUILDERS</p><h2>Use the fonts. <em>Ship the work.</em></h2><p>Fetch the catalog or grab a ready-to-use <code>@font-face</code> rule from the API.</p></div>
           <div className="api-callout-links"><a href="/developers">Developer guide <Icon name="arrow-up-right-01" /></a><a href={API_DOCS} target="_blank" rel="noreferrer">API reference <Icon name="arrow-up-right-01" /></a></div>
