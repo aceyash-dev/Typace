@@ -163,15 +163,15 @@ export default function App() {
       <main>
         {!isBrowse && <motion.section className="hero" aria-labelledby="hero-title" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
           <div className="hero-copy">
-            <p className="eyebrow"><span className="eyebrow-line" /> THE FONT CATALOG</p>
+            <p className="eyebrow"><span className="eyebrow-line" /> JUST A FONT LIBRARY, BUT NOT YOUR AVERAGE ONE</p>
             <h1 id="hero-title">Type with<br /><span>full</span> <em>volume.</em></h1>
-            <p className="hero-description">Browse the actual files. Preview a typeface, copy its CSS, or download it. Straight to the point.</p>
+            <p className="hero-description">A font library with a little more character. Preview typefaces, copy their CSS, and download the original files.</p>
             <a className="hero-link" href="#library">Browse the catalog <Icon name="arrow-down-right-01" /></a>
           </div>
-          <div className="hero-art">
-            <img className="hero-image" src="/og-image.png" alt="Typace typography artwork" width="1200" height="630" fetchPriority="high" />
-            <span className="hero-stamp" aria-hidden="true">TYPE<br />KA<br />TASHAN</span>
-            <span className="hero-corner-label" aria-hidden="true">TYPOGRAPHY / 001</span>
+          <div className="hero-art hero-tagline-panel" aria-label="Typace tagline">
+            <span className="hero-panel-index">TYPE LIBRARY / 001</span>
+            <p>Just a font library,<br /><em>but not your average one.</em></p>
+            <span className="hero-panel-foot">A LITTLE MORE CHARACTER. A LOT MORE TYPE.</span>
           </div>
         </motion.section>}
 
