@@ -4,7 +4,7 @@ import useVisibleFont from "../hooks/useVisibleFont.js";
 import { familyFor, fontUrl } from "../lib/fonts.js";
 
 export default function FontCard({ font, onPreview, onCopy, copied }) {
-  const { ref, loaded } = useVisibleFont(font);
+  const { ref, loaded, failed } = useVisibleFont(font);
   const reduceMotion = useReducedMotion();
   const family = familyFor(font);
   const specimenStyle = loaded ? { fontFamily: '"' + family + '", sans-serif' } : undefined;
@@ -21,10 +21,11 @@ export default function FontCard({ font, onPreview, onCopy, copied }) {
     >
       <div className="font-card-top">
         <span className="font-format">{String(font.type || "font").toUpperCase()}</span>
+        <span className={"font-load-state" + (loaded ? " is-loaded" : failed ? " is-failed" : "")} title={loaded ? "Font ready" : failed ? "Preview unavailable" : "Loading preview"}><span />{loaded ? "READY" : failed ? "FALLBACK" : "LOADING"}</span>
       </div>
       <button className="specimen-button" type="button" onClick={() => onPreview(font)} aria-label={"Preview " + font.name}>
         <span className="specimen" style={specimenStyle}>Aa</span>
-        <span className="specimen-caption">The quick brown fox jumps over the lazy dog.</span>
+        <span className="specimen-caption">{font.name} · The quick brown fox</span>
       </button>
       <div className="font-card-bottom">
         <div className="font-card-name">
