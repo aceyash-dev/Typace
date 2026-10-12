@@ -1304,3 +1304,40 @@ body {
   .browse-page .library-toolbar { grid-template-columns: minmax(0,1fr) auto auto auto; }
   .browse-page .library-toolbar .format-control { display: none; }
 }
+
+
+/* Browse refinement: one clear title, compact controls, no repeated promo blocks. */
+.browse-page .browse-intro { padding: clamp(30px, 4vw, 52px) 0 24px; }
+.browse-page .browse-intro .eyebrow { margin-bottom: 12px; }
+.browse-page .browse-intro h1 { margin: 0; font-family: var(--display-font); font-size: clamp(38px, 5.5vw, 64px); line-height: 1; letter-spacing: -.065em; }
+.browse-page .browse-intro h1 em { color: var(--accent); font-style: normal; }
+.browse-page .browse-intro > p:last-child { margin: 12px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.browse-page .full-library { padding-top: 24px; }
+.browse-page .full-library .section-heading { margin-bottom: 16px; }
+.browse-page .full-library .section-heading .eyebrow { margin-bottom: 7px; }
+.browse-page .full-library .section-heading h2 { font-size: clamp(26px, 3vw, 36px); }
+.browse-page .library-toolbar { grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 8px; margin: 0; padding: 8px; border-radius: 8px; }
+.browse-page .library-toolbar .search-box,
+.browse-page .library-toolbar .sort-control,
+.browse-page .library-toolbar .format-control { height: 42px; border-radius: 5px; }
+.browse-page .library-toolbar .view-switch { height: 42px; border-radius: 5px; }
+.browse-page .library-toolbar .view-switch button { height: 32px; width: 32px; border-radius: 3px; }
+.browse-page .browse-result-line { padding: 12px 0 14px; margin-bottom: 14px; }
+.browse-page .clear-filters { padding: 0; border: 0; background: transparent; cursor: pointer; }
+.browse-page .font-grid { gap: 14px; }
+.browse-page .font-card { padding: 14px; }
+.browse-page .font-card .specimen-button { min-height: 126px; }
+.browse-page .font-card .specimen { font-size: clamp(56px, 6vw, 86px); }
+@media (max-width: 760px) {
+  .browse-page .library-toolbar { top: 72px; grid-template-columns: minmax(0, 1fr) auto auto; }
+  .browse-page .library-toolbar .format-control { display: none; }
+  .browse-page .browse-intro { padding: 28px 0 18px; }
+  .browse-page .full-library { padding-top: 18px; }
+  .browse-page .full-library .section-heading { display: none; }
+  .browse-page .library-toolbar .search-box { padding: 0 10px; }
+  .browse-page .library-toolbar .sort-control { padding: 0 7px; }
+  .browse-page .library-toolbar .sort-control select { width: 72px; }
+  .browse-page .font-card { padding: 11px; }
+  .browse-page .font-card .specimen-button { min-height: 104px; }
+  .browse-page .font-card .specimen { font-size: clamp(48px, 12vw, 70px); }
+}
