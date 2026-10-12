@@ -94,9 +94,6 @@ export default function CookieConsent() {
           <a className="cookie-policy-link" href="/cookies">Read the full cookie policy ↗</a>
         </section>
       )}
-      {consent && !settingsOpen && (
-        <button type="button" className="cookie-manage" onClick={() => { setAnalytics(consent.analytics); setSettingsOpen(true); }}>Cookie settings <span aria-hidden="true">↗</span></button>
-      )}
     </>
   );
 }
