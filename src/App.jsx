@@ -35,6 +35,7 @@ export default function App() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
   const [commit, setCommit] = useState(null);
+  const [navVisible, setNavVisible] = useState(true);
   const searchRef = useRef(null);
   const reduceMotion = useReducedMotion();
 
@@ -87,6 +88,17 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   useEffect(() => { setVisibleCount(20); }, [query, sort, routeFormat, formatFilter]);
+  useEffect(() => {
+    let previousY = window.scrollY;
+    const onScroll = () => {
+      const currentY = window.scrollY;
+      if (currentY < 36 || currentY < previousY - 6) setNavVisible(true);
+      else if (currentY > previousY + 6) setNavVisible(false);
+      previousY = currentY;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const filtered = useMemo(() => {
     const needle = normalize(query).trim();
@@ -135,7 +147,7 @@ export default function App() {
           <span className="brand-word">Typace</span>
           <span className="brand-beta">BETA</span>
         </a>
-        <nav className="main-nav floating-nav" aria-label="Main navigation">
+        <nav className={"main-nav floating-nav" + (navVisible ? " nav-visible" : " nav-hidden")} aria-label="Main navigation">
           <a className={!isBrowse && !isDevelopers ? "nav-active" : ""} href="/" aria-label="Account">Account</a>
           <a className={"nav-explore" + (isBrowse ? " nav-active" : "")} href="/browse" aria-label="Explore font library">Explore <Icon name="arrow-up-right-01" /></a>
           <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer">Developer</a>
