@@ -1577,3 +1577,22 @@ body {
   .showcase-rail { gap:10px; margin-right:-12px; padding-right:12px; }
   .showcase-rail > .font-card { flex:0 0 78%; min-width:0; max-width:320px; }
 }
+
+/* Desktop navigation stays editorial and link-like; the compact icon-tab treatment is mobile-only. */
+@media (min-width:761px) {
+  .main-nav.floating-nav { position:static; transform:none; margin-left:auto; padding:0; gap:22px; border:0; border-radius:0; background:transparent; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none; }
+  .main-nav.floating-nav.nav-hidden { opacity:1; visibility:visible; pointer-events:auto; transform:none; }
+  .main-nav.floating-nav a { min-height:0; padding:10px 0; border-radius:0; background:transparent !important; color:var(--muted); }
+  .main-nav.floating-nav a.nav-active { color:var(--text); }
+  .main-nav.floating-nav a.nav-active::after { position:absolute; right:0; bottom:2px; left:0; height:2px; background:var(--accent); content:""; }
+  .main-nav.floating-nav a.nav-explore { color:var(--accent-dark); }
+  .main-nav.floating-nav a.nav-explore::after { display:none; }
+  .main-nav.floating-nav a.nav-explore > .hgi:nth-of-type(2) { display:none; }
+}
+@media (max-width:760px) {
+  /* Browse controls use the mobile icon-tab vocabulary; home remains a clean landing page. */
+  .home-page .main-nav.floating-nav a > .hgi { display:none; }
+  .home-page .main-nav.floating-nav a > span { display:inline; }
+  .home-page .main-nav.floating-nav a { flex-direction:row; min-height:44px; font-size:11px; }
+  .home-page .main-nav.floating-nav a.nav-explore > .hgi:nth-of-type(2) { display:none; }
+}
