@@ -14,9 +14,11 @@ export default function FontCard({ font, onPreview, onCopy, copied }) {
       className="font-card"
       ref={ref}
       initial={reduceMotion ? false : { opacity: 0, y: 16, scale: 0.985 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={reduceMotion ? undefined : { y: -5, scale: 1.012 }}
-      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.12 }}
+      whileHover={reduceMotion ? undefined : { y: -4, scale: 1.008 }}
+      whileTap={reduceMotion ? undefined : { scale: 0.995 }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
       layout
     >
       <div className="font-card-top">
