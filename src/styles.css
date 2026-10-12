@@ -277,7 +277,7 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 }
 
 
-/* Desi maximalism: ink, gulal pink, haldi yellow and peacock teal. */
+/* Earlier palette experiments retained for historical context; current tokens are defined below. */
 :root { --peacock: #ed7418; --haldi: #ffead6; --vermilion: #ed7418; --rani: #ed7418; }
 :root[data-theme="dark"] { --peacock: #ed7418; --haldi: #ffead6; --vermilion: #ed7418; --rani: #ed7418; }
 body {
@@ -383,7 +383,7 @@ body {
 }
 
 
-/* TYPOGRAPHIC DIRECTION: neo-industrial x Swiss grid x Desi maximalism */
+/* Typographic direction: warm Desi editorial with a restrained Swiss grid. */
 :root {
   --bg: #fff7e9;
   --surface: #fffdf7;
