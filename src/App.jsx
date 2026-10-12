@@ -148,14 +148,19 @@ export default function App() {
           <span className="brand-beta">BETA</span>
         </a>
         <nav className={"main-nav floating-nav" + (navVisible ? " nav-visible" : " nav-hidden")} aria-label="Main navigation">
-          <a className={!isBrowse && !isDevelopers ? "nav-active" : ""} href="/" aria-label="Account">Account</a>
-          <a className={"nav-explore" + (isBrowse ? " nav-active" : "")} href="/browse" aria-label="Explore font library">Explore <Icon name="arrow-up-right-01" /></a>
-          <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer">Developer</a>
+          <a className={!isBrowse && !isDevelopers ? "nav-active" : ""} href="/" aria-label="Account"><Icon name="user-circle" /><span>Account</span></a>
+          <a className={"nav-explore" + (isBrowse ? " nav-active" : "")} href="/browse" aria-label="Explore font library"><Icon name="compass" /><span>Explore</span><Icon name="arrow-up-right-01" /></a>
+          <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer"><Icon name="code" /><span>Developer</span></a>
         </nav>
-        <div className="header-actions">
-          <button className="theme-toggle" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} title="Toggle theme">
-            <Icon name={theme === "dark" ? "sun-03" : "moon-02"} />
-          </button>
+        <div className="header-actions account-menu">
+          <details className="account-popover">
+            <summary aria-label="Account settings" title="Account settings"><Icon name="user-settings-01" /></summary>
+            <div className="account-popover-panel">
+              <p className="account-popover-title">Preferences</p>
+              <button className="account-setting" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}><Icon name={theme === "dark" ? "sun-03" : "moon-02"} /><span>{theme === "dark" ? "Light appearance" : "Dark appearance"}</span></button>
+              <button className="account-setting" type="button" onClick={() => { window.dispatchEvent(new Event("typace:cookie-settings")); document.querySelector(".account-popover")?.removeAttribute("open"); }}><Icon name="cookie" /><span>Cookie settings</span></button>
+            </div>
+          </details>
           {!isBrowse && <a className="header-cta" href="/browse">Browse library <Icon name="arrow-up-right-01" /></a>}
         </div>
       </header>
@@ -163,7 +168,7 @@ export default function App() {
       <main>
         {!isBrowse && <motion.section className="hero" aria-labelledby="hero-title" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
           <div className="hero-copy">
-            <p className="eyebrow"><span className="eyebrow-line" /> JUST A FONT LIBRARY, BUT NOT YOUR AVERAGE ONE</p>
+            <p className="eyebrow"><span className="eyebrow-line" /> THE FONT CATALOG</p>
             <h1 id="hero-title">Type with<br /><span>full</span> <em>volume.</em></h1>
             <p className="hero-description">A font library with a little more character. Preview typefaces, copy their CSS, and download the original files.</p>
             <a className="hero-link" href="#library">Browse the catalog <Icon name="arrow-down-right-01" /></a>
@@ -171,7 +176,7 @@ export default function App() {
           <div className="hero-art hero-tagline-panel" aria-label="Typace tagline">
             <span className="hero-panel-index">TYPE LIBRARY / 001</span>
             <p>Just a font library,<br /><em>but not your average one.</em></p>
-            <span className="hero-panel-foot">A LITTLE MORE CHARACTER. A LOT MORE TYPE.</span>
+            <span className="hero-panel-foot">TYPOGRAPHY / 001</span>
           </div>
         </motion.section>}
 
@@ -207,7 +212,7 @@ export default function App() {
           {!loading && error && <div className="error-state" role="alert"><span className="error-icon"><Icon name="alert-circle" /></span><div><h3>The catalog did not load.</h3><p>{error}</p><button className="button button-primary" type="button" onClick={() => loadCatalog()}><Icon name="refresh" /> Try again</button></div></div>}
           {!loading && !error && filtered.length === 0 && <div className="empty-state"><Icon name="search-remove" /><h3>No fonts found.</h3><p>Try a shorter search or clear the filters.</p><button className="button button-secondary" type="button" onClick={() => { setQuery(""); setFormatFilter("all"); }}>Clear search</button></div>}
           {!loading && !error && filtered.length > 0 && <>
-            <div className={"font-grid " + (view === "list" ? "font-list-view" : "")}>
+            <div className={"font-grid " + (view === "list" ? "font-list-view" : "") + (!isBrowse ? " showcase-rail" : "")}>
               {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => <FontCard key={font.file} font={font} onPreview={setSelectedFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
             </div>
             {isBrowse && visibleCount < filtered.length && <div className="load-more-wrap"><button className="button button-secondary load-more" type="button" onClick={() => setVisibleCount((count) => Math.min(count + 20, filtered.length))}>Load 20 more fonts <Icon name="arrow-down-01" /><span>{formatCount(filtered.length - visibleCount)} remaining</span></button></div>}
