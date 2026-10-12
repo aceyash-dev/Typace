@@ -21,9 +21,6 @@ export default function FontCard({ font, onPreview, onCopy, copied }) {
     >
       <div className="font-card-top">
         <span className="font-format">{String(font.type || "font").toUpperCase()}</span>
-        {font.isNew
-          ? <span className="new-pill">NEW</span>
-          : <span className="font-category">{font.category || "unknown"}</span>}
       </div>
       <button className="specimen-button" type="button" onClick={() => onPreview(font)} aria-label={"Preview " + font.name}>
         <span className="specimen" style={specimenStyle}>Aa</span>
