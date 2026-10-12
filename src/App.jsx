@@ -21,7 +21,7 @@ export default function App() {
   const [sort, setSort] = useState("az");
   const [formatFilter, setFormatFilter] = useState("all");
   const [view, setView] = useState("grid");
-  const [visibleCount, setVisibleCount] = useState(24);
+  const [visibleCount, setVisibleCount] = useState(20);
   const [selectedFont, setSelectedFont] = useState(null);
   const [copiedFont, setCopiedFont] = useState("");
   const [toast, setToast] = useState("");
@@ -86,7 +86,7 @@ export default function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  useEffect(() => { setVisibleCount(24); }, [query, sort, routeFormat, formatFilter]);
+  useEffect(() => { setVisibleCount(20); }, [query, sort, routeFormat, formatFilter]);
 
   const filtered = useMemo(() => {
     const needle = normalize(query).trim();
@@ -198,7 +198,7 @@ export default function App() {
             <div className={"font-grid " + (view === "list" ? "font-list-view" : "")}>
               {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => <FontCard key={font.file} font={font} onPreview={setSelectedFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
             </div>
-            {isBrowse && visibleCount < filtered.length && <div className="load-more-wrap"><button className="button button-secondary load-more" type="button" onClick={() => setVisibleCount((count) => Math.min(count + 24, filtered.length))}>Load more fonts <Icon name="arrow-down-01" /><span>{formatCount(filtered.length - visibleCount)} remaining</span></button></div>}
+            {isBrowse && visibleCount < filtered.length && <div className="load-more-wrap"><button className="button button-secondary load-more" type="button" onClick={() => setVisibleCount((count) => Math.min(count + 20, filtered.length))}>Load 20 more fonts <Icon name="arrow-down-01" /><span>{formatCount(filtered.length - visibleCount)} remaining</span></button></div>}
           </>}
         </section>}
 
