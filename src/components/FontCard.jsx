@@ -13,10 +13,10 @@ export default function FontCard({ font, onPreview, onCopy, copied }) {
     <motion.article
       className="font-card"
       ref={ref}
-      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 16, scale: 0.985 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={reduceMotion ? undefined : { y: -3 }}
-      transition={{ duration: 0.18, ease: "easeOut" }}
+      whileHover={reduceMotion ? undefined : { y: -5, scale: 1.012 }}
+      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
       layout
     >
       <div className="font-card-top">
