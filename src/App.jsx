@@ -147,11 +147,11 @@ export default function App() {
           <span className="brand-word">Typace</span>
           <span className="brand-beta">BETA</span>
         </a>
-        <nav className={"main-nav floating-nav" + (navVisible ? " nav-visible" : " nav-hidden")} aria-label="Main navigation">
+        {(isBrowse || isDevelopers) && <nav className={"main-nav floating-nav" + (navVisible ? " nav-visible" : " nav-hidden")} aria-label="Main navigation">
           <a className={!isBrowse && !isDevelopers ? "nav-active" : ""} href="/" aria-label="Account"><Icon name="user-circle" /><span>Account</span></a>
           <a className={"nav-explore" + (isBrowse ? " nav-active" : "")} href="/browse" aria-label="Explore font library"><Icon name="compass" /><span>Explore</span><Icon name="arrow-up-right-01" /></a>
           <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer"><Icon name="code" /><span>Developer</span></a>
-        </nav>
+        </nav>}
         <div className="header-actions account-menu">
           <details className="account-popover">
             <summary aria-label="Account settings" title="Account settings"><Icon name="user-settings-01" /></summary>
@@ -159,6 +159,7 @@ export default function App() {
               <p className="account-popover-title">Preferences</p>
               <button className="account-setting" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}><Icon name={theme === "dark" ? "sun-03" : "moon-02"} /><span>{theme === "dark" ? "Light appearance" : "Dark appearance"}</span></button>
               <button className="account-setting" type="button" onClick={() => { window.dispatchEvent(new Event("typace:cookie-settings")); document.querySelector(".account-popover")?.removeAttribute("open"); }}><Icon name="cookie" /><span>Cookie settings</span></button>
+              <a className="account-setting" href="/cookies" onClick={() => document.querySelector(".account-popover")?.removeAttribute("open")}><Icon name="file-02" /><span>Cookie policy</span><Icon name="arrow-up-right-01" /></a>
             </div>
           </details>
           {!isBrowse && <a className="header-cta" href="/browse">Browse library <Icon name="arrow-up-right-01" /></a>}
@@ -231,7 +232,7 @@ export default function App() {
       <footer className="site-footer">
         <a className="footer-brand" href="/"><img className="footer-brand-image" src="/icon.png" alt="" width="30" height="30" /><span>Typace</span></a>
         <p>Made for type that has something to say.</p>
-        <div className="footer-links"><a className={isDevelopers ? "nav-active" : ""} href="/developers">Developers</a><a href={API_DOCS} target="_blank" rel="noreferrer">API docs</a><a href="/api/fonts">Catalog API</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/cookies">Cookie policy</a><a href="/security">Security</a><a href="#" onClick={(event) => { event.preventDefault(); window.dispatchEvent(new Event("typace:cookie-settings")); }}>Cookie settings</a><a href="/llms.txt">Docs for AI tools</a></div>
+        <div className="footer-links"><a className={isDevelopers ? "nav-active" : ""} href="/developers">Developers</a><a href={API_DOCS} target="_blank" rel="noreferrer">API docs</a><a href="/api/fonts">Catalog API</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/security">Security</a><a href="/llms.txt">Docs for AI tools</a></div>
         <span className="build-meta">{commit ? "BUILD " + commit.shortSha : "FONT LIBRARY"} <span aria-hidden="true">·</span> <a href="/api/commit">STATUS</a></span>
       </footer>
       <PreviewDialog font={selectedFont} onClose={() => setSelectedFont(null)} onCopy={handleCopy} copied={selectedFont ? copiedFont === selectedFont.file : false} />
