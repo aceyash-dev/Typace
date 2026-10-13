@@ -1775,3 +1775,54 @@ body { background-image: radial-gradient(ellipse at 12% 0%, color-mix(in srgb, v
   .main-nav a > .hgi { font-size:14px; }
   .load-sentinel { min-height:72px; }
 }
+
+
+/* Catalog UX: compact sticky search, clear metadata, and a restrained filter sheet. */
+.mobile-filter-toggle { display: none; }
+.catalog-filters { display: contents; }
+.font-file-meta { display: grid; gap: 5px; }
+.font-file-meta span:first-child { overflow-wrap: anywhere; }
+.font-file-meta span:last-child { color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
+.font-card-top { gap: 8px; }
+.font-load-state { flex-shrink: 0; }
+@media (max-width: 700px) {
+  .site-header { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(16px); }
+  .library-toolbar { position: sticky; top: 70px; z-index: 40; display: grid; grid-template-columns: minmax(0, 1fr) 82px; gap: 8px; margin: 0 -2px 16px; padding: 9px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--bg) 96%, transparent); box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 9%, transparent); backdrop-filter: blur(16px); }
+  .search-box { min-width: 0; width: 100%; height: 46px; gap: 8px; padding: 0 11px; border: 1px solid var(--line); border-radius: 10px; box-shadow: none; }
+  .search-box input { min-width: 0; font-size: 14px; }
+  .search-box kbd { display: none; }
+  .mobile-filter-toggle { display: inline-flex; height: 46px; position: relative; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; font-size: 12px; font-weight: 800; }
+  .mobile-filter-toggle .hgi { font-size: 17px; }
+  .mobile-filter-toggle i { position: absolute; top: 7px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .catalog-filters { display: none; grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; padding-top: 2px; }
+  .catalog-filters.filters-open { display: grid; }
+  .catalog-filters .sort-control, .catalog-filters .format-control, .catalog-filters .view-switch { min-width: 0; width: 100%; height: 42px; border: 1px solid var(--line); border-radius: 9px; box-shadow: none; }
+  .catalog-filters .sort-control { padding: 0 8px; gap: 4px; }
+  .catalog-filters .sort-control select, .catalog-filters .format-control select { min-width: 0; width: 100%; font-size: 11px; }
+  .catalog-filters .format-control { padding: 0 8px; }
+  .catalog-filters .view-switch { display: flex; }
+  .catalog-filters .view-switch button { width: 36px; height: 40px; }
+  .full-library { padding-top: 24px; }
+  .browse-intro { padding: 34px 0 26px; }
+  .browse-intro h1 { font-size: clamp(46px, 12vw, 64px); }
+  .font-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; border: 0; }
+  .font-card { min-width: 0; padding: 11px 10px 10px; border: 1px solid var(--line); border-top: 4px solid var(--accent) !important; border-radius: 14px; overflow: hidden; }
+  .font-card-top { flex-wrap: wrap; align-items: center; gap: 6px; }
+  .font-format { padding: 4px 6px; font-size: 9px; }
+  .font-load-state { font-size: 8px; letter-spacing: .04em; }
+  .specimen-button { min-height: 126px; padding: 12px 0; gap: 10px; }
+  .specimen { font-size: clamp(48px, 14vw, 74px); }
+  .specimen-caption { font-size: 9px; line-height: 1.4; }
+  .font-card-bottom { display: grid; gap: 9px; padding-top: 10px; }
+  .font-card-name h2 { overflow-wrap: anywhere; font-size: 13px; }
+  .font-card-name p { gap: 4px; font-size: 10px; }
+  .font-file-meta span:last-child { font-size: 9px; }
+  .font-card-actions { justify-content: space-between; gap: 4px; }
+  .font-card-actions .icon-button { width: 30px; height: 30px; }
+  .font-list-view .font-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .font-list-view .specimen-button { min-height: 80px; }
+  .floating-nav { z-index: 60; }
+}
+@media (min-width: 701px) {
+  .library-toolbar { position: sticky; top: 0; z-index: 35; padding: 12px 0; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(12px); }
+}
