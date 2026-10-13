@@ -160,6 +160,7 @@ export default function App() {
           <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer"><Icon name="code" /><span>Developer</span></a>
         </nav>}
         <div className="header-actions account-menu">
+          {!isBrowse && !isAccount && !isDevelopers && <a className="header-account-link" href="/account"><Icon name="user-circle" /><span>Account</span></a>}
           <details className="account-popover">
             <summary aria-label="Account settings" title="Account settings"><Icon name="user-settings-01" /></summary>
             <div className="account-popover-panel">
