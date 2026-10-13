@@ -1751,3 +1751,27 @@ body { background-image: radial-gradient(ellipse at 12% 0%, color-mix(in srgb, v
   .header-account-link { min-height:36px; padding:0 4px; font-size:11px; }
   .header-account-link .hgi { display:none; }
 }
+
+
+/* Catalog auto-pagination and tighter navigation affordances. */
+.load-sentinel { display:flex; align-items:center; justify-content:center; gap:12px; min-height:84px; padding:24px 0 4px; color:var(--muted); font-size:11px; letter-spacing:.02em; }
+.load-sentinel .loading-spinner { width:18px; height:18px; border-width:2px; }
+.main-nav { gap:clamp(16px, 2.8vw, 34px); }
+.main-nav a { display:inline-flex; align-items:center; gap:7px; white-space:nowrap; }
+.main-nav a > .hgi { font-size:15px; }
+.main-nav a.nav-explore { color:var(--accent-dark); }
+.main-nav a.nav-explore .hgi:last-child { font-size:12px; }
+.main-nav a.nav-explore.nav-active { color:var(--accent); }
+.account-settings-grid { grid-template-columns:repeat(2,minmax(0,1fr)); max-width:900px; }
+.account-settings-grid .account-overview-card { min-height:245px; }
+.account-settings-grid .account-overview-card p { max-width:38ch; }
+.developer-panels { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.developer-panel { min-height:255px; }
+@media (max-width:760px) {
+  .account-settings-grid, .developer-panels { grid-template-columns:1fr; }
+  .account-settings-grid .account-overview-card { min-height:0; }
+  .main-nav { gap:12px; }
+  .main-nav a { gap:4px; font-size:11px; }
+  .main-nav a > .hgi { font-size:14px; }
+  .load-sentinel { min-height:72px; }
+}
