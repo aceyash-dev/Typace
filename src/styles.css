@@ -1741,3 +1741,13 @@ body { background-image: radial-gradient(ellipse at 12% 0%, color-mix(in srgb, v
   .main-nav.floating-nav.nav-hidden a { transform: translateY(-5px); }
   .main-nav.floating-nav.nav-visible a { transform: translateY(0); }
 }
+
+
+/* Keep Account reachable from the landing header without adding a floating landing nav. */
+.header-account-link { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:40px; padding:0 10px; color:var(--text); font-size:12px; font-weight:750; text-decoration:none; }
+.header-account-link:hover { color:var(--accent-dark); }
+.header-account-link .hgi { font-size:16px; }
+@media (max-width:760px) {
+  .header-account-link { min-height:36px; padding:0 4px; font-size:11px; }
+  .header-account-link .hgi { display:none; }
+}
