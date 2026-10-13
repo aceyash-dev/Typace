@@ -8,6 +8,8 @@ export default function FontCard({ font, onPreview, onCopy, copied }) {
   const reduceMotion = useReducedMotion();
   const family = familyFor(font);
   const specimenStyle = loaded ? { fontFamily: '"' + family + '", sans-serif' } : undefined;
+  const bytes = Number(font.sizeBytes ?? font.size ?? font.bytes ?? 0);
+  const fileSize = bytes > 0 ? (bytes < 1024 * 1024 ? (bytes / 1024).toFixed(0) + " KB" : (bytes / (1024 * 1024)).toFixed(2) + " MB") : "Size unavailable";
 
   return (
     <motion.article
@@ -32,7 +34,7 @@ export default function FontCard({ font, onPreview, onCopy, copied }) {
       <div className="font-card-bottom">
         <div className="font-card-name">
           <h2>{font.name}</h2>
-          <p>{font.file}</p>
+          <p className="font-file-meta"><span>{font.file}</span><span>{String(font.type || "font").toUpperCase()} · {fileSize}</span></p>
         </div>
         <div className="font-card-actions">
           <button className="icon-button" type="button" onClick={() => onCopy(font)} aria-label={"Copy CSS for " + font.name} title={copied ? "Copied" : "Copy CSS"}>
