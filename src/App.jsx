@@ -10,6 +10,7 @@ import { copyText, formatCount, normalize, usableFont } from "./lib/fonts.js";
 const API = "/api/fonts";
 export default function App() {
   const isBrowse = window.location.pathname === "/browse" || window.location.pathname.startsWith("/browse/");
+  const isAccount = window.location.pathname === "/account";
   const isDevelopers = window.location.pathname === "/developers" || window.location.pathname.startsWith("/developers/");
   const API_DOCS = "https://docs.ace-base.cc/projects/typace-api";
   const routeFormat = ({ "/browse/woff2": "woff2", "/browse/woff": "woff", "/browse/ttf": "ttf", "/browse/otf": "otf" })[window.location.pathname] || "all";
@@ -90,14 +91,20 @@ export default function App() {
   useEffect(() => { setVisibleCount(20); }, [query, sort, routeFormat, formatFilter]);
   useEffect(() => {
     let previousY = window.scrollY;
+    let idleTimer;
     const onScroll = () => {
       const currentY = window.scrollY;
       if (currentY < 36 || currentY < previousY - 6) setNavVisible(true);
       else if (currentY > previousY + 6) setNavVisible(false);
       previousY = currentY;
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => setNavVisible(true), 720);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.clearTimeout(idleTimer);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   const filtered = useMemo(() => {
@@ -140,15 +147,15 @@ export default function App() {
   if (legalRoute) return <><LegalPage page={legalRoute} /><CookieConsent /></>;
 
   return (
-    <div className={"app-shell" + (isBrowse ? " browse-page" : " home-page")}>
+    <div className={"app-shell" + (isBrowse ? " browse-page" : isAccount ? " account-page" : isDevelopers ? " developers-route" : " home-page")}>
       <header className="site-header">
         <a className="brand" href="/" aria-label="Typace home">
           <img className="brand-image" src="/icon.png" alt="" width="38" height="38" />
           <span className="brand-word">Typace</span>
           <span className="brand-beta">BETA</span>
         </a>
-        {(isBrowse || isDevelopers) && <nav className={"main-nav floating-nav" + (navVisible ? " nav-visible" : " nav-hidden")} aria-label="Main navigation">
-          <a className={!isBrowse && !isDevelopers ? "nav-active" : ""} href="/" aria-label="Account"><Icon name="user-circle" /><span>Account</span></a>
+        {(isBrowse || isAccount || isDevelopers) && <nav className={"main-nav floating-nav" + (navVisible ? " nav-visible" : " nav-hidden")} aria-label="Main navigation">
+          <a className={isAccount ? "nav-active" : ""} href="/account" aria-label="Account"><Icon name="user-circle" /><span>Account</span></a>
           <a className={"nav-explore" + (isBrowse ? " nav-active" : "")} href="/browse" aria-label="Explore font library"><Icon name="compass" /><span>Explore</span><Icon name="arrow-up-right-01" /></a>
           <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer"><Icon name="code" /><span>Developer</span></a>
         </nav>}
@@ -167,12 +174,12 @@ export default function App() {
       </header>
 
       <main>
-        {!isBrowse && <motion.section className="hero" aria-labelledby="hero-title" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
+        {!isBrowse && !isAccount && !isDevelopers && <motion.section className="hero" aria-labelledby="hero-title" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
           <div className="hero-copy">
             <p className="eyebrow"><span className="eyebrow-line" /> THE FONT CATALOG</p>
             <h1 id="hero-title">Type with<br /><span>full</span> <em>volume.</em></h1>
             <p className="hero-description">A font library with a little more character. Preview typefaces, copy their CSS, and download the original files.</p>
-            <a className="hero-link" href="#library">Browse the catalog <Icon name="arrow-down-right-01" /></a>
+            <a className="hero-link" href="/browse">Open the font library <Icon name="arrow-up-right-01" /></a>
           </div>
           <div className="hero-art hero-tagline-panel" aria-label="Typace tagline">
             <span className="hero-panel-index">TYPE LIBRARY / 001</span>
@@ -183,11 +190,37 @@ export default function App() {
 
         {isBrowse && <section className="browse-intro"><p className="eyebrow">THE TYPE LIBRARY</p><h1>Find your <em>type.</em></h1><p>Preview, copy CSS, or download the original font file.</p></section>}
 
+        {isAccount && <section className="account-page-content">
+          <p className="eyebrow">ACCOUNT / ABOUT TYPOGRAPHY</p>
+          <h1>About <em>Typace.</em></h1>
+          <p className="account-lede">A font library for previewing typefaces, getting usable CSS, and downloading the original files. No account creation required to browse the collection.</p>
+          <div className="account-overview-grid">
+            <article className="account-overview-card account-overview-feature">
+              <span className="account-card-index">01 / ABOUT</span><Icon name="type-01" />
+              <h2>Type, ready to use.</h2><p>Explore the collection, preview fonts in context, copy generated CSS, and download source font files.</p>
+              <a className="account-inline-link" href="/browse">Explore the library <Icon name="arrow-up-right-01" /></a>
+            </article>
+            <article className="account-overview-card">
+              <span className="account-card-index">02 / FOR BUILDERS</span><Icon name="code" />
+              <h2>Made for projects.</h2><p>Use the catalog API and generated CSS endpoints in websites and applications.</p>
+              <a className="account-inline-link" href="/developers">Developer resources <Icon name="arrow-up-right-01" /></a>
+            </article>
+            <article className="account-overview-card">
+              <span className="account-card-index">03 / YOUR SETUP</span><Icon name="settings-02" />
+              <h2>Preferences</h2><p>Choose your appearance and manage optional analytics consent. These settings stay on this device.</p>
+              <button className="account-inline-link account-action-link" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}><Icon name={theme === "dark" ? "sun-03" : "moon-02"} /> {theme === "dark" ? "Switch to light" : "Switch to dark"}</button>
+              <button className="account-inline-link account-action-link" type="button" onClick={() => window.dispatchEvent(new Event("typace:cookie-settings"))}><Icon name="cookie" /> Cookie settings</button>
+              <a className="account-inline-link" href="/cookies">Cookie policy <Icon name="arrow-up-right-01" /></a>
+            </article>
+          </div>
+          <div className="account-about-footer"><span>TYPOGRAPHY / 001</span><a className="button button-primary" href="/browse">Open font library <Icon name="arrow-up-right-01" /></a></div>
+        </section>}
+
         {isDevelopers && <section className="developers-page"><p className="eyebrow">TYPOGRAPHY API / 002</p><h1>Build with <em>type.</em></h1><p className="developers-lede">Browse the API reference, fetch the catalog, and use the font files in your projects.</p><div className="developer-panels"><a className="developer-panel developer-panel-primary" href={API_DOCS} target="_blank" rel="noreferrer"><span className="developer-panel-index">01 / REFERENCE</span><Icon name="book-open-01" /><h2>API documentation</h2><p>Endpoints, request formats, responses, and integration details.</p><span className="developer-panel-link">Open API docs <Icon name="arrow-up-right-01" /></span></a><a className="developer-panel" href="/api/fonts"><span className="developer-panel-index">02 / DATA</span><Icon name="database-02" /><h2>Font catalog</h2><p>Inspect the live catalog response and available font metadata.</p><span className="developer-panel-link">View catalog JSON <Icon name="arrow-up-right-01" /></span></a><a className="developer-panel" href="/browse"><span className="developer-panel-index">03 / FILES</span><Icon name="type-01" /><h2>Browse font files</h2><p>Preview a typeface, copy its CSS, or download the original file.</p><span className="developer-panel-link">Open library <Icon name="arrow-up-right-01" /></span></a></div><div className="developer-code"><p className="eyebrow">QUICK START</p><h2>Start with the catalog endpoint.</h2><code>GET https://typace.ace-base.cc/api/fonts</code><button className="button button-secondary" type="button" onClick={() => { copyText("https://typace.ace-base.cc/api/fonts").then((ok) => setToast(ok ? "Catalog endpoint copied" : "Could not copy endpoint")); }}> <Icon name="copy-01" /> Copy endpoint</button></div></section>}
 
         
 
-                {!isDevelopers && <section className={"library-section" + (isBrowse ? " full-library" : " featured-library")} id="library" aria-labelledby="library-title">
+                {!isDevelopers && !isAccount && <section className={"library-section" + (isBrowse ? " full-library" : " featured-library")} id="library" aria-labelledby="library-title">
           <div className="section-heading">
             <div><p className="eyebrow">{isBrowse ? "THE COLLECTION" : "CURATED SPECIMENS / 06"}</p><h2 id="library-title">{isBrowse ? <>All typefaces</> : <>A few good <em>typefaces.</em></>}</h2></div>
             {isBrowse ? <p className="section-note">Search by name or format. Preview, copy the CSS, and download the original file.</p> : <a className="all-fonts-link" href="/browse">View all {formatCount(fonts.length)} fonts <Icon name="arrow-up-right-01" /></a>}
@@ -220,9 +253,9 @@ export default function App() {
           </>}
         </section>}
 
-        {!isBrowse && !isDevelopers && <section className="showcase-note"><span className="showcase-index">02 / 02</span><div><p className="eyebrow">THE WHOLE COLLECTION</p><h2>Good type deserves<br /><em>room to roam.</em></h2></div><a className="button button-primary" href="/browse">Explore the full library <Icon name="arrow-up-right-01" /></a></section>}
+        {!isBrowse && !isDevelopers && !isAccount && <section className="showcase-note"><span className="showcase-index">02 / 02</span><div><p className="eyebrow">THE WHOLE COLLECTION</p><h2>Good type deserves<br /><em>room to roam.</em></h2></div><a className="button button-primary" href="/browse">Explore the full library <Icon name="arrow-up-right-01" /></a></section>}
 
-        {!isDevelopers && !isBrowse && <section className="api-callout">
+        {!isDevelopers && !isBrowse && !isAccount && <section className="api-callout">
           <div className="api-callout-icon"><Icon name="code-square-01" /></div>
           <div className="api-callout-copy"><p className="eyebrow">FOR BUILDERS</p><h2>Use the fonts. <em>Ship the work.</em></h2><p>Fetch the catalog or grab a ready-to-use <code>@font-face</code> rule from the API.</p></div>
           <div className="api-callout-links"><a href="/developers">Developer guide <Icon name="arrow-up-right-01" /></a><a href={API_DOCS} target="_blank" rel="noreferrer">API reference <Icon name="arrow-up-right-01" /></a></div>
