@@ -161,11 +161,14 @@ async function getFontMetadata(entry) {
     const extension = path.extname(fileName).toLowerCase();
     const metadata = FONT_TYPES[extension];
     const name = fileName.slice(0, -extension.length).trim();
+    let sizeBytes = null;
+    try { sizeBytes = (await fs.stat(absolutePath)).size; } catch { /* Metadata remains usable if stat is unavailable. */ }
     return {
         name,
         file: relativePath.split(path.sep).join("/"),
         type: metadata.type,
         format: metadata.format,
+        sizeBytes,
         category: await getFontCategory(absolutePath),
         url: `/fonts/${relativePath
             .split(path.sep)
