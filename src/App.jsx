@@ -91,16 +91,6 @@ export default function App() {
   }, []);
   useEffect(() => { setVisibleCount(20); }, [query, sort, routeFormat, formatFilter]);
   useEffect(() => {
-    if (!isBrowse || loading || error || visibleCount >= filtered.length) return;
-    const sentinel = loadSentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) setVisibleCount((count) => Math.min(count + 20, filtered.length));
-    }, { rootMargin: "560px 0px", threshold: 0 });
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [isBrowse, loading, error, visibleCount, filtered.length]);
-  useEffect(() => {
     let previousY = window.scrollY;
     let idleTimer;
     const onScroll = () => {
@@ -131,6 +121,17 @@ export default function App() {
     });
     return results;
   }, [fonts, query, sort, routeFormat, formatFilter]);
+
+  useEffect(() => {
+    if (!isBrowse || loading || error || visibleCount >= filtered.length) return;
+    const sentinel = loadSentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) setVisibleCount((count) => Math.min(count + 20, filtered.length));
+    }, { rootMargin: "560px 0px", threshold: 0 });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [isBrowse, loading, error, visibleCount, filtered.length]);
 
   const featuredFonts = useMemo(() => {
     if (filtered.length <= 6) return filtered;
