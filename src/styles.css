@@ -1973,15 +1973,93 @@ body { background-image: radial-gradient(ellipse at 12% 0%, color-mix(in srgb, v
 }
 
 
-/* Mobile toolbar: hard reset conflicting legacy declarations. */
-@media(max-width:760px){
-.browse-page .library-toolbar{box-sizing:border-box!important;display:grid!important;grid-template-columns:minmax(0,1fr) 44px!important;grid-template-rows:44px auto!important;align-items:start!important;width:100%!important;height:auto!important;min-height:0!important;padding:8px!important;gap:8px!important;overflow:visible!important}
-.browse-page .library-toolbar>.search-box{box-sizing:border-box!important;display:flex!important;grid-area:1/1!important;position:relative!important;width:100%!important;min-width:0!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0 10px!important;visibility:visible!important;opacity:1!important}
-.browse-page .library-toolbar>.search-box input{display:block!important;visibility:visible!important;opacity:1!important;flex:1 1 auto!important;width:1px!important;min-width:0!important;height:100%!important;border:0!important;background:transparent!important}
-.browse-page .library-toolbar>.mobile-filter-toggle{box-sizing:border-box!important;display:flex!important;grid-area:1/2!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0!important}
-.browse-page .library-toolbar>.mobile-filter-toggle span{display:none!important}
-.browse-page .library-toolbar>.catalog-filters{display:none!important;grid-area:2/1/3/3!important;width:100%!important;min-height:0!important;margin:0!important;padding:0!important}
-.browse-page .library-toolbar>.catalog-filters.filters-open{display:grid!important}
-.browse-page .font-grid{align-items:stretch!important}
-.browse-page .font-card{box-sizing:border-box!important;min-width:0!important;height:100%!important}
+/* Consolidated mobile Browse toolbar and font-card layout. Replaces conflicting historical overrides. */
+@media (max-width: 760px) {
+  .browse-page .library-toolbar {
+    position: sticky !important; top: 6px !important; z-index: 90 !important;
+    display: grid !important; grid-template-columns: minmax(0, 1fr) 46px !important;
+    grid-template-rows: 46px auto !important; align-items: start !important;
+    width: 100% !important; height: auto !important; min-height: 0 !important;
+    margin: 0 0 16px !important; padding: 8px !important; gap: 8px !important;
+    overflow: visible !important; border: 1px solid var(--line) !important;
+    border-radius: 14px !important; background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+    box-shadow: 0 8px 24px rgba(48,37,29,.09) !important; backdrop-filter: blur(18px);
+  }
+  .browse-page .library-toolbar > .search-box {
+    box-sizing: border-box !important; position: relative !important; display: flex !important;
+    grid-column: 1 !important; grid-row: 1 !important; align-self: stretch !important;
+    width: 100% !important; min-width: 0 !important; height: 46px !important; min-height: 46px !important;
+    margin: 0 !important; padding: 0 11px !important; gap: 8px !important;
+    visibility: visible !important; opacity: 1 !important; border: 1px solid var(--line) !important;
+    border-radius: 10px !important; background: var(--bg) !important; box-shadow: none !important;
+  }
+  .browse-page .library-toolbar > .search-box > .hgi { flex: 0 0 auto !important; display: inline-flex !important; }
+  .browse-page .library-toolbar > .search-box input {
+    display: block !important; flex: 1 1 0 !important; width: 0 !important; min-width: 0 !important;
+    height: 100% !important; margin: 0 !important; padding: 0 !important; border: 0 !important;
+    outline: none !important; visibility: visible !important; opacity: 1 !important;
+    background: transparent !important; font-size: 14px !important;
+  }
+  .browse-page .library-toolbar > .search-box kbd { display: none !important; }
+  .browse-page .library-toolbar > .mobile-filter-toggle {
+    box-sizing: border-box !important; position: relative !important; display: inline-flex !important;
+    grid-column: 2 !important; grid-row: 1 !important; align-self: stretch !important;
+    width: 46px !important; min-width: 46px !important; height: 46px !important; min-height: 46px !important;
+    margin: 0 !important; padding: 0 !important; align-items: center !important; justify-content: center !important;
+    border: 1px solid var(--line) !important; border-radius: 10px !important;
+    background: var(--surface-muted) !important; color: var(--text) !important; box-shadow: none !important;
+  }
+  .browse-page .library-toolbar > .mobile-filter-toggle > span { display: none !important; }
+  .browse-page .library-toolbar > .mobile-filter-toggle > .hgi { display: inline-flex !important; font-size: 20px !important; }
+  .browse-page .library-toolbar > .catalog-filters {
+    box-sizing: border-box !important; display: none !important; grid-column: 1 / -1 !important; grid-row: 2 !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto !important; gap: 8px !important;
+    width: 100% !important; min-width: 0 !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important;
+  }
+  .browse-page .library-toolbar > .catalog-filters.filters-open { display: grid !important; }
+  .browse-page .catalog-filters .sort-control,
+  .browse-page .catalog-filters .format-control,
+  .browse-page .catalog-filters .view-switch {
+    display: flex !important; box-sizing: border-box !important; width: 100% !important; min-width: 0 !important;
+    height: 42px !important; min-height: 42px !important; margin: 0 !important;
+    border: 1px solid var(--line) !important; border-radius: 9px !important; box-shadow: none !important;
+  }
+  .browse-page .catalog-filters select { width: 100% !important; min-width: 0 !important; font-size: 11px !important; }
+  .browse-page .catalog-filters .view-switch { justify-content: center !important; }
+  .browse-page .catalog-filters .view-switch button { width: 34px !important; height: 40px !important; }
+  .browse-page .browse-result-line { display: flex !important; flex-direction: row !important; align-items: center !important; margin: 0 0 16px !important; padding-bottom: 12px !important; border-bottom: 1px solid var(--line); }
+  .browse-page .font-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; align-items: stretch !important; gap: 12px !important; border: 0 !important; }
+  .browse-page .font-card {
+    box-sizing: border-box !important; display: flex !important; flex-direction: column !important; gap: 0 !important;
+    width: 100% !important; min-width: 0 !important; height: 100% !important; padding: 12px !important;
+    border: 1px solid color-mix(in srgb, var(--line) 18%, transparent) !important;
+    border-top: 4px solid var(--accent) !important; border-radius: 16px !important;
+    background: var(--surface) !important; box-shadow: 0 5px 18px rgba(48,37,29,.055) !important; overflow: hidden !important;
+  }
+  .browse-page .font-card-top { display: flex !important; flex-wrap: nowrap !important; justify-content: space-between !important; gap: 6px !important; min-height: 28px; }
+  .browse-page .font-format { padding: 4px 7px !important; border-radius: 6px !important; font-size: 9px !important; }
+  .browse-page .font-load-state { flex: 0 0 auto !important; font-size: 8px !important; white-space: nowrap !important; }
+  .browse-page .font-card .specimen-button {
+    display: flex !important; flex: 1 0 auto !important; flex-direction: column !important;
+    justify-content: space-between !important; align-items: stretch !important; gap: 10px !important;
+    min-width: 0 !important; min-height: 132px !important; margin: 12px 0 14px !important; padding: 12px 0 !important;
+    border: 1px solid color-mix(in srgb, var(--accent) 10%, var(--line)) !important;
+    border-radius: 12px !important; background: color-mix(in srgb, var(--surface-muted) 62%, var(--surface)) !important;
+  }
+  .browse-page .font-card .specimen { font-size: clamp(42px, 12vw, 66px) !important; line-height: 1 !important; }
+  .browse-page .font-card .specimen-caption { display: block !important; width: 100% !important; max-width: 100% !important; overflow: hidden !important; white-space: nowrap !important; text-overflow: ellipsis !important; font-size: 9px !important; line-height: 1.35 !important; }
+  .browse-page .font-card-bottom { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 10px !important; margin-top: auto !important; padding-top: 12px !important; border-top: 1px solid color-mix(in srgb, var(--line) 16%, transparent) !important; }
+  .browse-page .font-card-name h2 { margin: 0 0 5px !important; font-size: 14px !important; line-height: 1.25 !important; overflow-wrap: anywhere !important; }
+  .browse-page .font-card-name p { display: grid !important; gap: 3px !important; margin: 0 !important; font-size: 10px !important; line-height: 1.35 !important; overflow-wrap: anywhere !important; }
+  .browse-page .font-file-meta span:last-child { color: var(--accent-dark) !important; font-size: 9px !important; font-weight: 800 !important; }
+  .browse-page .font-card-actions { display: flex !important; width: 100% !important; justify-content: space-between !important; gap: 8px !important; margin-top: 2px !important; }
+  .browse-page .font-card-actions .icon-button { display: inline-flex !important; width: 36px !important; height: 36px !important; border: 1px solid color-mix(in srgb, var(--line) 22%, transparent) !important; border-radius: 10px !important; background: transparent !important; box-shadow: none !important; }
+  .browse-page .font-card-actions .open-button { margin-left: auto !important; color: var(--accent-dark) !important; }
+  .browse-page .font-list-view .font-card { display: flex !important; }
+  .browse-page .preview-sheet { border-radius: 20px 20px 0 0 !important; }
+}
+@media (min-width: 761px) {
+  .browse-page .library-toolbar { display: grid; grid-template-columns: minmax(0,1fr) auto auto auto; align-items: center; gap: 10px; }
+  .browse-page .catalog-filters { display: contents; }
+  .browse-page .mobile-filter-toggle { display: none; }
 }
