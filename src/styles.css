@@ -1971,3 +1971,17 @@ body { background-image: radial-gradient(ellipse at 12% 0%, color-mix(in srgb, v
   .browse-page .catalog-filters { display: contents; }
   .browse-page .mobile-filter-toggle { display: none; }
 }
+
+
+/* Mobile toolbar: hard reset conflicting legacy declarations. */
+@media(max-width:760px){
+.browse-page .library-toolbar{box-sizing:border-box!important;display:grid!important;grid-template-columns:minmax(0,1fr) 44px!important;grid-template-rows:44px auto!important;align-items:start!important;width:100%!important;height:auto!important;min-height:0!important;padding:8px!important;gap:8px!important;overflow:visible!important}
+.browse-page .library-toolbar>.search-box{box-sizing:border-box!important;display:flex!important;grid-area:1/1!important;position:relative!important;width:100%!important;min-width:0!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0 10px!important;visibility:visible!important;opacity:1!important}
+.browse-page .library-toolbar>.search-box input{display:block!important;visibility:visible!important;opacity:1!important;flex:1 1 auto!important;width:1px!important;min-width:0!important;height:100%!important;border:0!important;background:transparent!important}
+.browse-page .library-toolbar>.mobile-filter-toggle{box-sizing:border-box!important;display:flex!important;grid-area:1/2!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0!important}
+.browse-page .library-toolbar>.mobile-filter-toggle span{display:none!important}
+.browse-page .library-toolbar>.catalog-filters{display:none!important;grid-area:2/1/3/3!important;width:100%!important;min-height:0!important;margin:0!important;padding:0!important}
+.browse-page .library-toolbar>.catalog-filters.filters-open{display:grid!important}
+.browse-page .font-grid{align-items:stretch!important}
+.browse-page .font-card{box-sizing:border-box!important;min-width:0!important;height:100%!important}
+}
