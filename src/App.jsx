@@ -21,6 +21,7 @@ export default function App() {
   const [query, setQuery] = useState(() => new URLSearchParams(window.location.search).get("search") || "");
   const [sort, setSort] = useState("az");
   const [formatFilter, setFormatFilter] = useState("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [view, setView] = useState("grid");
   const [visibleCount, setVisibleCount] = useState(20);
   const [selectedFont, setSelectedFont] = useState(null);
@@ -168,7 +169,7 @@ export default function App() {
         </a>
         {(isBrowse || isAccount || isDevelopers) && <nav className={"main-nav floating-nav" + (navVisible ? " nav-visible" : " nav-hidden")} aria-label="Main navigation">
           <a className={isAccount ? "nav-active" : ""} href="/account" aria-label="Account"><Icon name="user-circle" /><span>Account</span></a>
-          {isBrowse && <a className="nav-explore nav-active" href="/browse" aria-label="Explore font library"><Icon name="compass" /><span>Explore</span><Icon name="arrow-up-right-01" /></a>}
+          <a className={"nav-explore" + (isBrowse ? " nav-active" : "")} href="/browse" aria-label="Explore font library"><Icon name="compass" /><span>Explore</span>{isBrowse && <Icon name="arrow-up-right-01" />}</a>
           <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer"><Icon name="code" /><span>Developer</span></a>
         </nav>}
         <div className="header-actions account-menu">
@@ -233,17 +234,19 @@ export default function App() {
           </div>
           {isBrowse && <div className="library-toolbar">
             <label className="search-box">
-              <Icon name="search-01" />
-              <span className="sr-only">Search fonts</span>
-              <input ref={searchRef} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search fonts, formats, styles…" autoComplete="off" />
+              <Icon name="search-01" /><span className="sr-only">Search fonts</span>
+              <input ref={searchRef} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search fonts…" autoComplete="off" />
               {query && <button type="button" className="clear-search" onClick={() => { setQuery(""); searchRef.current?.focus(); }} aria-label="Clear search"><Icon name="cancel-01" /></button>}
               <kbd>/</kbd>
             </label>
-            <label className="sort-control"><span className="sr-only">Sort fonts</span><Icon name="sorting-05" /><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="az">Name A–Z</option><option value="za">Name Z–A</option></select></label>
-            <label className="format-control"><span className="sr-only">Filter file format</span><select value={formatFilter} onChange={(event) => setFormatFilter(event.target.value)}><option value="all">All formats</option><option value="woff2">WOFF2</option><option value="woff">WOFF</option><option value="ttf">TTF</option><option value="otf">OTF</option></select></label>
-            <div className="view-switch" role="group" aria-label="Font layout">
-              <button type="button" className={view === "grid" ? "active" : ""} onClick={() => setView("grid")} aria-pressed={view === "grid"} aria-label="Grid view"><Icon name="grid-view" /></button>
-              <button type="button" className={view === "list" ? "active" : ""} onClick={() => setView("list")} aria-pressed={view === "list"} aria-label="List view"><Icon name="list-view" /></button>
+            <button className={"mobile-filter-toggle" + (filtersOpen ? " is-open" : "")} type="button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen} aria-controls="catalog-filters" aria-label="Sort and filter fonts"><Icon name="filter" /><span>Filter</span>{(formatFilter !== "all" || sort !== "az") && <i aria-hidden="true" />}</button>
+            <div className={"catalog-filters" + (filtersOpen ? " filters-open" : "")} id="catalog-filters">
+              <label className="sort-control"><span className="sr-only">Sort fonts</span><Icon name="sorting-05" /><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="az">Name A–Z</option><option value="za">Name Z–A</option></select></label>
+              <label className="format-control"><span className="sr-only">Filter file format</span><select value={formatFilter} onChange={(event) => setFormatFilter(event.target.value)}><option value="all">All formats</option><option value="woff2">WOFF2</option><option value="woff">WOFF</option><option value="ttf">TTF</option><option value="otf">OTF</option></select></label>
+              <div className="view-switch" role="group" aria-label="Font layout">
+                <button type="button" className={view === "grid" ? "active" : ""} onClick={() => setView("grid")} aria-pressed={view === "grid"} aria-label="Grid view"><Icon name="grid-view" /></button>
+                <button type="button" className={view === "list" ? "active" : ""} onClick={() => setView("list")} aria-pressed={view === "list"} aria-label="List view"><Icon name="list-view" /></button>
+              </div>
             </div>
           </div>}
           {isBrowse && <div className="browse-result-line"><span className="result-count" aria-live="polite">{loading ? "Loading fonts…" : formatCount(filtered.length) + (filtered.length === 1 ? " font" : " fonts")}</span>{(query || formatFilter !== "all" || routeFormat !== "all") && <button type="button" className="text-link clear-filters" onClick={() => { setQuery(""); setFormatFilter("all"); window.history.replaceState({}, "", "/browse"); }}>Clear filters <Icon name="cancel-01" /></button>}</div>}
