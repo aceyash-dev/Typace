@@ -38,6 +38,7 @@ export default function App() {
   const [commit, setCommit] = useState(null);
   const [navVisible, setNavVisible] = useState(true);
   const searchRef = useRef(null);
+  const loadSentinelRef = useRef(null);
   const reduceMotion = useReducedMotion();
 
   async function loadCatalog(signal) {
@@ -89,6 +90,16 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   useEffect(() => { setVisibleCount(20); }, [query, sort, routeFormat, formatFilter]);
+  useEffect(() => {
+    if (!isBrowse || loading || error || visibleCount >= filtered.length) return;
+    const sentinel = loadSentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) setVisibleCount((count) => Math.min(count + 20, filtered.length));
+    }, { rootMargin: "560px 0px", threshold: 0 });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [isBrowse, loading, error, visibleCount, filtered.length]);
   useEffect(() => {
     let previousY = window.scrollY;
     let idleTimer;
@@ -156,13 +167,13 @@ export default function App() {
         </a>
         {(isBrowse || isAccount || isDevelopers) && <nav className={"main-nav floating-nav" + (navVisible ? " nav-visible" : " nav-hidden")} aria-label="Main navigation">
           <a className={isAccount ? "nav-active" : ""} href="/account" aria-label="Account"><Icon name="user-circle" /><span>Account</span></a>
-          <a className={"nav-explore" + (isBrowse ? " nav-active" : "")} href="/browse" aria-label="Explore font library"><Icon name="compass" /><span>Explore</span><Icon name="arrow-up-right-01" /></a>
+          {isBrowse && <a className="nav-explore nav-active" href="/browse" aria-label="Explore font library"><Icon name="compass" /><span>Explore</span><Icon name="arrow-up-right-01" /></a>}
           <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer"><Icon name="code" /><span>Developer</span></a>
         </nav>}
         <div className="header-actions account-menu">
           {!isBrowse && !isAccount && !isDevelopers && <a className="header-account-link" href="/account"><Icon name="user-circle" /><span>Account</span></a>}
           <details className="account-popover">
-            <summary aria-label="Account settings" title="Account settings"><Icon name="user-settings-01" /></summary>
+            <summary aria-label="Account settings" title="Account settings"><Icon name="settings-02" /></summary>
             <div className="account-popover-panel">
               <p className="account-popover-title">Preferences</p>
               <button className="account-setting" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}><Icon name={theme === "dark" ? "sun-03" : "moon-02"} /><span>{theme === "dark" ? "Light appearance" : "Dark appearance"}</span></button>
@@ -170,7 +181,7 @@ export default function App() {
               <a className="account-setting" href="/cookies" onClick={() => document.querySelector(".account-popover")?.removeAttribute("open")}><Icon name="file-02" /><span>Cookie policy</span><Icon name="arrow-up-right-01" /></a>
             </div>
           </details>
-          {!isBrowse && <a className="header-cta" href="/browse">Browse library <Icon name="arrow-up-right-01" /></a>}
+          {!isBrowse && !isAccount && !isDevelopers && <a className="header-cta" href="/browse">Browse library <Icon name="arrow-up-right-01" /></a>}
         </div>
       </header>
 
@@ -192,32 +203,25 @@ export default function App() {
         {isBrowse && <section className="browse-intro"><p className="eyebrow">THE TYPE LIBRARY</p><h1>Find your <em>type.</em></h1><p>Preview, copy CSS, or download the original font file.</p></section>}
 
         {isAccount && <section className="account-page-content">
-          <p className="eyebrow">ACCOUNT / ABOUT TYPOGRAPHY</p>
-          <h1>About <em>Typace.</em></h1>
-          <p className="account-lede">A font library for previewing typefaces, getting usable CSS, and downloading the original files. No account creation required to browse the collection.</p>
-          <div className="account-overview-grid">
-            <article className="account-overview-card account-overview-feature">
-              <span className="account-card-index">01 / ABOUT</span><Icon name="type-01" />
-              <h2>Type, ready to use.</h2><p>Explore the collection, preview fonts in context, copy generated CSS, and download source font files.</p>
-              <a className="account-inline-link" href="/browse">Explore the library <Icon name="arrow-up-right-01" /></a>
+          <p className="eyebrow">ACCOUNT / PREFERENCES</p>
+          <h1>Your <em>settings.</em></h1>
+          <p className="account-lede">Control how Typace looks and manage your privacy preferences on this device.</p>
+          <div className="account-overview-grid account-settings-grid">
+            <article className="account-overview-card">
+              <span className="account-card-index">01 / APPEARANCE</span><Icon name="sun-03" />
+              <h2>Color theme</h2><p>Choose the appearance that works best for your screen.</p>
+              <button className="account-inline-link account-action-link" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}><Icon name={theme === "dark" ? "sun-03" : "moon-02"} /> Switch to {theme === "dark" ? "light" : "dark"}</button>
             </article>
             <article className="account-overview-card">
-              <span className="account-card-index">02 / FOR BUILDERS</span><Icon name="code" />
-              <h2>Made for projects.</h2><p>Use the catalog API and generated CSS endpoints in websites and applications.</p>
-              <a className="account-inline-link" href="/developers">Developer resources <Icon name="arrow-up-right-01" /></a>
-            </article>
-            <article className="account-overview-card">
-              <span className="account-card-index">03 / YOUR SETUP</span><Icon name="settings-02" />
-              <h2>Preferences</h2><p>Choose your appearance and manage optional analytics consent. These settings stay on this device.</p>
-              <button className="account-inline-link account-action-link" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}><Icon name={theme === "dark" ? "sun-03" : "moon-02"} /> {theme === "dark" ? "Switch to light" : "Switch to dark"}</button>
-              <button className="account-inline-link account-action-link" type="button" onClick={() => window.dispatchEvent(new Event("typace:cookie-settings"))}><Icon name="cookie" /> Cookie settings</button>
-              <a className="account-inline-link" href="/cookies">Cookie policy <Icon name="arrow-up-right-01" /></a>
+              <span className="account-card-index">02 / PRIVACY</span><Icon name="cookie" />
+              <h2>Cookie settings</h2><p>Manage optional analytics consent. Essential site functionality remains available either way.</p>
+              <button className="account-inline-link account-action-link" type="button" onClick={() => window.dispatchEvent(new Event("typace:cookie-settings"))}>Manage cookie consent <Icon name="arrow-up-right-01" /></button>
+              <a className="account-inline-link" href="/cookies">Read cookie policy <Icon name="arrow-up-right-01" /></a>
             </article>
           </div>
-          <div className="account-about-footer"><span>TYPOGRAPHY / 001</span><a className="button button-primary" href="/browse">Open font library <Icon name="arrow-up-right-01" /></a></div>
         </section>}
 
-        {isDevelopers && <section className="developers-page"><p className="eyebrow">TYPOGRAPHY API / 002</p><h1>Build with <em>type.</em></h1><p className="developers-lede">Browse the API reference, fetch the catalog, and use the font files in your projects.</p><div className="developer-panels"><a className="developer-panel developer-panel-primary" href={API_DOCS} target="_blank" rel="noreferrer"><span className="developer-panel-index">01 / REFERENCE</span><Icon name="book-open-01" /><h2>API documentation</h2><p>Endpoints, request formats, responses, and integration details.</p><span className="developer-panel-link">Open API docs <Icon name="arrow-up-right-01" /></span></a><a className="developer-panel" href="/api/fonts"><span className="developer-panel-index">02 / DATA</span><Icon name="database-02" /><h2>Font catalog</h2><p>Inspect the live catalog response and available font metadata.</p><span className="developer-panel-link">View catalog JSON <Icon name="arrow-up-right-01" /></span></a><a className="developer-panel" href="/browse"><span className="developer-panel-index">03 / FILES</span><Icon name="type-01" /><h2>Browse font files</h2><p>Preview a typeface, copy its CSS, or download the original file.</p><span className="developer-panel-link">Open library <Icon name="arrow-up-right-01" /></span></a><a className="developer-panel" href="/api/openapi.json"><span className="developer-panel-index">04 / SCHEMA</span><Icon name="file-code" /><h2>OpenAPI schema</h2><p>Machine-readable endpoint definitions for clients and tooling.</p><span className="developer-panel-link">View schema <Icon name="arrow-up-right-01" /></span></a></div><div className="developer-code"><p className="eyebrow">QUICK START</p><h2>Start with the catalog endpoint.</h2><code>GET https://typace.ace-base.cc/api/fonts</code><button className="button button-secondary" type="button" onClick={() => { copyText("https://typace.ace-base.cc/api/fonts").then((ok) => setToast(ok ? "Catalog endpoint copied" : "Could not copy endpoint")); }}> <Icon name="copy-01" /> Copy endpoint</button></div></section>}
+        {isDevelopers && <section className="developers-page"><p className="eyebrow">TYPOGRAPHY API / 002</p><h1>Build with <em>type.</em></h1><p className="developers-lede">Browse the API reference, fetch the catalog, and use the font files in your projects.</p><div className="developer-panels"><a className="developer-panel developer-panel-primary" href={API_DOCS} target="_blank" rel="noreferrer"><span className="developer-panel-index">01 / REFERENCE</span><Icon name="book-open-01" /><h2>API documentation</h2><p>Endpoints, request formats, responses, and integration details.</p><span className="developer-panel-link">Open API docs <Icon name="arrow-up-right-01" /></span></a><a className="developer-panel" href="/api/fonts"><span className="developer-panel-index">02 / DATA</span><Icon name="database-02" /><h2>Font catalog</h2><p>Inspect the live catalog response and available font metadata.</p><span className="developer-panel-link">View catalog JSON <Icon name="arrow-up-right-01" /></span></a><article className="developer-panel"><span className="developer-panel-index">03 / ABOUT</span><Icon name="type-01" /><h2>About Typace</h2><p>A focused font library for previewing typefaces, copying CSS, and downloading original font files.</p><span className="developer-panel-link">Typography, ready to use</span></article><a className="developer-panel" href="/api/openapi.json"><span className="developer-panel-index">04 / SCHEMA</span><Icon name="file-code" /><h2>OpenAPI schema</h2><p>Machine-readable endpoint definitions for clients and tooling.</p><span className="developer-panel-link">View schema <Icon name="arrow-up-right-01" /></span></a></div><div className="developer-code"><p className="eyebrow">QUICK START</p><h2>Start with the catalog endpoint.</h2><code>GET https://typace.ace-base.cc/api/fonts</code><button className="button button-secondary" type="button" onClick={() => { copyText("https://typace.ace-base.cc/api/fonts").then((ok) => setToast(ok ? "Catalog endpoint copied" : "Could not copy endpoint")); }}> <Icon name="copy-01" /> Copy endpoint</button></div></section>}
 
         
 
@@ -250,7 +254,7 @@ export default function App() {
             <div className={"font-grid " + (view === "list" ? "font-list-view" : "") + (!isBrowse ? " showcase-rail" : "")}>
               {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => <FontCard key={font.file} font={font} onPreview={setSelectedFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
             </div>
-            {isBrowse && visibleCount < filtered.length && <div className="load-more-wrap"><button className="button button-secondary load-more" type="button" onClick={() => setVisibleCount((count) => Math.min(count + 20, filtered.length))}>Load 20 more fonts <Icon name="arrow-down-01" /><span>{formatCount(filtered.length - visibleCount)} remaining</span></button></div>}
+            {isBrowse && visibleCount < filtered.length && <div className="load-sentinel" ref={loadSentinelRef} aria-hidden="true"><span className="loading-spinner" /><span>Loading more typefaces…</span></div>}
           </>}
         </section>}
 
