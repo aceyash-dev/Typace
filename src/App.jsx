@@ -180,23 +180,37 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, [fonts]);
 
-  // Give each specimen a shareable, indexable title and canonical URL.
+  // Give specimens and format views a shareable, indexable title and canonical
+  // URL. Canonicals point at the server-rendered pages so crawlers consolidate
+  // on content they can read without JavaScript.
   useEffect(() => {
-    if (!selectedFont) return undefined;
     const description = document.querySelector('meta[name="description"]');
     const canonical = document.querySelector('link[rel="canonical"]');
     const previousTitle = document.title;
     const previousDescription = description?.getAttribute("content") || "";
     const previousCanonical = canonical?.getAttribute("href") || "";
-    document.title = selectedFont.name + " Font — Preview & CSS | Typace";
-    if (description) description.setAttribute("content", "Preview " + selectedFont.name + ", copy its CSS as @font-face, @import, or a <link> tag, or download the original " + String(selectedFont.type || "font").toUpperCase() + " file from Typace.");
-    if (canonical) canonical.setAttribute("href", "https://typace.ace-base.cc/browse/font/" + slugFor(selectedFont));
+    let title = "";
+    let descriptionText = "";
+    let canonicalHref = "";
+    if (selectedFont) {
+      title = selectedFont.name + " Font — Preview & CSS | Typace";
+      descriptionText = "Preview " + selectedFont.name + ", copy its CSS as @font-face, @import, or a <link> tag, or download the original " + String(selectedFont.type || "font").toUpperCase() + " file from Typace.";
+      canonicalHref = "https://typace.ace-base.cc/font/" + slugFor(selectedFont);
+    } else if (isBrowse && routeFormat !== "all") {
+      title = routeFormat.toUpperCase() + " Fonts | Typace";
+      descriptionText = "Browse " + routeFormat.toUpperCase() + " fonts published by Typace, with ready-to-use CSS and downloads.";
+      canonicalHref = "https://typace.ace-base.cc/formats/" + routeFormat;
+    }
+    if (!title) return undefined;
+    document.title = title;
+    if (description) description.setAttribute("content", descriptionText);
+    if (canonical) canonical.setAttribute("href", canonicalHref);
     return () => {
       document.title = previousTitle;
       if (description) description.setAttribute("content", previousDescription);
       if (canonical) canonical.setAttribute("href", previousCanonical);
     };
-  }, [selectedFont]);
+  }, [selectedFont, isBrowse, routeFormat]);
 
   async function handleCopy(font, variant = "face") {
     try {
