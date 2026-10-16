@@ -8,7 +8,7 @@
 - Browse catalog: https://typace.ace-base.cc/browse
 - Developer guide: https://typace.ace-base.cc/developers
 - Font catalog API: https://typace.ace-base.cc/api/fonts
-- Search API: https://typace.ace-base.cc/api/search?q=QUERY
+- Search API: https://typace.ace-base.cc/api/search
 - Individual font API: https://typace.ace-base.cc/api/fonts/SLUG
 - Generated CSS: https://typace.ace-base.cc/api/css/SLUG
 - API health: https://typace.ace-base.cc/api/health
@@ -22,7 +22,7 @@
 
 The live GET /api/fonts response is the authoritative list of published font assets. Do not hardcode font names or assume every format exists for every family.
 
-Each record includes name, file, type, format, category, url, createdAt, updatedAt, and isNew. Dates may be null. Categories may be unknown. Do not infer designers, foundries, licenses, glyph coverage, variable axes, weight, style, or OpenType features without a reliable published source.
+Each record includes name, file, type, format, category, url, sizeBytes, createdAt, updatedAt, and isNew. Dates and sizeBytes may be null. isNew marks assets added in a recent catalog batch; do not treat it as a general popularity or quality signal. Categories may be unknown. Do not infer designers, foundries, licenses, glyph coverage, variable axes, weight, style, or OpenType features without a reliable published source.
 
 ## API usage
 
@@ -30,7 +30,7 @@ Each record includes name, file, type, format, category, url, createdAt, updated
 - GET /api/fonts lists the current catalog as a JSON array.
 - GET /api/search?q=QUERY searches name, file, type, and format. Omit q to retrieve the catalog.
 - GET /api/fonts/SLUG returns one metadata record.
-- GET /api/css/SLUG returns a text/css @font-face declaration.
+- GET /api/css/SLUG returns a text/css @font-face declaration with an absolute asset URL.
 - GET /api/openapi.json returns the OpenAPI 3.0.3 contract.
 - GET /api/commit returns deployment commit metadata without exposing the private repository URL.
 
@@ -42,7 +42,7 @@ Use the returned url and format fields. Do not assume every font is TTF or that 
 
 - Browse all fonts: https://typace.ace-base.cc/browse
 - WOFF2: https://typace.ace-base.cc/browse/woff2
-- WOFF: https://typace.ace-base.cc/browse/woff
 - TrueType: https://typace.ace-base.cc/browse/ttf
 - OpenType: https://typace.ace-base.cc/browse/otf
+- Font specimen (deep link): https://typace.ace-base.cc/browse/font/SLUG
 - Developer resources: https://typace.ace-base.cc/developers
