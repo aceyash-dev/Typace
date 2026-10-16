@@ -7,6 +7,18 @@
       "destination": "/api/sitemap"
     },
     {
+      "source": "/formats",
+      "destination": "/api/formats"
+    },
+    {
+      "source": "/formats/:slug",
+      "destination": "/api/formats/:slug"
+    },
+    {
+      "source": "/font/:slug",
+      "destination": "/api/font-page/:slug"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
