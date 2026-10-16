@@ -2,35 +2,32 @@ import { useEffect, useRef, useState } from "react";
 import Icon from "./Icon.jsx";
 import { fontUrl, familyFor, loadFontFace } from "../lib/fonts.js";
 
-const SWIPE_DISTANCE = 56;
-const CLOSE_DISTANCE = 96;
-const SAMPLES = [
-  ["Aa Bb Cc 0123", "Aa / 123"],
-  ["Sphinx of black quartz, judge my vow.", "Pangram"],
-  ["ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz", "Alphabet"],
-];
+const SWIPE_CLOSE = 110;
+const SWIPE_NAV = 78;
 
-export default function PreviewDialog({ font, position, total, onClose, onStep, onCopy, copied }) {
+export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, onNext }) {
   const sheetRef = useRef(null);
-  const drag = useRef(null);
-  const handlers = useRef({ onClose, onStep });
-  handlers.current = { onClose, onStep };
-  const [sample, setSample] = useState(SAMPLES[0][0]);
-  const [fontStatus, setFontStatus] = useState("idle");
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const dragRef = useRef(null);
+  const [sample, setSample] = useState("Aa Bb Cc 0123");
+  const [fontReady, setFontReady] = useState(false);
+  const [fontFailed, setFontFailed] = useState(false);
+  const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
+  const family = font ? familyFor(font) : "";
 
   useEffect(() => {
     if (!font) return undefined;
     let active = true;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    setFontStatus("loading");
-    setOffset({ x: 0, y: 0 });
-    loadFontFace(font).then((ready) => { if (active) setFontStatus(ready ? "ready" : "fallback"); });
+    setFontReady(false);
+    setFontFailed(false);
+    loadFontFace(font).then((result) => {
+      if (active) { setFontReady(result); setFontFailed(!result); }
+    });
     const onKeyDown = (event) => {
-      if (event.key === "Escape") handlers.current.onClose();
-      if (event.key === "ArrowRight") handlers.current.onStep(1);
-      if (event.key === "ArrowLeft") handlers.current.onStep(-1);
+      if (event.key === "Escape") onClose();
+      else if (event.key === "ArrowLeft" && onPrev) onPrev();
+      else if (event.key === "ArrowRight" && onNext) onNext();
     };
     window.addEventListener("keydown", onKeyDown);
     sheetRef.current?.focus();
@@ -39,73 +36,90 @@ export default function PreviewDialog({ font, position, total, onClose, onStep, 
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [font]);
-
-  function onTouchStart(event) {
-    const interactive = event.target.closest("input, textarea, button, a");
-    if (event.touches.length !== 1 || interactive) { drag.current = null; return; }
-    const touch = event.touches[0];
-    drag.current = { x: touch.clientX, y: touch.clientY, dx: 0, dy: 0, axis: null, scrollTop: sheetRef.current?.scrollTop ?? 0 };
-  }
-
-  function onTouchMove(event) {
-    const current = drag.current;
-    if (!current) return;
-    const touch = event.touches[0];
-    current.dx = touch.clientX - current.x;
-    current.dy = touch.clientY - current.y;
-    if (!current.axis && (Math.abs(current.dx) > 8 || Math.abs(current.dy) > 8)) {
-      current.axis = Math.abs(current.dx) > Math.abs(current.dy) ? "x" : "y";
-    }
-    if (current.axis === "x") setOffset({ x: current.dx * 0.4, y: 0 });
-    else if (current.axis === "y" && current.dy > 0 && current.scrollTop <= 0) setOffset({ x: 0, y: current.dy * 0.5 });
-  }
-
-  function onTouchEnd() {
-    const current = drag.current;
-    drag.current = null;
-    setOffset({ x: 0, y: 0 });
-    if (!current) return;
-    if (current.axis === "x" && Math.abs(current.dx) > SWIPE_DISTANCE) handlers.current.onStep(current.dx < 0 ? 1 : -1);
-    else if (current.axis === "y" && current.dy > CLOSE_DISTANCE && current.scrollTop <= 0) handlers.current.onClose();
-  }
+  }, [font, onClose, onPrev, onNext]);
 
   if (!font) return null;
-  const family = familyFor(font);
+
+  function startDrag(event) {
+    if (event.target.closest("input, textarea, button, a, select, summary")) return;
+    dragRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      axis: null,
+      fromHandle: !!event.target.closest(".sheet-grabber, .preview-head"),
+    };
+    setDrag({ x: 0, y: 0, active: true });
+    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* capture is best-effort */ }
+  }
+  function moveDrag(event) {
+    const start = dragRef.current;
+    if (!start) return;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (!start.axis && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+      start.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+    }
+    if (start.axis === "y") {
+      if (start.fromHandle) setDrag({ x: 0, y: Math.max(0, dy), active: true });
+    } else if (start.axis === "x") {
+      setDrag({ x: dx, y: 0, active: true });
+    }
+  }
+  function endDrag(event) {
+    const start = dragRef.current;
+    dragRef.current = null;
+    setDrag({ x: 0, y: 0, active: false });
+    if (!start) return;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (start.axis === "y" && start.fromHandle && dy > SWIPE_CLOSE) { onClose(); return; }
+    if (start.axis === "x" && Math.abs(dx) > SWIPE_NAV) {
+      if (dx < 0 && onNext) onNext();
+      else if (dx > 0 && onPrev) onPrev();
+    }
+  }
+
+  const dragStyle = {
+    transform: "translate(" + drag.x + "px, " + drag.y + "px)",
+    transition: drag.active ? "none" : "transform .3s cubic-bezier(.22,1,.36,1), opacity .3s ease",
+    opacity: drag.active && drag.y > 0 ? Math.max(0.45, 1 - drag.y / 460) : 1,
+  };
 
   return (
     <div className="sheet-scrim" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <section
-        className="preview-dialog preview-sheet"
+        className={"preview-dialog preview-sheet" + (drag.active ? " is-dragging" : "")}
         ref={sheetRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="preview-title"
         tabIndex={-1}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        onTouchCancel={onTouchEnd}
+        style={dragStyle}
+        onPointerDown={startDrag}
+        onPointerMove={moveDrag}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
       >
         <div className="sheet-grabber" aria-hidden="true"><span /></div>
-        <div className="preview-shell" style={offset.x || offset.y ? { transform: "translate3d(" + offset.x + "px, " + offset.y + "px, 0)" } : undefined}>
+        <div className="preview-shell">
           <div className="preview-head">
-            <div className="preview-title-block">
-              <span className="preview-counter">{position} / {total}</span>
+            <div>
+              <span className="eyebrow">TYPE SPECIMEN / PREVIEW</span>
               <h2 id="preview-title">{font.name}</h2>
-              <p className="preview-type">{String(font.type).toUpperCase()}</p>
+              <p>{String(font.type || "font").toUpperCase()}</p>
             </div>
             <button className="icon-button close-button" type="button" onClick={onClose} aria-label="Close preview">
               <Icon name="cancel-01" />
             </button>
           </div>
-          <div className="preview-specimen" aria-live="polite" style={{ fontFamily: fontStatus === "ready" ? '"' + family + '", sans-serif' : "inherit" }}>
-            {sample || " "}
-          </div>
-          <label className="sample-label" htmlFor="sample-text">Try your own text</label>
-          <input id="sample-text" className="sample-input" value={sample} maxLength={180} onChange={(event) => setSample(event.target.value)} placeholder="Type something…" />
-          <div className="preview-presets" aria-label="Sample text presets">
-            {SAMPLES.map(([text, label]) => <button key={label} type="button" onClick={() => setSample(text)}>{label}</button>)}
+          <div className="preview-stage">
+            <div className="preview-stage-meta"><span className={fontFailed ? "preview-font-status is-failed" : "preview-font-status"}>{fontReady ? "FONT READY" : fontFailed ? "SYSTEM FALLBACK · REOPEN TO RETRY" : "LOADING TYPEFACE…"}</span></div>
+            <div className="preview-sample" style={{ fontFamily: fontReady ? '"' + family + '", sans-serif' : "inherit", fontSize: "clamp(34px, 8vw, 62px)" }} aria-live="polite">
+              {sample || " "}
+            </div>
+            <label className="sample-label" htmlFor="sample-text">Try your own text</label>
+            <input id="sample-text" className="sample-input" value={sample} maxLength={180} onChange={(event) => setSample(event.target.value)} placeholder="Type something…" />
+            <div className="preview-presets" aria-label="Specimen presets"><button type="button" onClick={() => setSample("Aa Bb Cc 0123")}>Aa / 123</button><button type="button" onClick={() => setSample("Sphinx of black quartz, judge my vow.")}>Pangram</button><button type="button" onClick={() => setSample("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz")}>Alphabet</button></div>
           </div>
           <div className="preview-actions">
             <button className="button button-primary" type="button" onClick={() => onCopy(font)}>
@@ -115,11 +129,13 @@ export default function PreviewDialog({ font, position, total, onClose, onStep, 
               <Icon name="download-01" /> Download
             </a>
           </div>
-          <div className="preview-nav">
-            <button type="button" onClick={() => onStep(-1)} aria-label="Previous font"><Icon name="arrow-left-01" /></button>
-            <span className="preview-hint">{fontStatus === "fallback" ? "Preview unavailable" : "Swipe or use arrows"}</span>
-            <button type="button" onClick={() => onStep(1)} aria-label="Next font"><Icon name="arrow-right-01" /></button>
-          </div>
+          {(onPrev || onNext) && (
+            <div className="preview-nav" aria-label="Browse typefaces">
+              <button className="icon-button" type="button" onClick={onPrev} disabled={!onPrev} aria-label="Previous typeface"><Icon name="arrow-left-01" /></button>
+              <span className="preview-nav-hint">Swipe to browse</span>
+              <button className="icon-button" type="button" onClick={onNext} disabled={!onNext} aria-label="Next typeface"><Icon name="arrow-right-01" /></button>
+            </div>
+          )}
         </div>
       </section>
     </div>
