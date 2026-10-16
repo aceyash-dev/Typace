@@ -3,18 +3,54 @@ import Icon from "./Icon.jsx";
 import useVisibleFont from "../hooks/useVisibleFont.js";
 import { familyFor, fontUrl } from "../lib/fonts.js";
 
-function formatSize(font) {
-  const bytes = Number(font.sizeBytes ?? 0);
+function fileSizeLabel(font) {
+  const bytes = Number(font.sizeBytes ?? font.size ?? font.bytes ?? 0);
   if (!(bytes > 0)) return "";
-  return bytes < 1024 * 1024 ? Math.round(bytes / 1024) + " KB" : (bytes / (1024 * 1024)).toFixed(2) + " MB";
+  return bytes < 1024 * 1024
+    ? (bytes / 1024).toFixed(0) + " KB"
+    : (bytes / (1024 * 1024)).toFixed(2) + " MB";
 }
 
-export default function FontCard({ font, onPreview, onCopy, copied }) {
+export default function FontCard({ font, onPreview, onCopy, copied, variant = "card" }) {
   const { ref, loaded, failed } = useVisibleFont(font);
   const reduceMotion = useReducedMotion();
-  const specimenStyle = loaded ? { fontFamily: '"' + familyFor(font) + '", sans-serif' } : undefined;
-  const size = formatSize(font);
+  const family = familyFor(font);
+  const format = String(font.type || "font").toUpperCase();
+  const size = fileSizeLabel(font);
+  const state = loaded ? "ready" : failed ? "failed" : "loading";
+  const specimenStyle = loaded ? { fontFamily: '"' + family + '", sans-serif' } : undefined;
 
+  // Peek view: a compact specimen wall (freefaces.gallery style). Just the
+  // typeface set in itself, a tiny format tag, and quiet actions.
+  if (variant === "peek") {
+    return (
+      <motion.article
+        className="peek-tile"
+        ref={ref}
+        initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.1 }}
+        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <button className="peek-sample" type="button" onClick={() => onPreview(font)} aria-label={"Preview " + font.name}>
+          <span className={"peek-glyph is-" + state} style={specimenStyle}>{font.name}</span>
+        </button>
+        <div className="peek-bar">
+          <span className="peek-format">{format}</span>
+          <div className="peek-actions">
+            <button className="icon-button" type="button" onClick={() => onCopy(font)} aria-label={"Copy CSS for " + font.name} title={copied ? "Copied" : "Copy CSS"}>
+              <Icon name={copied ? "checkmark-circle-02" : "copy-01"} />
+            </button>
+            <a className="icon-button" href={fontUrl(font)} download={String(font.file).split("/").pop()} aria-label={"Download " + font.name} title="Download font">
+              <Icon name="download-01" />
+            </a>
+          </div>
+        </div>
+      </motion.article>
+    );
+  }
+
+  // Card view: the fuller preview card used in the library grid.
   return (
     <motion.article
       className="font-card"
@@ -28,16 +64,12 @@ export default function FontCard({ font, onPreview, onCopy, copied }) {
       layout
     >
       <div className="font-card-top">
-        <span className="font-format">{String(font.type || "font").toUpperCase()}</span>
-        {(loaded || failed) && (
-          <span className={"font-load-state" + (loaded ? " is-loaded" : " is-failed")} title={loaded ? "Font ready" : "Preview unavailable"}>
-            <span />{loaded ? "READY" : "FALLBACK"}
-          </span>
-        )}
+        <span className="font-format">{format}</span>
+        <span className={"font-load-state" + (loaded ? " is-loaded" : failed ? " is-failed" : "")} title={loaded ? "Font ready" : failed ? "Preview unavailable" : "Loading preview"}><span />{loaded ? "READY" : failed ? "FALLBACK" : "LOADING"}</span>
       </div>
       <button className="specimen-button" type="button" onClick={() => onPreview(font)} aria-label={"Preview " + font.name}>
         <span className="specimen" style={specimenStyle}>Aa</span>
-        <span className="specimen-caption">The quick brown fox</span>
+        <span className="specimen-caption">{font.name} · The quick brown fox</span>
       </button>
       <div className="font-card-bottom">
         <div className="font-card-name">
