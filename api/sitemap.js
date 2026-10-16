@@ -1,11 +1,12 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
+import { listFonts } from "./_lib/fonts.js";
+
 const BASE_URL = "https://typace.ace-base.cc";
 
 const pages = [
     { path: "/", changefreq: "weekly", priority: "1.0" },
     { path: "/browse", changefreq: "weekly", priority: "0.9" },
     { path: "/browse/woff2", changefreq: "weekly", priority: "0.8" },
-    { path: "/browse/woff", changefreq: "weekly", priority: "0.8" },
     { path: "/browse/ttf", changefreq: "weekly", priority: "0.8" },
     { path: "/browse/otf", changefreq: "weekly", priority: "0.8" },
     { path: "/developers", changefreq: "monthly", priority: "0.8" },
@@ -24,14 +25,35 @@ function escapeXml(value) {
         .replace(/'/g, "&apos;");
 }
 
-export default function handler(req, res) {
+// Kept in sync with slugFor() in src/lib/fonts.js so sitemap URLs match the
+// shareable specimen deep links the app generates.
+function slugify(value) {
+    return String(value || "")
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
+
+export default async function handler(req, res) {
     if (req.method !== "GET") {
         res.setHeader("Allow", "GET");
         return res.status(405).send("Method not allowed.");
     }
     if (!enforceRateLimit(req, res)) return;
 
-    const urls = pages.map(page =>
+    let fontPages = [];
+    try {
+        const fonts = await listFonts();
+        fontPages = fonts
+            .map(font => ({ path: `/browse/font/${slugify(font.name)}`, changefreq: "monthly", priority: "0.6" }))
+            .filter(page => page.path !== "/browse/font/");
+    } catch {
+        // The sitemap still lists the static pages if the catalog is unavailable.
+    }
+
+    const urls = [...pages, ...fontPages].map(page =>
         `  <url><loc>${escapeXml(BASE_URL + page.path)}</loc><changefreq>${page.changefreq}</changefreq><priority>${page.priority}</priority></url>`
     );
     const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>`;
