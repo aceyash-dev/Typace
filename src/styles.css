@@ -2046,3 +2046,61 @@ h1, h2, .section-heading h2, .preview-head h2 { text-wrap: balance; }
 @media (min-width: 1600px) {
   .font-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+
+/* ==========================================================================
+   NAVIGATION — final authoritative layout.
+   Desktop (≥1025px): inline in the header (never overlaps the brand).
+   Tablet + phone (≤1024px): a single docked bottom bar.
+   Overrides every earlier floating-nav rule.
+   ========================================================================== */
+@media (min-width: 1025px) {
+  .app-shell .site-header .main-nav.floating-nav {
+    position: static !important;
+    top: auto !important; right: auto !important; bottom: auto !important; left: auto !important;
+    transform: none !important;
+    margin: 0 0 0 auto !important;
+    padding: 0 !important;
+    gap: clamp(18px, 2.4vw, 34px) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: auto !important;
+    z-index: auto !important;
+  }
+  .app-shell .site-header .main-nav.floating-nav a { min-height: 0 !important; padding: 10px 0 !important; border-radius: 0 !important; background: transparent !important; color: var(--muted) !important; font-size: 12px !important; }
+  .app-shell .site-header .main-nav.floating-nav a.nav-active { color: var(--text) !important; }
+  .app-shell .site-header .main-nav.floating-nav a.nav-explore { color: var(--accent-dark) !important; }
+  .app-shell .site-header .main-nav.floating-nav a.nav-explore::after { display: none !important; }
+}
+
+@media (max-width: 1024px) {
+  .app-shell .main-nav.floating-nav {
+    position: fixed !important;
+    top: auto !important; right: auto !important;
+    bottom: 16px !important; left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 200 !important;
+    width: min(420px, calc(100vw - 28px)) !important;
+    margin: 0 !important;
+    justify-content: space-between !important;
+    padding: 6px !important;
+    border: 1px solid color-mix(in srgb, var(--line) 80%, transparent) !important;
+    border-radius: 22px !important;
+    background: color-mix(in srgb, var(--surface) 94%, transparent) !important;
+    box-shadow: 0 12px 38px rgba(48,37,29,.18) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  .app-shell .main-nav.floating-nav a { flex: 1 1 0 !important; min-width: 0 !important; justify-content: center !important; }
+  .app-shell .main-nav.floating-nav a.nav-explore { background: var(--accent) !important; color: #fffaf2 !important; }
+  .app-shell .main-nav.floating-nav.nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0 !important; visibility: hidden !important; }
+  .app-shell .main-nav.floating-nav.nav-visible { transform: translate(-50%, 0) !important; opacity: 1 !important; visibility: visible !important; }
+  main { padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important; }
+}
