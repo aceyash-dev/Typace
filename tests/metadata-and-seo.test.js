@@ -219,6 +219,7 @@ test("React shell keeps Grandstander and Hugeicons and removes the legacy inline
     assert.match(html, /use\.hugeicons\.com\/font\/icons\.css/);
     assert.match(html, /src="\/src\/main\.jsx"/);
     assert.match(html, /id="root"/);
+    assert.match(html, /property="og:image" content="https:\/\/typace\.ace-base\.cc\/og-image\.png"/);
     assert.doesNotMatch(html, /function loadFonts\(\)|let previewRequestId/);
 });
 
@@ -228,17 +229,18 @@ test("React landing focuses on the font catalog and uses the existing brand asse
     const preview = await readFile(new URL("../src/components/PreviewDialog.jsx", import.meta.url), "utf8");
     const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    for (const text of ["The catalog did not load.", "Try again", "PreviewDialog", "/api/css/", "/api/openapi.json", "/llms.txt", 'src="/icon.png"', 'src="/og-image.png"']) {
+    for (const text of ["The catalog did not load.", "Try again", "PreviewDialog", "fontFaceCss", "/api/openapi.json", "/llms.txt", 'src="/icon.png"']) {
         assert.ok(app.includes(text), "missing UI contract: " + text);
     }
     assert.ok(!app.includes("Revamp in Progress"), "revamp banner must stay removed");
     assert.ok(!app.includes("SCROLL TO EXPLORE"), "generic exploration copy must stay removed");
     assert.match(styles, /font-family: "Grandstander", cursive/);
-    assert.match(styles, /--peacock: #006b64/);
+    assert.match(styles, /--peacock: #ed7418/);
     assert.match(html, /family=Grandstander/);
     assert.match(card, /Download font/);
     assert.match(card, /motion\.article/);
-    assert.match(preview, /\/api\/fonts\//);
+    assert.match(preview, /onCopy/);
+  assert.doesNotMatch(preview, /API record|size-slider/);
     assert.match(app, /aria-live="polite"/);
     assert.match(app, /aria-pressed=/);
 });

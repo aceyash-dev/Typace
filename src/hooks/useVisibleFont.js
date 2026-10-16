@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { loadFontFace, usableFont } from "../lib/fonts.js";
 
-export default function useVisibleFont(font, enabled = true) {
+export default function useVisibleFont(font) {
   const ref = useRef(null);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    if (!enabled || !ref.current || !usableFont(font)) return undefined;
+    if (!ref.current || !usableFont(font)) return undefined;
     setLoaded(false);
     setFailed(false);
     let active = true;
@@ -35,7 +35,7 @@ export default function useVisibleFont(font, enabled = true) {
       active = false;
       observer?.disconnect();
     };
-  }, [font, enabled]);
+  }, [font]);
 
   return { ref, loaded, failed };
 }

@@ -5,9 +5,25 @@ import FontCard from "./components/FontCard.jsx";
 import PreviewDialog from "./components/PreviewDialog.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import LegalPage from "./components/LegalPage.jsx";
-import { copyText, formatCount, normalize, usableFont } from "./lib/fonts.js";
+import { copyText, fontFaceCss, formatCount, normalize, usableFont } from "./lib/fonts.js";
 
 const API = "/api/fonts";
+
+function SkeletonCard() {
+  return (
+    <div className="font-card skeleton-card" aria-hidden="true">
+      <div className="font-card-top"><span className="skeleton-line sk-pill" /></div>
+      <span className="skeleton-specimen" />
+      <div className="font-card-bottom">
+        <div className="font-card-name">
+          <span className="skeleton-line sk-title" />
+          <span className="skeleton-line sk-meta" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const isBrowse = window.location.pathname === "/browse" || window.location.pathname.startsWith("/browse/");
   const isAccount = window.location.pathname === "/account";
@@ -139,22 +155,28 @@ export default function App() {
     return Array.from({ length: 6 }, (_, index) => filtered[Math.round(index * (filtered.length - 1) / 5)]);
   }, [filtered]);
 
-  async function handleCopy(font) {
-    try {
-      const response = await fetch("/api/css/" + encodeURIComponent(font.name), { headers: { Accept: "text/css" } });
-      if (!response.ok) throw new Error("CSS endpoint returned " + response.status);
-      const css = await response.text();
-      if (!css || !css.includes("@font-face")) throw new Error("CSS response was empty or invalid.");
-      const ok = await copyText(css);
-      if (!ok) throw new Error("Clipboard is unavailable.");
+  function handleCopy(font) {
+    // Written inside the tap itself: mobile browsers reject clipboard writes that
+    // happen after an await, so the CSS is built locally instead of fetched first.
+    copyText(fontFaceCss(font)).then((ok) => {
+      if (!ok) {
+        setToast("Could not copy CSS on this browser.");
+        window.setTimeout(() => setToast(""), 3200);
+        return;
+      }
       setCopiedFont(font.file);
       setToast("CSS copied for " + font.name);
       window.setTimeout(() => setCopiedFont(""), 1800);
       window.setTimeout(() => setToast(""), 2400);
-    } catch {
-      setToast("Could not copy CSS. Open the font API to copy it manually.");
-      window.setTimeout(() => setToast(""), 3200);
-    }
+    });
+  }
+
+  // The peek view moves through the same list the reader is looking at.
+  const navList = isBrowse ? filtered : featuredFonts;
+  const previewIndex = selectedFont ? navList.findIndex((font) => font.file === selectedFont.file) : -1;
+  function stepPreview(direction) {
+    if (previewIndex < 0 || !navList.length) return;
+    setSelectedFont(navList[(previewIndex + direction + navList.length) % navList.length]);
   }
 
   if (legalRoute) return <><LegalPage page={legalRoute} /><CookieConsent /></>;
@@ -249,16 +271,18 @@ export default function App() {
               </div>
             </div>
           </div>}
-          {isBrowse && <div className="browse-result-line"><span className="result-count" aria-live="polite">{loading ? "Loading fonts…" : formatCount(filtered.length) + (filtered.length === 1 ? " font" : " fonts")}</span>{(query || formatFilter !== "all" || routeFormat !== "all") && <button type="button" className="text-link clear-filters" onClick={() => { setQuery(""); setFormatFilter("all"); window.history.replaceState({}, "", "/browse"); }}>Clear filters <Icon name="cancel-01" /></button>}</div>}
+          {isBrowse && <div className="browse-result-line"><span className="result-count" aria-live="polite">{loading ? <span className="skeleton-line sk-count"><span className="sr-only">Loading fonts</span></span> : formatCount(filtered.length) + (filtered.length === 1 ? " font" : " fonts")}</span>{(query || formatFilter !== "all" || routeFormat !== "all") && <button type="button" className="text-link clear-filters" onClick={() => { setQuery(""); setFormatFilter("all"); window.history.replaceState({}, "", "/browse"); }}>Clear filters <Icon name="cancel-01" /></button>}</div>}
 
-          {loading && <div className="loading-state" role="status"><span className="loading-spinner" /><span>Setting the type…</span></div>}
+          {loading && <div className={"font-grid skeleton-grid" + (view === "list" ? " font-list-view" : "") + (!isBrowse ? " showcase-rail" : "")} role="status" aria-label="Loading fonts">
+            {Array.from({ length: isBrowse ? 8 : 4 }, (_, index) => <SkeletonCard key={index} />)}
+          </div>}
           {!loading && error && <div className="error-state" role="alert"><span className="error-icon"><Icon name="alert-circle" /></span><div><h3>The catalog did not load.</h3><p>{error}</p><button className="button button-primary" type="button" onClick={() => loadCatalog()}><Icon name="refresh" /> Try again</button></div></div>}
           {!loading && !error && filtered.length === 0 && <div className="empty-state"><Icon name="search-remove" /><h3>No fonts found.</h3><p>Try a shorter search or clear the filters.</p><button className="button button-secondary" type="button" onClick={() => { setQuery(""); setFormatFilter("all"); }}>Clear search</button></div>}
           {!loading && !error && filtered.length > 0 && <>
             <div className={"font-grid " + (view === "list" ? "font-list-view" : "") + (!isBrowse ? " showcase-rail" : "")}>
               {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => <FontCard key={font.file} font={font} onPreview={setSelectedFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
             </div>
-            {isBrowse && visibleCount < filtered.length && <div className="load-sentinel" ref={loadSentinelRef} aria-hidden="true"><span className="loading-spinner" /><span>Loading more typefaces…</span></div>}
+            {isBrowse && visibleCount < filtered.length && <div className="font-grid skeleton-grid load-sentinel" ref={loadSentinelRef} aria-hidden="true"><SkeletonCard /><SkeletonCard /></div>}
           </>}
         </section>}
 
@@ -276,7 +300,15 @@ export default function App() {
         <div className="footer-links"><a className={isDevelopers ? "nav-active" : ""} href="/developers">Developers</a><a href={API_DOCS} target="_blank" rel="noreferrer">API docs</a><a href="/api/fonts">Catalog API</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/security">Security</a><a href="/llms.txt">Docs for AI tools</a></div>
         <span className="build-meta">{commit ? "BUILD " + commit.shortSha : "FONT LIBRARY"} <span aria-hidden="true">·</span> <a href="/api/commit">STATUS</a></span>
       </footer>
-      <PreviewDialog font={selectedFont} onClose={() => setSelectedFont(null)} onCopy={handleCopy} copied={selectedFont ? copiedFont === selectedFont.file : false} />
+      <PreviewDialog
+        font={selectedFont}
+        position={previewIndex + 1}
+        total={navList.length}
+        onClose={() => setSelectedFont(null)}
+        onStep={stepPreview}
+        onCopy={handleCopy}
+        copied={selectedFont ? copiedFont === selectedFont.file : false}
+      />
       {toast && <div className="toast" role="status"><Icon name="checkmark-circle-02" />{toast}</div>}
       <CookieConsent />
     </div>

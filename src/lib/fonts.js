@@ -23,6 +23,14 @@ export function fontUrl(font) {
   return new URL(font.url, window.location.origin).href;
 }
 
+// Builds the same @font-face rule as /api/css/:slug locally, so copying never waits on a network call.
+export function fontFaceCss(font) {
+  const family = String(font.name).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const format = fontFormat(font);
+  return '@font-face {\n  font-family: "' + family + '";\n  src: url("' + fontUrl(font) + '")' +
+    (format ? ' format("' + format + '")' : "") + ";\n  font-display: swap;\n}";
+}
+
 function fontFormat(font) {
   const format = String(font.format || "").toLowerCase();
   if (["truetype", "opentype", "woff", "woff2"].includes(format)) return format;
