@@ -2,6 +2,7 @@ import { motion, useReducedMotion } from "motion/react";
 import Icon from "./Icon.jsx";
 import useVisibleFont from "../hooks/useVisibleFont.js";
 import { familyFor, fontUrl } from "../lib/fonts.js";
+import { track } from "../lib/analytics.js";
 
 function fileSizeLabel(font) {
   const bytes = Number(font.sizeBytes ?? font.size ?? font.bytes ?? 0);
@@ -44,7 +45,7 @@ export default function FontCard({ font, onPreview, onCopy, copied, variant = "c
             <button className="icon-button" type="button" onClick={() => onCopy(font)} aria-label={"Copy CSS for " + font.name} title={copied ? "Copied" : "Copy CSS"}>
               <Icon name={copied ? "checkmark-circle-02" : "copy-01"} />
             </button>
-            <a className="icon-button" href={fontUrl(font)} download={String(font.file).split("/").pop()} aria-label={"Download " + font.name} title="Download font">
+            <a className="icon-button" href={fontUrl(font)} download={String(font.file).split("/").pop()} onClick={() => track("download_font", { font: font.name, variant: "peek" })} aria-label={"Download " + font.name} title="Download font">
               <Icon name="download-01" />
             </a>
           </div>
@@ -86,7 +87,7 @@ export default function FontCard({ font, onPreview, onCopy, copied, variant = "c
           <button className="icon-button" type="button" onClick={() => onCopy(font)} aria-label={"Copy CSS for " + font.name} title={copied ? "Copied" : "Copy CSS"}>
             <Icon name={copied ? "checkmark-circle-02" : "copy-01"} />
           </button>
-          <a className="icon-button" href={fontUrl(font)} download={String(font.file).split("/").pop()} aria-label={"Download " + font.name} title="Download font">
+          <a className="icon-button" href={fontUrl(font)} download={String(font.file).split("/").pop()} onClick={() => track("download_font", { font: font.name, variant: "card" })} aria-label={"Download " + font.name} title="Download font">
             <Icon name="download-01" />
           </a>
           <button className="icon-button open-button" type="button" onClick={() => onPreview(font)} aria-label={"Open " + font.name + " preview"} title="Open preview">
