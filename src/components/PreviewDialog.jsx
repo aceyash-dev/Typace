@@ -8,6 +8,10 @@ const SWIPE_NAV = 78;
 export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, onNext }) {
   const sheetRef = useRef(null);
   const dragRef = useRef(null);
+  // Keep the latest callbacks in a ref so the effect below only re-runs when the
+  // font changes — otherwise navigating prev/next would reset the loaded state.
+  const callbacks = useRef({ onClose, onPrev, onNext });
+  callbacks.current = { onClose, onPrev, onNext };
   const [sample, setSample] = useState("Aa Bb Cc 0123");
   const [fontReady, setFontReady] = useState(false);
   const [fontFailed, setFontFailed] = useState(false);
@@ -25,9 +29,9 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
       if (active) { setFontReady(result); setFontFailed(!result); }
     });
     const onKeyDown = (event) => {
-      if (event.key === "Escape") onClose();
-      else if (event.key === "ArrowLeft" && onPrev) onPrev();
-      else if (event.key === "ArrowRight" && onNext) onNext();
+      if (event.key === "Escape") callbacks.current.onClose();
+      else if (event.key === "ArrowLeft" && callbacks.current.onPrev) callbacks.current.onPrev();
+      else if (event.key === "ArrowRight" && callbacks.current.onNext) callbacks.current.onNext();
     };
     window.addEventListener("keydown", onKeyDown);
     sheetRef.current?.focus();
@@ -36,7 +40,7 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [font, onClose, onPrev, onNext]);
+  }, [font]);
 
   if (!font) return null;
 
@@ -69,7 +73,8 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
     const start = dragRef.current;
     dragRef.current = null;
     setDrag({ x: 0, y: 0, active: false });
-    if (!start) return;
+    // A cancelled pointer (e.g. the browser took over a scroll) must not navigate.
+    if (!start || event.type === "pointercancel") return;
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
     if (start.axis === "y" && start.fromHandle && dy > SWIPE_CLOSE) { onClose(); return; }
