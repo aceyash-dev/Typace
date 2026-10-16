@@ -17,11 +17,11 @@ export default function FontCard({ font, onPreview, onCopy, copied, variant = "c
   const family = familyFor(font);
   const format = String(font.type || "font").toUpperCase();
   const size = fileSizeLabel(font);
+  const isNew = Boolean(font.isNew);
   const state = loaded ? "ready" : failed ? "failed" : "loading";
   const specimenStyle = loaded ? { fontFamily: '"' + family + '", sans-serif' } : undefined;
 
-  // Peek view: a compact specimen wall (freefaces.gallery style). Just the
-  // typeface set in itself, a tiny format tag, and quiet actions.
+  // Peek view: a compact specimen wall (freefaces.gallery style).
   if (variant === "peek") {
     return (
       <motion.article
@@ -36,7 +36,10 @@ export default function FontCard({ font, onPreview, onCopy, copied, variant = "c
           <span className={"peek-glyph is-" + state} style={specimenStyle}>{font.name}</span>
         </button>
         <div className="peek-bar">
-          <span className="peek-format">{format}</span>
+          <span className="peek-tags">
+            <span className="peek-format">{format}</span>
+            {isNew && <span className="peek-new">NEW</span>}
+          </span>
           <div className="peek-actions">
             <button className="icon-button" type="button" onClick={() => onCopy(font)} aria-label={"Copy CSS for " + font.name} title={copied ? "Copied" : "Copy CSS"}>
               <Icon name={copied ? "checkmark-circle-02" : "copy-01"} />
@@ -64,7 +67,10 @@ export default function FontCard({ font, onPreview, onCopy, copied, variant = "c
       layout
     >
       <div className="font-card-top">
-        <span className="font-format">{format}</span>
+        <span className="font-card-tags">
+          <span className="font-format">{format}</span>
+          {isNew && <span className="font-new">NEW</span>}
+        </span>
         <span className={"font-load-state" + (loaded ? " is-loaded" : failed ? " is-failed" : "")} title={loaded ? "Font ready" : failed ? "Preview unavailable" : "Loading preview"}><span />{loaded ? "READY" : failed ? "FALLBACK" : "LOADING"}</span>
       </div>
       <button className="specimen-button" type="button" onClick={() => onPreview(font)} aria-label={"Preview " + font.name}>
