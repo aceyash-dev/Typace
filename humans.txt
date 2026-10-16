@@ -19,8 +19,10 @@ Description: Font discovery, metadata, and digital font delivery service.
 
 /* FORMAT */
 
-Primary distribution format:
+Distribution formats:
 - TrueType Font (.ttf)
+- OpenType Font (.otf)
+- WOFF2 webfont (.woff2)
 
 /* PRINCIPLES */
 
