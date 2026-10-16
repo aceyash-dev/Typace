@@ -6,9 +6,10 @@ const BASE_URL = "https://typace.ace-base.cc";
 const pages = [
     { path: "/", changefreq: "weekly", priority: "1.0" },
     { path: "/browse", changefreq: "weekly", priority: "0.9" },
-    { path: "/browse/woff2", changefreq: "weekly", priority: "0.8" },
-    { path: "/browse/ttf", changefreq: "weekly", priority: "0.8" },
-    { path: "/browse/otf", changefreq: "weekly", priority: "0.8" },
+    { path: "/formats", changefreq: "weekly", priority: "0.8" },
+    { path: "/formats/woff2", changefreq: "weekly", priority: "0.8" },
+    { path: "/formats/ttf", changefreq: "weekly", priority: "0.8" },
+    { path: "/formats/otf", changefreq: "weekly", priority: "0.8" },
     { path: "/developers", changefreq: "monthly", priority: "0.8" },
     { path: "/privacy", changefreq: "yearly", priority: "0.3" },
     { path: "/terms", changefreq: "yearly", priority: "0.3" },
@@ -47,8 +48,8 @@ export default async function handler(req, res) {
     try {
         const fonts = await listFonts();
         fontPages = fonts
-            .map(font => ({ path: `/browse/font/${slugify(font.name)}`, changefreq: "monthly", priority: "0.6" }))
-            .filter(page => page.path !== "/browse/font/");
+            .map(font => ({ path: `/font/${slugify(font.name)}`, changefreq: "monthly", priority: "0.7" }))
+            .filter(page => page.path !== "/font/");
     } catch {
         // The sitemap still lists the static pages if the catalog is unavailable.
     }
