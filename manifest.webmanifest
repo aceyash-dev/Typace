@@ -1,0 +1,29 @@
+{
+  "name": "Typace — Font Library",
+  "short_name": "Typace",
+  "description": "A font library for previewing typefaces, copying ready-to-use CSS, and downloading font files.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fff7e9",
+  "theme_color": "#ed7418",
+  "categories": [
+    "design",
+    "productivity",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
