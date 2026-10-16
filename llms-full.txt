@@ -55,6 +55,7 @@ These pages are server-rendered HTML and readable without JavaScript, so answer 
 - /formats — fonts grouped by file format
 - /formats/{woff2|ttf|otf} — fonts of one format
 - /font/{slug} — one page per font with a facts list, a @font-face rule, and an FAQ
+- /faq — answers to common questions, with FAQPage and HowTo structured data
 - /browse/font/{slug} — interactive specimen (client-rendered)
 
 Each /font/{slug} page answers the common questions directly: how to use the font in CSS, what format it is, how to download it, and how licensing works.
