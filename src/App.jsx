@@ -8,6 +8,7 @@ import LegalPage from "./components/LegalPage.jsx";
 import SkeletonGrid from "./components/SkeletonGrid.jsx";
 import SiteFooter from "./components/SiteFooter.jsx";
 import { copyText, fontCssSnippet, formatCount, normalize, slugFor, usableFont } from "./lib/fonts.js";
+import { track } from "./lib/analytics.js";
 
 const API = "/api/fonts";
 export default function App() {
@@ -147,6 +148,7 @@ export default function App() {
   })();
 
   function openFont(font) {
+    if (font) track("open_font", { font: font.name, format: font.type });
     setSelectedFont(font);
     if (isBrowse && font) {
       const slug = slugFor(font);
@@ -229,6 +231,7 @@ export default function App() {
       if (!snippet) throw new Error("No snippet to copy.");
       const ok = await copyText(snippet);
       if (!ok) throw new Error("Clipboard is unavailable.");
+      track("copy_css", { font: font.name, variant });
       const label = { face: "CSS", import: "@import", link: "<link> tag", url: "font URL" }[variant] || "CSS";
       setCopiedFont(font.file);
       setToast(label + " copied for " + font.name);
