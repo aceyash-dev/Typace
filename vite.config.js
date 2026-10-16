@@ -9,6 +9,7 @@ const staticFiles = [
   "favicon.ico",
   "icon.png",
   "og-image.png",
+  "manifest.webmanifest",
   "humans.txt",
   "robots.txt",
   "llms.txt",
