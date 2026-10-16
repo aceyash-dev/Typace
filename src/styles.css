@@ -2112,3 +2112,75 @@ body { min-height: 100dvh; }
   .preview-sheet .preview-shell { padding: 18px 18px calc(20px + env(safe-area-inset-bottom)) !important; }
   .preview-actions .button { flex: 1 1 auto; }
 }
+
+/* ==========================================================================
+   Typace feature pass — "New" badge, copy variants, specimen themes.
+   ========================================================================== */
+
+/* "New" badge (from the API's isNew flag) */
+.font-card-tags { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.font-new {
+  display: inline-flex; align-items: center; min-height: 23px; padding: 4px 7px;
+  border-radius: 6px; background: var(--accent); color: #fffaf2;
+  font-size: 9px; font-weight: 800; letter-spacing: .1em;
+}
+.peek-tags { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.peek-new {
+  display: inline-flex; align-items: center; padding: 2px 5px; border-radius: 5px;
+  background: var(--accent); color: #fffaf2; font-size: 8px; font-weight: 800; letter-spacing: .1em;
+}
+
+/* Specimen theme toggle */
+.specimen-theme { display: inline-flex; align-items: center; gap: 6px; }
+.specimen-theme-btn {
+  display: inline-grid; place-items: center; width: 26px; height: 26px; padding: 0;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+  cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease;
+}
+.specimen-theme-btn span { display: block; width: 13px; height: 13px; border-radius: 50%; }
+.specimen-theme-btn.is-light span { background: #fffdf8; box-shadow: inset 0 0 0 1px var(--line); }
+.specimen-theme-btn.is-dark span { background: #17120e; }
+.specimen-theme-btn.is-ink span { background: var(--accent); }
+.specimen-theme-btn.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+
+/* Themed specimen stage */
+.preview-stage { transition: background .25s ease, color .25s ease, border-color .25s ease; }
+.preview-stage.is-dark { background: #17120e; border-color: #2c221b; color: #f7eee1; }
+.preview-stage.is-ink { background: var(--accent); border-color: transparent; color: #fffaf2; }
+.preview-stage.is-dark .preview-font-status,
+.preview-stage.is-ink .preview-font-status { color: inherit; opacity: .82; }
+.preview-stage.is-dark .sample-label,
+.preview-stage.is-ink .sample-label { color: inherit; opacity: .8; }
+.preview-stage.is-dark .sample-input,
+.preview-stage.is-ink .sample-input { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); color: inherit; }
+.preview-stage.is-dark .sample-input::placeholder,
+.preview-stage.is-ink .sample-input::placeholder { color: inherit; opacity: .6; }
+.preview-stage.is-dark .preview-presets button,
+.preview-stage.is-ink .preview-presets button { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.28); color: inherit; }
+.preview-stage.is-ink .specimen-theme-btn { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.4); }
+
+/* Copy variants: @font-face / @import / <link> / URL */
+.copy-variants { margin: 18px 0 0; }
+.copy-tabs {
+  display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--surface-muted);
+}
+.copy-tabs button {
+  padding: 7px 11px; border: 0; border-radius: 7px; background: transparent;
+  color: var(--muted); font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; white-space: nowrap;
+}
+.copy-tabs button:hover { color: var(--text); }
+.copy-tabs button.active { background: var(--surface); color: var(--accent-dark); box-shadow: 0 1px 3px rgba(48,37,29,.08); }
+.copy-snippet {
+  margin: 10px 0 0; padding: 13px 14px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2;
+}
+.copy-snippet code { font: inherit; }
+.preview-actions { margin-top: 16px; }
+@media (max-width: 760px) {
+  .copy-tabs { display: flex; width: 100%; }
+  .copy-tabs button { flex: 1 1 auto; padding: 8px 6px; }
+  .specimen-theme-btn { width: 28px; height: 28px; }
+}
