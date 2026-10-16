@@ -19,6 +19,10 @@
       "destination": "/api/font-page/:slug"
     },
     {
+      "source": "/faq",
+      "destination": "/api/faq"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
