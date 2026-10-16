@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "./Icon.jsx";
 import { fontUrl, familyFor, loadFontFace, fontCssSnippet } from "../lib/fonts.js";
+import { track } from "../lib/analytics.js";
 
 const SWIPE_CLOSE = 110;
 const SWIPE_NAV = 78;
@@ -191,7 +192,7 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
             <button className="button button-primary" type="button" onClick={() => onCopy(font, variant)}>
               <Icon name={copied ? "checkmark-circle-02" : "copy-01"} /> {copied ? "Copied" : "Copy " + activeVariant.label}
             </button>
-            <a className="button button-secondary" href={fontUrl(font)} download={String(font.file).split("/").pop()}>
+            <a className="button button-secondary" href={fontUrl(font)} download={String(font.file).split("/").pop()} onClick={() => track("download_font", { font: font.name, variant: "sheet" })}>
               <Icon name="download-01" /> Download
             </a>
           </div>
