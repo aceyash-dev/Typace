@@ -1,22 +1,51 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "./Icon.jsx";
-import { fontUrl, familyFor, loadFontFace } from "../lib/fonts.js";
+import { fontUrl, familyFor, loadFontFace, fontCssSnippet } from "../lib/fonts.js";
 
 const SWIPE_CLOSE = 110;
 const SWIPE_NAV = 78;
+const VARIANTS = [
+  { id: "face", label: "@font-face" },
+  { id: "import", label: "@import" },
+  { id: "link", label: "<link>" },
+  { id: "url", label: "URL" },
+];
+const THEMES = [
+  { id: "light", label: "Light specimen" },
+  { id: "dark", label: "Dark specimen" },
+  { id: "ink", label: "Specimen on colour" },
+];
+
+function readStored(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value === null ? fallback : value;
+  } catch { return fallback; }
+}
+function writeStored(key, value) {
+  try { localStorage.setItem(key, value); } catch { /* storage may be blocked */ }
+}
 
 export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, onNext }) {
   const sheetRef = useRef(null);
   const dragRef = useRef(null);
-  // Keep the latest callbacks in a ref so the effect below only re-runs when the
-  // font changes — otherwise navigating prev/next would reset the loaded state.
+  // Keep the latest callbacks in a ref so the effect only re-runs when the font
+  // changes — otherwise navigating prev/next would reset the loaded state.
   const callbacks = useRef({ onClose, onPrev, onNext });
   callbacks.current = { onClose, onPrev, onNext };
-  const [sample, setSample] = useState("Aa Bb Cc 0123");
+  const [sample, setSample] = useState(() => readStored("typace-sample", "Aa Bb Cc 0123"));
+  const [variant, setVariant] = useState("face");
+  const [theme, setTheme] = useState(() => {
+    const stored = readStored("typace-specimen-theme", "light");
+    return ["light", "dark", "ink"].includes(stored) ? stored : "light";
+  });
   const [fontReady, setFontReady] = useState(false);
   const [fontFailed, setFontFailed] = useState(false);
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
   const family = font ? familyFor(font) : "";
+
+  useEffect(() => { writeStored("typace-sample", sample); }, [sample]);
+  useEffect(() => { writeStored("typace-specimen-theme", theme); }, [theme]);
 
   useEffect(() => {
     if (!font) return undefined;
@@ -44,8 +73,11 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
 
   if (!font) return null;
 
+  const snippet = fontCssSnippet(font, variant);
+  const activeVariant = VARIANTS.find((item) => item.id === variant) || VARIANTS[0];
+
   function startDrag(event) {
-    if (event.target.closest("input, textarea, button, a, select, summary")) return;
+    if (event.target.closest("input, textarea, button, a, select, summary, pre")) return;
     dragRef.current = {
       x: event.clientX,
       y: event.clientY,
@@ -73,7 +105,6 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
     const start = dragRef.current;
     dragRef.current = null;
     setDrag({ x: 0, y: 0, active: false });
-    // A cancelled pointer (e.g. the browser took over a scroll) must not navigate.
     if (!start || event.type === "pointercancel") return;
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
@@ -117,8 +148,23 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
               <Icon name="cancel-01" />
             </button>
           </div>
-          <div className="preview-stage">
-            <div className="preview-stage-meta"><span className={fontFailed ? "preview-font-status is-failed" : "preview-font-status"}>{fontReady ? "FONT READY" : fontFailed ? "SYSTEM FALLBACK · REOPEN TO RETRY" : "LOADING TYPEFACE…"}</span></div>
+          <div className={"preview-stage is-" + theme}>
+            <div className="preview-stage-meta">
+              <span className={fontFailed ? "preview-font-status is-failed" : "preview-font-status"}>{fontReady ? "FONT READY" : fontFailed ? "SYSTEM FALLBACK · REOPEN TO RETRY" : "LOADING TYPEFACE…"}</span>
+              <div className="specimen-theme" role="group" aria-label="Specimen background">
+                {THEMES.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={"specimen-theme-btn is-" + item.id + (theme === item.id ? " active" : "")}
+                    onClick={() => setTheme(item.id)}
+                    aria-pressed={theme === item.id}
+                    aria-label={item.label}
+                    title={item.label}
+                  ><span /></button>
+                ))}
+              </div>
+            </div>
             <div className="preview-sample" style={{ fontFamily: fontReady ? '"' + family + '", sans-serif' : "inherit", fontSize: "clamp(34px, 8vw, 62px)" }} aria-live="polite">
               {sample || " "}
             </div>
@@ -126,9 +172,24 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
             <input id="sample-text" className="sample-input" value={sample} maxLength={180} onChange={(event) => setSample(event.target.value)} placeholder="Type something…" />
             <div className="preview-presets" aria-label="Specimen presets"><button type="button" onClick={() => setSample("Aa Bb Cc 0123")}>Aa / 123</button><button type="button" onClick={() => setSample("Sphinx of black quartz, judge my vow.")}>Pangram</button><button type="button" onClick={() => setSample("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz")}>Alphabet</button></div>
           </div>
+          <div className="copy-variants">
+            <div className="copy-tabs" role="tablist" aria-label="CSS format">
+              {VARIANTS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={variant === item.id}
+                  className={variant === item.id ? "active" : ""}
+                  onClick={() => setVariant(item.id)}
+                >{item.label}</button>
+              ))}
+            </div>
+            <pre className="copy-snippet"><code>{snippet}</code></pre>
+          </div>
           <div className="preview-actions">
-            <button className="button button-primary" type="button" onClick={() => onCopy(font)}>
-              <Icon name={copied ? "checkmark-circle-02" : "copy-01"} /> {copied ? "CSS copied" : "Copy CSS"}
+            <button className="button button-primary" type="button" onClick={() => onCopy(font, variant)}>
+              <Icon name={copied ? "checkmark-circle-02" : "copy-01"} /> {copied ? "Copied" : "Copy " + activeVariant.label}
             </button>
             <a className="button button-secondary" href={fontUrl(font)} download={String(font.file).split("/").pop()}>
               <Icon name="download-01" /> Download
