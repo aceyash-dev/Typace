@@ -12,7 +12,6 @@ export default async function handler(req, res) {
         const fonts = await listFonts();
         const formats = [
             ["woff2","WOFF2","Modern webfont format for browsers"],
-            ["woff","WOFF","Webfont format with broad browser support"],
             ["ttf","TrueType","TrueType font files"],
             ["otf","OpenType","OpenType font files"]
         ];
@@ -25,7 +24,7 @@ export default async function handler(req, res) {
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Browse Fonts by Format | Typace</title>
-<meta name="description" content="Browse the Typace font library by webfont and font file format, including WOFF2, WOFF, TrueType, and OpenType.">
+<meta name="description" content="Browse the Typace font library by webfont and font file format, including WOFF2, TrueType, and OpenType.">
 <link rel="canonical" href="${canonical}">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Typace">
