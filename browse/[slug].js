@@ -8,7 +8,6 @@ function escapeHTML(value = "") {
 
 const formats = {
     woff2: ["WOFF2","woff2","Modern webfont format for browsers"],
-    woff: ["WOFF","woff","Webfont format with broad browser support"],
     ttf: ["TrueType","ttf","TrueType font files"],
     otf: ["OpenType","otf","OpenType font files"]
 };
