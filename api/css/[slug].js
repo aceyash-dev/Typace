@@ -29,9 +29,13 @@ export default async function handler(req, res) {
         }
 
         const family = JSON.stringify(font.name).slice(1, -1);
+        // Absolute file URL so the generated CSS works when pasted anywhere.
+        const protocol = String(req.headers["x-forwarded-proto"] || "https").split(",")[0].trim();
+        const host = req.headers.host || "typace.ace-base.cc";
+        const fileUrl = `${protocol}://${host}${font.url}`;
         const css = `@font-face {
   font-family: "${family}";
-  src: url("${font.url}") format("${font.format}");
+  src: url("${fileUrl}") format("${font.format}");
   font-display: swap;
 }`;
         res.setHeader("Content-Type", "text/css; charset=utf-8");
