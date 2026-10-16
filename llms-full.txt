@@ -24,7 +24,7 @@ Returns status, service, API version, check timestamp, catalog status/count, and
 
 ### GET /api/fonts
 
-Returns a JSON array of current font records. Records contain name, file, type, format, category, url, createdAt, updatedAt, and isNew. createdAt and updatedAt may be null. category is one of serif, sans-serif, or unknown.
+Returns a JSON array of current font records. Records contain name, file, type, format, category, url, sizeBytes, createdAt, updatedAt, and isNew. createdAt, updatedAt, and sizeBytes may be null. category is one of serif, sans-serif, or unknown. isNew flags assets from a recent catalog batch.
 
 ### GET /api/search?q=QUERY
 
@@ -36,7 +36,7 @@ Returns one metadata record. The slug can be a display name, filename, or normal
 
 ### GET /api/css/SLUG
 
-Returns text/css containing an @font-face declaration for the requested published font. HTTP 404 returns FONT_NOT_FOUND.
+Returns text/css containing an @font-face declaration for the requested published font, with an absolute asset URL. HTTP 404 returns FONT_NOT_FOUND.
 
 ### GET /api/commit
 
