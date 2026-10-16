@@ -5,7 +5,7 @@ import FontCard from "./components/FontCard.jsx";
 import PreviewDialog from "./components/PreviewDialog.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import LegalPage from "./components/LegalPage.jsx";
-import { buildFontFace, copyText, formatCount, normalize, usableFont } from "./lib/fonts.js";
+import { copyText, fontCssSnippet, formatCount, normalize, slugFor, usableFont } from "./lib/fonts.js";
 
 const API = "/api/fonts";
 export default function App() {
@@ -13,14 +13,14 @@ export default function App() {
   const isAccount = window.location.pathname === "/account";
   const isDevelopers = window.location.pathname === "/developers" || window.location.pathname.startsWith("/developers/");
   const API_DOCS = "https://docs.ace-base.cc/projects/typace-api";
-  const routeFormat = ({ "/browse/woff2": "woff2", "/browse/woff": "woff", "/browse/ttf": "ttf", "/browse/otf": "otf" })[window.location.pathname] || "all";
+  const routeFormat = ({ "/browse/woff2": "woff2", "/browse/ttf": "ttf", "/browse/otf": "otf" })[window.location.pathname] || "all";
   const legalRoute = { "/privacy": "privacy", "/terms": "terms", "/cookies": "cookies", "/security": "security" }[window.location.pathname];
   const [fonts, setFonts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [query, setQuery] = useState(() => new URLSearchParams(window.location.search).get("search") || "");
   const [sort, setSort] = useState("az");
-  const [formatFilter, setFormatFilter] = useState("all");
+  const [formatFilter, setFormatFilter] = useState(routeFormat === "all" ? "all" : routeFormat);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [view, setView] = useState("card");
   const [visibleCount, setVisibleCount] = useState(20);
@@ -139,32 +139,94 @@ export default function App() {
     return Array.from({ length: 6 }, (_, index) => filtered[Math.round(index * (filtered.length - 1) / 5)]);
   }, [filtered]);
 
-  async function handleCopy(font) {
+  const deepSlug = (() => {
+    const match = window.location.pathname.match(/^\/browse\/font\/(.+)$/);
+    return match ? decodeURIComponent(match[1]).replace(/\/+$/, "") : "";
+  })();
+
+  function openFont(font) {
+    setSelectedFont(font);
+    if (isBrowse && font) {
+      const slug = slugFor(font);
+      if (slug) window.history.pushState({ typaceFont: slug }, "", "/browse/font/" + slug);
+    }
+  }
+  function closeFont() {
+    setSelectedFont(null);
+    if (isBrowse && window.location.pathname.startsWith("/browse/font/")) {
+      window.history.pushState({}, "", "/browse");
+    }
+  }
+
+  // Open the specimen named in a /browse/font/<slug> deep link.
+  useEffect(() => {
+    if (!deepSlug || !fonts.length) return;
+    const match = fonts.find((item) => slugFor(item) === deepSlug);
+    if (match) setSelectedFont(match);
+  }, [deepSlug, fonts]);
+
+  // Keep the sheet in sync with browser back/forward.
+  useEffect(() => {
+    const onPop = () => {
+      const match = window.location.pathname.match(/^\/browse\/font\/(.+)$/);
+      if (match && fonts.length) {
+        const slug = decodeURIComponent(match[1]);
+        setSelectedFont(fonts.find((item) => slugFor(item) === slug) || null);
+      } else {
+        setSelectedFont(null);
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [fonts]);
+
+  // Give each specimen a shareable, indexable title and canonical URL.
+  useEffect(() => {
+    if (!selectedFont) return undefined;
+    const description = document.querySelector('meta[name="description"]');
+    const canonical = document.querySelector('link[rel="canonical"]');
+    const previousTitle = document.title;
+    const previousDescription = description?.getAttribute("content") || "";
+    const previousCanonical = canonical?.getAttribute("href") || "";
+    document.title = selectedFont.name + " Font — Preview & CSS | Typace";
+    if (description) description.setAttribute("content", "Preview " + selectedFont.name + ", copy its CSS as @font-face, @import, or a <link> tag, or download the original " + String(selectedFont.type || "font").toUpperCase() + " file from Typace.");
+    if (canonical) canonical.setAttribute("href", "https://typace.ace-base.cc/browse/font/" + slugFor(selectedFont));
+    return () => {
+      document.title = previousTitle;
+      if (description) description.setAttribute("content", previousDescription);
+      if (canonical) canonical.setAttribute("href", previousCanonical);
+    };
+  }, [selectedFont]);
+
+  async function handleCopy(font, variant = "face") {
     try {
-      // Prefer the server-rendered rule, but fall back to building it locally
-      // so the copy action always works, even if the CSS API is unavailable.
-      let css = "";
-      try {
-        const response = await fetch("/api/css/" + encodeURIComponent(font.name), { headers: { Accept: "text/css" } });
-        if (response.ok) css = await response.text();
-      } catch { /* fall through to the local rule */ }
-      if (!css || !css.includes("@font-face")) css = buildFontFace(font);
-      if (!css) throw new Error("No CSS to copy.");
-      const ok = await copyText(css);
+      // The @font-face variant prefers the server rule; every other variant is
+      // generated locally so copying is instant and always available.
+      let snippet = "";
+      if (variant === "face") {
+        try {
+          const response = await fetch("/api/css/" + encodeURIComponent(font.name), { headers: { Accept: "text/css" } });
+          if (response.ok) snippet = await response.text();
+        } catch { /* fall through to the local rule */ }
+      }
+      if (!snippet || !snippet.includes("@font-face")) snippet = fontCssSnippet(font, variant);
+      if (!snippet) throw new Error("No snippet to copy.");
+      const ok = await copyText(snippet);
       if (!ok) throw new Error("Clipboard is unavailable.");
+      const label = { face: "CSS", import: "@import", link: "<link> tag", url: "font URL" }[variant] || "CSS";
       setCopiedFont(font.file);
-      setToast("CSS copied for " + font.name);
+      setToast(label + " copied for " + font.name);
       window.setTimeout(() => setCopiedFont(""), 1800);
       window.setTimeout(() => setToast(""), 2400);
     } catch {
-      setToast("Couldn’t copy the CSS. Try again, or download the font file instead.");
+      setToast("Couldn’t copy. Try again, or download the font file instead.");
       window.setTimeout(() => setToast(""), 3200);
     }
   }
 
   const selectedIndex = selectedFont ? filtered.findIndex((item) => item.file === selectedFont.file) : -1;
-  const goPrev = selectedIndex > 0 ? () => setSelectedFont(filtered[selectedIndex - 1]) : null;
-  const goNext = selectedIndex >= 0 && selectedIndex < filtered.length - 1 ? () => setSelectedFont(filtered[selectedIndex + 1]) : null;
+  const goPrev = selectedIndex > 0 ? () => openFont(filtered[selectedIndex - 1]) : null;
+  const goNext = selectedIndex >= 0 && selectedIndex < filtered.length - 1 ? () => openFont(filtered[selectedIndex + 1]) : null;
 
   if (legalRoute) return <><LegalPage page={legalRoute} /><CookieConsent /></>;
 
@@ -251,7 +313,7 @@ export default function App() {
             <button className={"mobile-filter-toggle" + (filtersOpen ? " is-open" : "")} type="button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen} aria-controls="catalog-filters" aria-label="Sort and filter fonts"><Icon name="filter" /><span>Filter</span>{(formatFilter !== "all" || sort !== "az") && <i aria-hidden="true" />}</button>
             <div className={"catalog-filters" + (filtersOpen ? " filters-open" : "")} id="catalog-filters">
               <label className="sort-control"><span className="sr-only">Sort fonts</span><Icon name="sorting-05" /><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="az">Name A–Z</option><option value="za">Name Z–A</option></select></label>
-              <label className="format-control"><span className="sr-only">Filter file format</span><select value={formatFilter} onChange={(event) => setFormatFilter(event.target.value)}><option value="all">All formats</option><option value="woff2">WOFF2</option><option value="woff">WOFF</option><option value="ttf">TTF</option><option value="otf">OTF</option></select></label>
+              <label className="format-control"><span className="sr-only">Filter file format</span><select value={formatFilter} onChange={(event) => { const value = event.target.value; setFormatFilter(value); if (isBrowse) window.history.replaceState({}, "", value === "all" ? "/browse" : "/browse/" + value); }}><option value="all">All formats</option><option value="woff2">WOFF2</option><option value="ttf">TTF</option><option value="otf">OTF</option></select></label>
               <div className="view-switch" role="group" aria-label="Font layout">
                 <button type="button" className={view === "card" ? "active" : ""} onClick={() => setView("card")} aria-pressed={view === "card"} aria-label="Card view"><Icon name="grid-view" /></button>
                 <button type="button" className={view === "peek" ? "active" : ""} onClick={() => setView("peek")} aria-pressed={view === "peek"} aria-label="Peek view"><Icon name="list-view" /></button>
@@ -265,7 +327,7 @@ export default function App() {
           {!loading && !error && filtered.length === 0 && <div className="empty-state"><Icon name="search-remove" /><h3>No fonts found.</h3><p>Try a shorter search or clear the filters.</p><button className="button button-secondary" type="button" onClick={() => { setQuery(""); setFormatFilter("all"); }}>Clear search</button></div>}
           {!loading && !error && filtered.length > 0 && <>
             <div className={"font-grid" + (view === "peek" ? " peek-grid" : "") + (!isBrowse ? " showcase-rail" : "")}>
-              {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => <FontCard key={font.file} font={font} variant={view} onPreview={setSelectedFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
+              {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => <FontCard key={font.file} font={font} variant={view} onPreview={openFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
             </div>
             {isBrowse && visibleCount < filtered.length && <div className="font-grid load-sentinel-grid" ref={loadSentinelRef} aria-hidden="true">{Array.from({ length: 4 }, (_, index) => <div className="font-card skeleton-card" key={index}><div className="skeleton-top"><span className="skeleton-line skeleton-badge" /><span className="skeleton-line skeleton-state" /></div><span className="skeleton-specimen" /><span className="skeleton-line skeleton-title" /><div className="skeleton-actions"><span className="skeleton-chip" /><span className="skeleton-chip" /><span className="skeleton-chip" /></div></div>)}</div>}
           </>}
@@ -282,10 +344,10 @@ export default function App() {
 
       <footer className="site-footer">
         <a className="footer-brand" href="/"><img className="footer-brand-image" src="/icon.png" alt="" width="30" height="30" /><span>Typace</span></a>
-        <div className="footer-links"><a className={isDevelopers ? "nav-active" : ""} href="/developers">Developers</a><a href={API_DOCS} target="_blank" rel="noreferrer">API docs</a><a href="/api/fonts">Catalog API</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/security">Security</a><a href="/llms.txt">Docs for AI tools</a></div>
+        <div className="footer-links"><a className={isDevelopers ? "nav-active" : ""} href="/developers">Developers</a><a href={API_DOCS} target="_blank" rel="noreferrer">API docs</a><a href="/api/fonts">Catalog API</a><a href="/browse/woff2">WOFF2</a><a href="/browse/ttf">TTF</a><a href="/browse/otf">OTF</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/security">Security</a><a href="/llms.txt">Docs for AI tools</a></div>
         <span className="build-meta">{commit ? "BUILD " + commit.shortSha : "FONT LIBRARY"} <span aria-hidden="true">·</span> <a href="/api/commit">STATUS</a></span>
       </footer>
-      <PreviewDialog font={selectedFont} onClose={() => setSelectedFont(null)} onCopy={handleCopy} copied={selectedFont ? copiedFont === selectedFont.file : false} onPrev={goPrev} onNext={goNext} />
+      <PreviewDialog font={selectedFont} onClose={closeFont} onCopy={handleCopy} copied={selectedFont ? copiedFont === selectedFont.file : false} onPrev={goPrev} onNext={goNext} />
       {toast && <div className="toast" role="status"><Icon name="checkmark-circle-02" />{toast}</div>}
       <CookieConsent />
     </div>
