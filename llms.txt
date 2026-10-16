@@ -41,8 +41,10 @@ Use the returned url and format fields. Do not assume every font is TTF or that 
 ## Discovery pages
 
 - Browse all fonts: https://typace.ace-base.cc/browse
-- WOFF2: https://typace.ace-base.cc/browse/woff2
-- TrueType: https://typace.ace-base.cc/browse/ttf
-- OpenType: https://typace.ace-base.cc/browse/otf
-- Font specimen (deep link): https://typace.ace-base.cc/browse/font/SLUG
+- Fonts by format: https://typace.ace-base.cc/formats
+- WOFF2 fonts: https://typace.ace-base.cc/formats/woff2
+- TrueType fonts: https://typace.ace-base.cc/formats/ttf
+- OpenType fonts: https://typace.ace-base.cc/formats/otf
+- Font page (server-rendered, per font): https://typace.ace-base.cc/font/SLUG
+- Interactive specimen: https://typace.ace-base.cc/browse/font/SLUG
 - Developer resources: https://typace.ace-base.cc/developers
