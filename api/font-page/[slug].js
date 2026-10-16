@@ -105,6 +105,17 @@ export default async function handler(req, res) {
                     "@type": "Question", name: question,
                     acceptedAnswer: { "@type": "Answer", text: answer }
                 }))
+            },
+            {
+                "@type": "HowTo",
+                "@id": `${canonical}#howto`,
+                name: `How to use ${font.name} in CSS`,
+                step: [
+                    { "@type": "HowToStep", position: 1, text: `Copy the @font-face rule for ${font.name}.` },
+                    { "@type": "HowToStep", position: 2, text: "Paste the rule into your stylesheet." },
+                    { "@type": "HowToStep", position: 3, text: `Set font-family: \"${font.name}\" on the elements that should use it.` },
+                    { "@type": "HowToStep", position: 4, text: "Include a system fallback so text stays readable if the file cannot load." }
+                ]
             }
         ];
 
@@ -161,7 +172,7 @@ ${faqs.map(([q, a]) => `<h3>${escapeHTML(q)}</h3><p>${escapeHTML(a)}</p>`).join(
 <p><a href="${formatURL}">Browse all ${type} fonts</a></p>
 <p class="muted">Typace is a font library and font delivery service by The Ace Base. Check the font's license before redistributing or embedding it.</p>
 </main>
-<footer><a href="/">Typace</a> · <a href="/browse">Browse all fonts</a> · <a href="/formats">Formats</a> · <a href="/llms.txt">llms.txt</a></footer>
+<footer><a href="/">Typace</a> · <a href="/browse">Browse all fonts</a> · <a href="/formats">Formats</a> · <a href="/faq">FAQ</a> · <a href="/llms.txt">llms.txt</a></footer>
 </body></html>`;
 
         res.setHeader("Content-Type", "text/html; charset=utf-8");
