@@ -46,6 +46,19 @@ Returns sha, shortSha, message, date, and source. Private repository URLs are in
 
 Returns the OpenAPI 3.0.3 specification. Public API access does not require an API key.
 
+## Crawlable pages
+
+These pages are server-rendered HTML and readable without JavaScript, so answer engines and AI crawlers can extract them directly:
+
+- / — home
+- /browse — interactive catalog
+- /formats — fonts grouped by file format
+- /formats/{woff2|ttf|otf} — fonts of one format
+- /font/{slug} — one page per font with a facts list, a @font-face rule, and an FAQ
+- /browse/font/{slug} — interactive specimen (client-rendered)
+
+Each /font/{slug} page answers the common questions directly: how to use the font in CSS, what format it is, how to download it, and how licensing works.
+
 ## Common response behavior
 
 - Supported methods: GET and OPTIONS.
