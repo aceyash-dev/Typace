@@ -4,10 +4,14 @@ Allow: /
 Disallow: /admin/
 Disallow: /private/
 Disallow: /drafts/
+Disallow: /account
+Disallow: /api/
 Disallow: /node_modules/
 Disallow: /.git/
 Disallow: /.github/
 Disallow: /tests/
 Disallow: /*.map$
 
+# Machine-readable entry points
+# https://typace.ace-base.cc/llms.txt
 Sitemap: https://typace.ace-base.cc/sitemap.xml
