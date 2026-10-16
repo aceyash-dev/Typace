@@ -40,6 +40,10 @@
           "value": "strict-origin-when-cross-origin"
         },
         {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        },
+        {
           "key": "X-Frame-Options",
           "value": "DENY"
         },
@@ -52,6 +56,10 @@
     {
       "source": "/api/(.*)",
       "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        },
         {
           "key": "Access-Control-Allow-Origin",
           "value": "*"
