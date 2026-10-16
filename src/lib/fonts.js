@@ -3,7 +3,7 @@ const fontLoadPromises = new Map();
 export function normalize(value) {
   return String(value || "")
     .normalize("NFKD")
-    .replace(/[\\u0300-\\u036f]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 }
 
@@ -37,6 +37,29 @@ export function buildFontFace(font) {
   const format = fontFormat(font);
   const url = fontUrl(font).replace(/["\\]/g, (character) => encodeURIComponent(character));
   return "@font-face {\n  font-family: \"" + family + "\";\n  src: url(\"" + url + "\")" + (format ? " format(\"" + format + "\")" : "") + ";\n  font-display: swap;\n}";
+}
+
+function absoluteUrl(value) {
+  try { return new URL(value, window.location.origin).href; } catch { return value; }
+}
+
+// A stable, URL-safe slug for a font — used for shareable specimen deep links.
+export function slugFor(font) {
+  return normalize(font.name || font.file || "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// Ready-to-paste snippets for the copy control: the raw @font-face rule, an
+// @import, a <link> tag, or the plain font-file URL.
+export function fontCssSnippet(font, variant = "face") {
+  if (!usableFont(font)) return "";
+  if (variant === "face") return buildFontFace(font);
+  const cssUrl = absoluteUrl("/api/css/" + encodeURIComponent(font.name));
+  if (variant === "import") return '@import url("' + cssUrl + '");';
+  if (variant === "link") return '<link rel="stylesheet" href="' + cssUrl + '">';
+  if (variant === "url") return fontUrl(font);
+  return buildFontFace(font);
 }
 
 export function loadFontFace(font) {
