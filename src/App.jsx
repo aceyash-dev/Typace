@@ -5,6 +5,8 @@ import FontCard from "./components/FontCard.jsx";
 import PreviewDialog from "./components/PreviewDialog.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import LegalPage from "./components/LegalPage.jsx";
+import SkeletonGrid from "./components/SkeletonGrid.jsx";
+import SiteFooter from "./components/SiteFooter.jsx";
 import { copyText, fontCssSnippet, formatCount, normalize, slugFor, usableFont } from "./lib/fonts.js";
 
 const API = "/api/fonts";
@@ -336,14 +338,14 @@ export default function App() {
           </div>}
           {isBrowse && <div className="browse-result-line"><span className="result-count" aria-live="polite">{loading ? <span className="skeleton-line skeleton-count" aria-hidden="true" /> : formatCount(filtered.length) + (filtered.length === 1 ? " font" : " fonts")}</span>{(query || formatFilter !== "all" || routeFormat !== "all") && <button type="button" className="text-link clear-filters" onClick={() => { setQuery(""); setFormatFilter("all"); window.history.replaceState({}, "", "/browse"); }}>Clear filters <Icon name="cancel-01" /></button>}</div>}
 
-          {loading && <div className="font-grid font-skeleton-grid" role="status" aria-busy="true" aria-live="polite"><span className="sr-only">Loading fonts…</span>{Array.from({ length: isBrowse ? 8 : 6 }, (_, index) => <div className="font-card skeleton-card" key={index} aria-hidden="true"><div className="skeleton-top"><span className="skeleton-line skeleton-badge" /><span className="skeleton-line skeleton-state" /></div><span className="skeleton-specimen" /><span className="skeleton-line skeleton-title" /><span className="skeleton-line skeleton-meta" /><div className="skeleton-actions"><span className="skeleton-chip" /><span className="skeleton-chip" /><span className="skeleton-chip" /></div></div>)}</div>}
+          {loading && <SkeletonGrid count={isBrowse ? 8 : 6} label="Loading fonts…" />}
           {!loading && error && <div className="error-state" role="alert"><span className="error-icon"><Icon name="alert-circle" /></span><div><h3>The catalog did not load.</h3><p>{error}</p><button className="button button-primary" type="button" onClick={() => loadCatalog()}><Icon name="refresh" /> Try again</button></div></div>}
           {!loading && !error && filtered.length === 0 && <div className="empty-state"><Icon name="search-remove" /><h3>No fonts found.</h3><p>Try a shorter search or clear the filters.</p><button className="button button-secondary" type="button" onClick={() => { setQuery(""); setFormatFilter("all"); }}>Clear search</button></div>}
           {!loading && !error && filtered.length > 0 && <>
             <div className={"font-grid" + (view === "peek" ? " peek-grid" : "") + (!isBrowse ? " showcase-rail" : "")}>
               {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => <FontCard key={font.file} font={font} variant={view} onPreview={openFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
             </div>
-            {isBrowse && visibleCount < filtered.length && <div className="font-grid load-sentinel-grid" ref={loadSentinelRef} aria-hidden="true">{Array.from({ length: 4 }, (_, index) => <div className="font-card skeleton-card" key={index}><div className="skeleton-top"><span className="skeleton-line skeleton-badge" /><span className="skeleton-line skeleton-state" /></div><span className="skeleton-specimen" /><span className="skeleton-line skeleton-title" /><div className="skeleton-actions"><span className="skeleton-chip" /><span className="skeleton-chip" /><span className="skeleton-chip" /></div></div>)}</div>}
+            {isBrowse && visibleCount < filtered.length && <SkeletonGrid count={4} compact gridRef={loadSentinelRef} />}
           </>}
         </section>}
 
@@ -356,11 +358,7 @@ export default function App() {
         </section>}
       </main>
 
-      <footer className="site-footer">
-        <a className="footer-brand" href="/"><img className="footer-brand-image" src="/icon.png" alt="" width="30" height="30" /><span>Typace</span></a>
-        <div className="footer-links"><a className={isDevelopers ? "nav-active" : ""} href="/developers">Developers</a><a href={API_DOCS} target="_blank" rel="noreferrer">API docs</a><a href="/api/fonts">Catalog API</a><a href="/browse/woff2">WOFF2</a><a href="/browse/ttf">TTF</a><a href="/browse/otf">OTF</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/security">Security</a><a href="/llms.txt">Docs for AI tools</a></div>
-        <span className="build-meta">{commit ? "BUILD " + commit.shortSha : "FONT LIBRARY"} <span aria-hidden="true">·</span> <a href="/api/commit">STATUS</a></span>
-      </footer>
+      <SiteFooter commit={commit} isDevelopers={isDevelopers} apiDocs={API_DOCS} />
       <PreviewDialog font={selectedFont} onClose={closeFont} onCopy={handleCopy} copied={selectedFont ? copiedFont === selectedFont.file : false} onPrev={goPrev} onNext={goNext} />
       {toast && <div className="toast" role="status"><Icon name="checkmark-circle-02" />{toast}</div>}
       <CookieConsent />
