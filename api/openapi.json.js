@@ -114,6 +114,22 @@ export default function handler(req, res) {
                     }
                 }
             },
+            "/api/image": {
+                get: {
+                    tags: ["Assets"],
+                    operationId: "getThemeImage",
+                    summary: "Proxy a random image for palette extraction",
+                    description: "Fetches a random image from one of several free providers server-side and returns it same-origin. This exists because a browser can only read pixels from a CORS-enabled image, and keyed providers such as Unsplash and Pexels cannot be called from a page at all. The response reports the winning source in X-Image-Provider, and returns 502 IMAGE_UNAVAILABLE when no provider is reachable.",
+                    parameters: [
+                        { name: "seed", in: "query", description: "Stable seed selecting the image.", schema: { type: "string" } }
+                    ],
+                    responses: {
+                        "200": { description: "Image bytes, with an image/* content type." },
+                        "429": ok("Rate limit exceeded", errorRef),
+                        "502": ok("No image provider available", errorRef)
+                    }
+                }
+            },
             "/api/fonts": {
                 get: {
                     tags: ["Catalog"],
