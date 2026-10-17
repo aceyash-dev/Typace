@@ -11,6 +11,10 @@ import { copyText, fontCssSnippet, formatCount, normalize, slugFor, usableFont }
 import { track } from "./lib/analytics.js";
 
 const API = "/api/fonts";
+// How many additional fonts each scroll trigger reveals, and how many the first
+// paint shows. Kept small and predictable so batches land evenly.
+const LOAD_BATCH = 10;
+const INITIAL_VISIBLE = 20;
 export default function App() {
   const isBrowse = window.location.pathname === "/browse" || window.location.pathname.startsWith("/browse/");
   const isAccount = window.location.pathname === "/account";
@@ -26,7 +30,7 @@ export default function App() {
   const [formatFilter, setFormatFilter] = useState(routeFormat === "all" ? "all" : routeFormat);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [view, setView] = useState("card");
-  const [visibleCount, setVisibleCount] = useState(20);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const [selectedFont, setSelectedFont] = useState(null);
   const [copiedFont, setCopiedFont] = useState("");
   const [toast, setToast] = useState("");
@@ -93,7 +97,7 @@ export default function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  useEffect(() => { setVisibleCount(20); }, [query, sort, routeFormat, formatFilter]);
+  useEffect(() => { setVisibleCount(INITIAL_VISIBLE); }, [query, sort, routeFormat, formatFilter]);
   useEffect(() => {
     let previousY = window.scrollY;
     let idleTimer;
@@ -126,16 +130,27 @@ export default function App() {
     return results;
   }, [fonts, query, sort, routeFormat, formatFilter]);
 
+  // Keep the current result count in a ref so the observer itself stays stable.
+  // Re-creating it on every increment made it fire again immediately while the
+  // sentinel was still within the root margin, so batches landed unevenly.
+  const resultCountRef = useRef(0);
+  resultCountRef.current = filtered.length;
+  const hasMore = isBrowse && visibleCount < filtered.length;
+
   useEffect(() => {
-    if (!isBrowse || loading || error || visibleCount >= filtered.length) return;
+    if (!hasMore || loading || error) return;
     const sentinel = loadSentinelRef.current;
     if (!sentinel) return;
     const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) setVisibleCount((count) => Math.min(count + 20, filtered.length));
-    }, { rootMargin: "560px 0px", threshold: 0 });
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      setVisibleCount((count) => {
+        const total = resultCountRef.current;
+        return count >= total ? count : Math.min(count + LOAD_BATCH, total);
+      });
+    }, { rootMargin: "400px 0px", threshold: 0 });
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [isBrowse, loading, error, visibleCount, filtered.length]);
+  }, [hasMore, loading, error]);
 
   const featuredFonts = useMemo(() => {
     if (filtered.length <= 6) return filtered;
@@ -351,7 +366,7 @@ export default function App() {
             <div className={"font-grid" + (view === "peek" ? " peek-grid" : "") + (!isBrowse ? " showcase-rail" : "")}>
               {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => <FontCard key={font.file} font={font} variant={view} onPreview={openFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
             </div>
-            {isBrowse && visibleCount < filtered.length && <SkeletonGrid count={4} compact gridRef={loadSentinelRef} />}
+            {isBrowse && visibleCount < filtered.length && <SkeletonGrid count={LOAD_BATCH} compact gridRef={loadSentinelRef} />}
           </>}
         </section>}
 
