@@ -1,4 +1,4 @@
-import { listFonts, findFont } from "../_lib/fonts.js";
+import { listFonts, findFont } from "./_lib/fonts.js";
 
 const BASE = "https://typace.ace-base.cc";
 
