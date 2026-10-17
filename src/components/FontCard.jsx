@@ -1,28 +1,21 @@
 import { motion, useReducedMotion } from "motion/react";
 import Icon from "./Icon.jsx";
 import useVisibleFont from "../hooks/useVisibleFont.js";
-import { familyFor, fontUrl } from "../lib/fonts.js";
+import { familyFor, fontUrl, formatBytes } from "../lib/fonts.js";
 import { track } from "../lib/analytics.js";
 
-function fileSizeLabel(font) {
-  const bytes = Number(font.sizeBytes ?? font.size ?? font.bytes ?? 0);
-  if (!(bytes > 0)) return "";
-  return bytes < 1024 * 1024
-    ? (bytes / 1024).toFixed(0) + " KB"
-    : (bytes / (1024 * 1024)).toFixed(2) + " MB";
-}
-
-const PANGram = "The quick brown fox";
+const PANGRAM = "The quick brown fox";
 
 export default function FontCard({ font, onPreview, onCopy, copied, variant = "card" }) {
   const { ref, loaded, failed } = useVisibleFont(font);
   const reduceMotion = useReducedMotion();
   const family = familyFor(font);
   const format = String(font.type || "font").toUpperCase();
-  const size = fileSizeLabel(font);
+  const size = formatBytes(font.sizeBytes ?? font.size ?? font.bytes);
   const isNew = Boolean(font.isNew);
   const state = loaded ? "ready" : failed ? "failed" : "loading";
   const specimenStyle = loaded ? { fontFamily: '"' + family + '", sans-serif' } : undefined;
+  const downloadName = String(font.file || "").split("/").pop();
 
   if (variant === "peek") {
     return (
@@ -46,8 +39,9 @@ export default function FontCard({ font, onPreview, onCopy, copied, variant = "c
             <button className="icon-button" type="button" onClick={() => onCopy(font)} aria-label={"Copy CSS for " + font.name} title={copied ? "Copied" : "Copy CSS"}>
               <Icon name={copied ? "checkmark-circle-02" : "copy-01"} />
             </button>
-            <a className="icon-button" href={fontUrl(font)} download={String(font.file).split("/").pop()} onClick={() => track("download_font", { font: font.name, variant: "peek" })} aria-label={"Download " + font.name} title="Download font">
+            <a className="icon-button download-button" href={fontUrl(font)} download={downloadName} onClick={() => track("download_font", { font: font.name, variant: "peek" })} aria-label={"Download " + font.name + (size ? " (" + size + ")" : "")} title={"Download" + (size ? " · " + size : "")}>
               <Icon name="download-01" />
+              {size && <span className="download-size">{size}</span>}
             </a>
           </div>
         </div>
@@ -74,7 +68,7 @@ export default function FontCard({ font, onPreview, onCopy, copied, variant = "c
         aria-label={"Preview " + font.name}
       >
         <span className="specimen" style={specimenStyle}>Aa</span>
-        <span className="specimen-caption" style={specimenStyle}>{PANGram}</span>
+        <span className="specimen-caption" style={specimenStyle}>{PANGRAM}</span>
       </button>
 
       <div className="font-card-bottom">
@@ -82,7 +76,6 @@ export default function FontCard({ font, onPreview, onCopy, copied, variant = "c
           <h2>{font.name}</h2>
           <p className="font-file-meta">
             <span>{format}</span>
-            {size && <><i className="meta-dot" aria-hidden="true" /><span>{size}</span></>}
             {isNew && <><i className="meta-dot" aria-hidden="true" /><span>New</span></>}
           </p>
         </div>
@@ -90,8 +83,9 @@ export default function FontCard({ font, onPreview, onCopy, copied, variant = "c
           <button className="icon-button" type="button" onClick={() => onCopy(font)} aria-label={"Copy CSS for " + font.name} title={copied ? "Copied" : "Copy CSS"}>
             <Icon name={copied ? "checkmark-circle-02" : "copy-01"} />
           </button>
-          <a className="icon-button" href={fontUrl(font)} download={String(font.file).split("/").pop()} onClick={() => track("download_font", { font: font.name, variant: "card" })} aria-label={"Download " + font.name} title="Download font">
+          <a className="icon-button download-button" href={fontUrl(font)} download={downloadName} onClick={() => track("download_font", { font: font.name, variant: "card" })} aria-label={"Download " + font.name + (size ? " (" + size + ")" : "")} title={"Download" + (size ? " · " + size : "")}>
             <Icon name="download-01" />
+            {size && <span className="download-size">{size}</span>}
           </a>
           <button className="icon-button open-button" type="button" onClick={() => onPreview(font)} aria-label={"Open " + font.name + " preview"} title="Open preview">
             <Icon name="arrow-up-right-01" />
