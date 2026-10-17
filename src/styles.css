@@ -2477,11 +2477,13 @@ main { padding-bottom: 108px !important; }
   --specimen-ink: #b94b08;
   --theme-image: none;
 }
-/* The specimen glyph uses the hue-tuned ink, not the raw accent. */
+/* Cards keep the brand accent. The photo-derived ink is used only where the
+   photo actually is — the preview specimen sitting on top of it — because that
+   tint exists for contrast against the image, not as a general text colour. */
 .specimen,
 .font-card .specimen,
-.peek-glyph,
-.preview-sample { color: var(--specimen-ink) !important; }
+.peek-glyph { color: var(--accent) !important; }
+.preview-stage.is-image .preview-sample { color: var(--specimen-ink) !important; }
 
 /* ==========================================================================
    PASS 9 — the photo as the preview background.
