@@ -58,6 +58,10 @@
         {
           "key": "Permissions-Policy",
           "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "cross-origin"
         }
       ]
     },
@@ -74,15 +78,23 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET, OPTIONS"
+          "value": "GET, HEAD, OPTIONS"
         },
         {
           "key": "Access-Control-Allow-Headers",
           "value": "Accept, Content-Type"
         },
         {
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
+        },
+        {
           "key": "Access-Control-Expose-Headers",
-          "value": "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version"
+          "value": "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version, ETag, X-Total-Count"
+        },
+        {
+          "key": "Timing-Allow-Origin",
+          "value": "*"
         }
       ]
     },
@@ -94,17 +106,98 @@
           "value": "*"
         },
         {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, HEAD, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
+        },
+        {
+          "key": "Timing-Allow-Origin",
+          "value": "*"
+        },
+        {
           "key": "Cache-Control",
-          "value": "public, max-age=60, s-maxage=300, stale-while-revalidate=3600"
+          "value": "public, max-age=31536000, s-maxage=31536000, immutable"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, s-maxage=31536000, immutable"
         }
       ]
     },
     {
-      "source": "/(.*\\.(?:js|css|png|jpg|jpeg|webp|avif|svg|ico))",
+      "source": "/(.*)\\.ttf",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "font/ttf"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.otf",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "font/otf"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.woff2",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "font/woff2"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Timing-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, s-maxage=31536000, immutable"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, s-maxage=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.woff",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "font/woff"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.(?:js|css|png|jpg|jpeg|webp|avif|svg|ico|json|webmanifest))",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"
+          "value": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, s-maxage=31536000, immutable"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, s-maxage=31536000, immutable"
         }
       ]
     }
