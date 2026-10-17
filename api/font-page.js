@@ -176,7 +176,10 @@ ${faqs.map(([q, a]) => `<h3>${escapeHTML(q)}</h3><p>${escapeHTML(a)}</p>`).join(
 </body></html>`;
 
         res.setHeader("Content-Type", "text/html; charset=utf-8");
-        res.setHeader("Cache-Control", "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400");
+        // Early hint: let the browser start the font fetch before it parses the body.
+        res.setHeader("Link", `<${fileURL}>; rel=preload; as=font; type="font/${font.type}"; crossorigin`);
+        res.setHeader("Cache-Control", "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=86400");
+        res.setHeader("CDN-Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
         return res.status(200).send(html);
     } catch (error) {
         console.error("Typace font page failed:", error);
