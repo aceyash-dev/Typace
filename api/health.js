@@ -4,7 +4,7 @@ import { listFonts, getCatalogStatus } from "./_lib/fonts.js";
 function setHeaders(res, status = 200) {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
     res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
     res.setHeader("X-API-Version", "1.1.0");
@@ -14,14 +14,14 @@ function setHeaders(res, status = 200) {
 
 function sendJSON(res, status, payload) {
     setHeaders(res, status);
-    if (status === 405) res.setHeader("Allow", "GET, OPTIONS");
+    if (status === 405) res.setHeader("Allow", "GET, HEAD, OPTIONS");
     return res.status(status).json(payload);
 }
 
 export default async function handler(req, res) {
     setHeaders(res, req.method === "OPTIONS" ? 204 : 200);
     if (req.method === "OPTIONS") return res.status(204).end();
-    if (req.method !== "GET") {
+    if (req.method !== "GET" && req.method !== "HEAD") {
         return sendJSON(res, 405, { error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
     if (!enforceRateLimit(req, res)) return;
