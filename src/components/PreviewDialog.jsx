@@ -3,8 +3,10 @@ import Icon from "./Icon.jsx";
 import { fontUrl, familyFor, loadFontFace, fontCssSnippet, formatBytes } from "../lib/fonts.js";
 import { track } from "../lib/analytics.js";
 
-const SWIPE_CLOSE = 110;
-const SWIPE_NAV = 78;
+const SWIPE_CLOSE = 120;
+const SWIPE_NAV_MIN = 64;      // floor, for narrow screens
+const SWIPE_NAV_RATIO = 0.22;  // fraction of the sheet width that counts as a swipe
+const SWIPE_VELOCITY = 0.55;   // px per ms — a quick flick navigates even if short
 // Pick the stack you are building in and get code that works there, rather than
 // choosing between CSS syntaxes.
 const LANGUAGES = [
@@ -85,39 +87,61 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
   const sizeLabel = formatBytes(font.sizeBytes ?? font.size ?? font.bytes);
 
   function startDrag(event) {
-    if (event.target.closest("input, textarea, button, a, select, summary, pre")) return;
+    // Never hijack a gesture that starts on something interactive or scrollable.
+    if (event.target.closest("input, textarea, button, a, select, summary, pre, code")) return;
     dragRef.current = {
       x: event.clientX,
       y: event.clientY,
+      startedAt: performance.now(),
       axis: null,
       fromHandle: !!event.target.closest(".sheet-grabber, .preview-head"),
     };
     setDrag({ x: 0, y: 0, active: true });
     try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* capture is best-effort */ }
   }
+
   function moveDrag(event) {
     const start = dragRef.current;
     if (!start) return;
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
-    if (!start.axis && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
-      start.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+    // Lock the axis once, with a little hysteresis so a slightly diagonal swipe
+    // still resolves to the direction the user meant.
+    if (!start.axis && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+      start.axis = Math.abs(dx) > Math.abs(dy) * 1.15 ? "x" : "y";
     }
-    if (start.axis === "y") {
-      if (start.fromHandle) setDrag({ x: 0, y: Math.max(0, dy), active: true });
-    } else if (start.axis === "x") {
-      setDrag({ x: dx, y: 0, active: true });
+    if (start.axis === "x") {
+      // Move with the finger; add resistance when there is nothing further to reach.
+      const blocked = (dx < 0 && !onNext) || (dx > 0 && !onPrev);
+      setDrag({ x: blocked ? dx * 0.28 : dx, y: 0, active: true });
+    } else if (start.axis === "y" && start.fromHandle) {
+      setDrag({ x: 0, y: Math.max(0, dy), active: true });
     }
   }
+
   function endDrag(event) {
     const start = dragRef.current;
     dragRef.current = null;
     setDrag({ x: 0, y: 0, active: false });
     if (!start || event.type === "pointercancel") return;
+
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
-    if (start.axis === "y" && start.fromHandle && dy > SWIPE_CLOSE) { onClose(); return; }
-    if (start.axis === "x" && Math.abs(dx) > SWIPE_NAV) {
+    const elapsed = Math.max(1, performance.now() - start.startedAt);
+    const speed = Math.abs(dx) / elapsed;          // px per ms
+    const width = sheetRef.current?.offsetWidth || 340;
+    const navThreshold = Math.max(SWIPE_NAV_MIN, width * SWIPE_NAV_RATIO);
+
+    if (start.axis === "y" && start.fromHandle) {
+      // Dismiss on a long pull, or a short but decisive flick downwards.
+      if (dy > SWIPE_CLOSE || (dy > 46 && dy / elapsed > 0.5)) onClose();
+      return;
+    }
+
+    if (start.axis === "x") {
+      const dragged = Math.abs(dx) > navThreshold;
+      const flicked = speed > SWIPE_VELOCITY && Math.abs(dx) > 26;
+      if (!dragged && !flicked) return;
       if (dx < 0 && onNext) onNext();
       else if (dx > 0 && onPrev) onPrev();
     }
