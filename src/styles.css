@@ -2269,3 +2269,49 @@ h1, h2, .section-heading h2, .preview-head h2 { text-wrap: balance; }
   .browse-page .skeleton-card .skeleton-specimen { min-height: 150px !important; }
   .skeleton-bottom { padding: 13px 14px 14px; }
 }
+
+/* ==========================================================================
+   PASS 5 — navigation is ALWAYS a docked bottom bar (all viewports).
+   Overrides every earlier nav rule, including the desktop-inline one.
+   ========================================================================== */
+.app-shell .site-header .main-nav.floating-nav,
+.app-shell .main-nav.floating-nav {
+  position: fixed !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: 14px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 200 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+  width: min(440px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 6px !important;
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent) !important;
+  border-radius: 22px !important;
+  background: color-mix(in srgb, var(--surface) 95%, transparent) !important;
+  box-shadow: 0 12px 38px rgba(48,37,29,.18) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.app-shell .site-header .main-nav.floating-nav a,
+.app-shell .main-nav.floating-nav a {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  min-height: 40px !important;
+  justify-content: center !important;
+  height: auto !important;
+  border-radius: 16px !important;
+}
+.app-shell .main-nav.floating-nav a.nav-explore { background: var(--accent) !important; color: #fffaf2 !important; }
+.app-shell .main-nav.floating-nav a.nav-explore::after { display: none !important; }
+.app-shell .main-nav.floating-nav.nav-hidden { transform: translate(-50%, 160%) !important; opacity: 0 !important; visibility: hidden !important; }
+.app-shell .main-nav.floating-nav.nav-visible { transform: translate(-50%, 0) !important; opacity: 1 !important; visibility: visible !important; }
+main { padding-bottom: 108px !important; }
