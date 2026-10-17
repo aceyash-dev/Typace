@@ -24,7 +24,7 @@ Returns status, service, API version, check timestamp, catalog status/count, and
 
 ### GET /api/fonts
 
-Returns a JSON array of current font records. Records contain name, file, type, format, category, url, sizeBytes, createdAt, updatedAt, and isNew. createdAt, updatedAt, and sizeBytes may be null. category is one of serif, sans-serif, or unknown. isNew flags assets from a recent catalog batch.
+Returns a JSON array of current font records. Records contain name, file, type, format, category, url, sizeBytes, createdAt, updatedAt, and isNew. createdAt, updatedAt, and sizeBytes may be null. category is one of serif, sans-serif, or unknown. isNew flags assets from a recent catalog batch. Supports ?format= (ttf, otf, woff2), ?category= (serif, sans-serif, unknown), ?limit= (1-500), and ?offset=. The X-Total-Count response header reports the number of matching records. Responses carry a weak ETag; send it as If-None-Match to receive 304 Not Modified with no body.
 
 ### GET /api/search?q=QUERY
 
@@ -36,7 +36,7 @@ Returns one metadata record. The slug can be a display name, filename, or normal
 
 ### GET /api/css/SLUG
 
-Returns text/css containing an @font-face declaration for the requested published font, with an absolute asset URL. HTTP 404 returns FONT_NOT_FOUND.
+Returns text/css containing an @font-face declaration for the requested published font, with an absolute asset URL. The response also includes a Link header with rel=preload and as=font for the asset, an early hint. HTTP 404 returns FONT_NOT_FOUND.
 
 ### GET /api/commit
 
@@ -62,15 +62,18 @@ Each /font/{slug} page answers the common questions directly: how to use the fon
 
 ## Common response behavior
 
-- Supported methods: GET and OPTIONS.
-- CORS: Access-Control-Allow-Origin is *.
+- Supported methods: GET, HEAD, and OPTIONS.
+- CORS: Access-Control-Allow-Origin is *; preflights are cached for 86400 seconds via Access-Control-Max-Age.
 - API version header: X-API-Version.
 - JSON errors include error and code.
-- Rate limiting: 10 requests per minute per client IP, best-effort per serverless runtime.
+- Conditional requests: catalog responses send a weak ETag and return 304 on a matching If-None-Match.
+- Rate limiting: 60 requests per minute per client IP by default (TYPACE_RATE_LIMIT overrides it), best-effort per serverless runtime.
 - Rate-limit headers: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After.
 - HTTP 429 indicates the client should wait for Retry-After seconds.
 - Error responses use Cache-Control: no-store.
 - OPTIONS preflight requests are not counted against the API limit.
+- Caching: successful responses set Cache-Control with s-maxage, stale-while-revalidate, and stale-if-error, plus CDN-Cache-Control for the edge lifetime.
+- Font assets: served with Cache-Control: public, max-age=31536000, immutable and explicit font/ttf, font/otf, or font/woff2 content types.
 
 ## Font data integrity and licensing
 
