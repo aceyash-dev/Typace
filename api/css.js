@@ -1,5 +1,5 @@
-import { enforceRateLimit } from "../_lib/rate-limit.js";
-import { listFonts, findFont } from "../_lib/fonts.js";
+import { enforceRateLimit } from "./_lib/rate-limit.js";
+import { listFonts, findFont } from "./_lib/fonts.js";
 
 export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
