@@ -23,14 +23,6 @@
       "destination": "/api/faq"
     },
     {
-      "source": "/api/fonts/:slug",
-      "destination": "/api/font?slug=:slug"
-    },
-    {
-      "source": "/api/css/:slug",
-      "destination": "/api/css?slug=:slug"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
