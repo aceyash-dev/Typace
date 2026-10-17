@@ -52,14 +52,88 @@ export function slugFor(font) {
 
 // Ready-to-paste snippets for the copy control: the raw @font-face rule, an
 // @import, a <link> tag, or the plain font-file URL.
-export function fontCssSnippet(font, variant = "face") {
+// Human-readable file size, or "" when the catalog has no size for the asset.
+export function formatBytes(bytes) {
+  const value = Number(bytes || 0);
+  if (!(value > 0)) return "";
+  return value < 1024 * 1024
+    ? Math.round(value / 1024) + " KB"
+    : (value / (1024 * 1024)).toFixed(2) + " MB";
+}
+
+const indent = (block) => block.split("\n").map((line) => (line ? "  " + line : line)).join("\n");
+
+/**
+ * Implementation snippets keyed by target, so a developer picks their stack and
+ * gets code that works there. Everything is generated locally from the catalog
+ * entry, so it is instant and never depends on a network round trip.
+ */
+export function fontCssSnippet(font, language = "css") {
   if (!usableFont(font)) return "";
-  if (variant === "face") return buildFontFace(font);
-  const cssUrl = absoluteUrl("/api/css/" + encodeURIComponent(font.name));
-  if (variant === "import") return '@import url("' + cssUrl + '");';
-  if (variant === "link") return '<link rel="stylesheet" href="' + cssUrl + '">';
-  if (variant === "url") return fontUrl(font);
-  return buildFontFace(font);
+
+  const family = String(font.name || "").replace(/["\\]/g, "\\$&");
+  const slug = slugFor(font) || "typeface";
+  const absUrl = absoluteUrl(fontUrl(font));
+  const absFace = buildFontFace(font).replace(/url\("([^"]+)"\)/, 'url("' + absUrl + '")');
+  const cssStack = 'font-family: "' + family + '", sans-serif;';
+  const reactStack = "fontFamily: '" + '"' + family + '", sans-serif' + "'";
+  const cssEndpoint = absoluteUrl("/api/css/" + encodeURIComponent(font.name));
+  const faceBlock = indent(absFace);
+
+  const snippets = {
+    css:
+      absFace + "\n\n/* then apply it */\nbody {\n  " + cssStack + "\n}",
+
+    html:
+      '<link rel="stylesheet" href="' + cssEndpoint + '">\n' +
+      "<style>\n  .typeface {\n    " + cssStack + "\n  }\n</style>\n\n" +
+      '<p class="typeface">The quick brown fox</p>',
+
+    react:
+      "// Load the face at runtime — no stylesheet needed.\n" +
+      'import { useEffect } from "react";\n\n' +
+      "const FONT_FACE = `" + absFace.replace(/`/g, "\\`") + "`;\n\n" +
+      "export default function Typeface({ children }) {\n" +
+      "  useEffect(() => {\n" +
+      '    const style = document.createElement("style");\n' +
+      "    style.textContent = FONT_FACE;\n" +
+      "    document.head.append(style);\n" +
+      "    return () => style.remove();\n" +
+      "  }, []);\n\n" +
+      "  return <span style={{ " + reactStack + " }}>{children}</span>;\n" +
+      "}",
+
+    next:
+      "// app/layout.tsx — import the stylesheet once, at the root\n" +
+      'import "./globals.css";\n\n' +
+      "/* app/globals.css */\n" + absFace + "\n\n" +
+      "// then use it anywhere\n" +
+      "<h1 style={{ " + reactStack + " }}>The quick brown fox</h1>",
+
+    vue:
+      '<template>\n  <p class="typeface">The quick brown fox</p>\n</template>\n\n' +
+      "<style>\n" + faceBlock + "\n\n  .typeface {\n    " + cssStack + "\n  }\n</style>",
+
+    svelte:
+      '<p class="typeface">The quick brown fox</p>\n\n' +
+      "<style>\n" + faceBlock + "\n\n  .typeface {\n    " + cssStack + "\n  }\n</style>",
+
+    tailwind:
+      "/* app.css — declare the face once */\n" + absFace + "\n\n" +
+      "// tailwind.config.js\n" +
+      "module.exports = {\n" +
+      "  theme: {\n    extend: {\n      fontFamily: {\n" +
+      "        " + slug + ": [" + JSON.stringify(family) + ', "sans-serif"],\n' +
+      "      },\n    },\n  },\n};\n\n" +
+      '<p class="font-' + slug + '">The quick brown fox</p>',
+
+    astro:
+      "---\n// src/layouts/Base.astro\n---\n\n" +
+      "<style is:global>\n" + faceBlock + "\n</style>\n\n" +
+      '<p style="' + cssStack + '">The quick brown fox</p>',
+  };
+
+  return snippets[language] || snippets.css;
 }
 
 export function loadFontFace(font) {
