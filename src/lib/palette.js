@@ -6,11 +6,60 @@
 // read — offline, blocked, or a tainted canvas — we fall back to a deterministic
 // colour from the seed so the interface still has an accent.
 
-const PROVIDER = "https://picsum.photos";
 const SEED_KEY = "typace-theme-seed";
 
+// FNV-1a with a murmur3-style finaliser: the finaliser matters because we index
+// providers (and hues) off the low bits, which FNV-1a alone distributes poorly.
+function hashSeed(seed) {
+  let hash = 2166136261;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash ^= seed.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  hash ^= hash >>> 15;
+  hash = Math.imul(hash, 2246822507);
+  hash ^= hash >>> 13;
+  hash = Math.imul(hash, 3266489909);
+  hash ^= hash >>> 16;
+  return hash >>> 0;
+}
+
+/**
+ * Independent free image sources, each CORS-enabled so the canvas stays
+ * readable. They are tried in a seed-rotated order: any one of them failing
+ * (outage, block, tainted canvas) simply moves on to the next, and if all of
+ * them fail we still resolve a palette locally without touching the network.
+ */
+export const PROVIDERS = [
+  {
+    id: "picsum",
+    label: "Lorem Picsum",
+    url: (seed, size) =>
+      "https://picsum.photos/seed/" + encodeURIComponent(seed) + "/" + size + "/" + size,
+  },
+  {
+    id: "loremflickr",
+    label: "LoremFlickr",
+    url: (seed, size) =>
+      "https://loremflickr.com/" + size + "/" + size + "/abstract?lock=" + (hashSeed(seed) % 9999),
+  },
+  {
+    id: "dicebear",
+    label: "DiceBear",
+    url: (seed, size) =>
+      "https://api.dicebear.com/9.x/shapes/png?seed=" + encodeURIComponent(seed) + "&size=" + size,
+  },
+  {
+    id: "robohash",
+    label: "Robohash",
+    url: (seed, size) =>
+      "https://robohash.org/" + encodeURIComponent(seed) + ".png?size=" + size + "x" + size,
+  },
+];
+
+/** The default (first-tried) provider, kept for callers that want one URL. */
 export function imageUrl(seed, size = 200) {
-  return PROVIDER + "/seed/" + encodeURIComponent(seed) + "/" + size + "/" + size;
+  return PROVIDERS[0].url(seed, size);
 }
 
 function readSeed() {
@@ -93,7 +142,7 @@ export function dominantColor(image, sampleSize = 32) {
  * hue and moves the opposite way: a light source is tinted darker, a dark source
  * is lightened.
  */
-export function themeFromColor({ r, g, b }) {
+export function themeFromColor({ r, g, b }, provider = "local") {
   const { h, s, l } = rgbToHsl(r, g, b);
   const isLight = l >= 58;
   const saturation = clamp(s, 36, 88);
@@ -102,6 +151,7 @@ export function themeFromColor({ r, g, b }) {
   return {
     isLight,
     hue: Math.round(h),
+    provider,
     accent: css(h, saturation, accentLightness),
     accentDark: css(h, saturation, clamp(accentLightness - 14, 18, 46)),
     accentSoft: css(h, Math.max(24, saturation - 24), clamp(accentLightness + 34, 80, 95)),
@@ -109,21 +159,21 @@ export function themeFromColor({ r, g, b }) {
   };
 }
 
-/** Deterministic stand-in when the photo cannot be read. */
+/** Deterministic stand-in when no provider can be read. Needs no network. */
 export function themeFromSeed(seed) {
-  let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
-  }
+  const hash = hashSeed(seed);
   const h = hash % 360;
   const s = 46 + (hash % 24);
+  const l = 40 + (Math.floor(hash / 7) % 16);
+  const isLight = l >= 58;
   return {
-    isLight: false,
+    isLight,
     hue: h,
-    accent: css(h, s, 44),
-    accentDark: css(h, s, 32),
+    provider: "local",
+    accent: css(h, s, l),
+    accentDark: css(h, s, clamp(l - 14, 18, 46)),
     accentSoft: css(h, Math.max(24, s - 22), 92),
-    ink: css(h, s, 70),
+    ink: css(h, s, isLight ? clamp(l - 26, 18, 42) : clamp(l + 26, 62, 86)),
   };
 }
 
@@ -139,28 +189,73 @@ export function applyTheme(theme) {
   root.style.setProperty("--specimen-ink", theme.ink);
   root.dataset.accent = theme.isLight ? "light" : "dark";
   root.dataset.accentHue = String(theme.hue);
+  if (theme.provider) root.dataset.accentProvider = theme.provider;
 }
 
-/** Resolve a theme for a seed, never rejecting. */
-export function loadImageTheme(seed) {
+/**
+ * Resolve a theme for a seed. Never rejects and never hangs: providers are tried
+ * in a seed-rotated order, each with its own timeout, and a local palette is the
+ * guaranteed final answer.
+ */
+export function loadImageTheme(seed, { size = 200, providerTimeout = 4500 } = {}) {
   return new Promise((resolve) => {
     if (typeof Image === "undefined") { resolve(themeFromSeed(seed)); return; }
-    const image = new Image();
-    image.crossOrigin = "anonymous";
-    image.decoding = "async";
+
+    const start = hashSeed(seed) % PROVIDERS.length;
+    const order = PROVIDERS.map((_, offset) => PROVIDERS[(start + offset) % PROVIDERS.length]);
+    let index = 0;
     let settled = false;
+
     const finish = (theme) => { if (!settled) { settled = true; resolve(theme); } };
-    const timer = setTimeout(() => finish(themeFromSeed(seed)), 6000);
-    image.onload = () => {
-      clearTimeout(timer);
+
+    const tryNext = () => {
+      if (settled) return;
+      const provider = order[index];
+      index += 1;
+      if (!provider) { finish(themeFromSeed(seed)); return; }
+
+      const image = new Image();
+      image.crossOrigin = "anonymous";
+      image.decoding = "async";
+      let done = false;
+
+      const advance = () => {
+        if (done || settled) return;
+        done = true;
+        clearTimeout(timer);
+        tryNext();
+      };
+
+      const timer = setTimeout(() => {
+        // A slow provider must not hold up the palette.
+        try { image.src = ""; } catch { /* ignore */ }
+        advance();
+      }, providerTimeout);
+
+      image.onload = () => {
+        if (done || settled) return;
+        try {
+          const color = dominantColor(image);
+          if (color) {
+            done = true;
+            clearTimeout(timer);
+            finish(themeFromColor(color, provider.id));
+            return;
+          }
+        } catch {
+          // Tainted canvas or unreadable pixels — fall through to the next source.
+        }
+        advance();
+      };
+      image.onerror = advance;
+
       try {
-        const color = dominantColor(image);
-        finish(color ? themeFromColor(color) : themeFromSeed(seed));
+        image.src = provider.url(seed, size);
       } catch {
-        finish(themeFromSeed(seed));   // canvas tainted → deterministic fallback
+        advance();
       }
     };
-    image.onerror = () => { clearTimeout(timer); finish(themeFromSeed(seed)); };
-    image.src = imageUrl(seed);
+
+    tryNext();
   });
 }
