@@ -12,8 +12,8 @@ export default async function handler(req, res) {
         res.setHeader("Cache-Control", "no-store");
         return res.status(204).end();
     }
-    if (req.method !== "GET") {
-        res.setHeader("Allow", "GET, OPTIONS");
+    if (req.method !== "GET" && req.method !== "HEAD") {
+        res.setHeader("Allow", "GET, HEAD, OPTIONS");
         res.setHeader("Cache-Control", "no-store");
         res.setHeader("Content-Type", "application/json; charset=utf-8");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
@@ -40,7 +40,10 @@ export default async function handler(req, res) {
 }`;
         res.setHeader("Content-Type", "text/css; charset=utf-8");
         res.setHeader("X-Content-Type-Options", "nosniff");
-        res.setHeader("Cache-Control", "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400");
+        res.setHeader("Cache-Control", "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=86400");
+        res.setHeader("CDN-Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+        res.setHeader("Link", `<${fileUrl}>; rel=preload; as=font; type="font/${font.type}"; crossorigin`);
+        if (req.method === "HEAD") return res.status(200).end();
         return res.status(200).send(css);
     } catch (error) {
         console.error("Typace CSS generation failed:", error);
