@@ -55,6 +55,16 @@ export const PROVIDERS = [
     url: (seed, size) =>
       "https://robohash.org/" + encodeURIComponent(seed) + ".png?size=" + size + "x" + size,
   },
+  {
+    // Same-origin proxy. Not subject to CORS, so it is the one source that can
+    // never be blocked by the browser — and it is where the keyed providers
+    // (Unsplash, Pexels) live, since those cannot be called from a page at all.
+    // Always tried last, after every direct provider.
+    id: "typace",
+    label: "Typace image proxy",
+    sameOrigin: true,
+    url: (seed) => "/api/image?seed=" + encodeURIComponent(seed),
+  },
 ];
 
 /** The default (first-tried) provider, kept for callers that want one URL. */
@@ -201,8 +211,14 @@ export function loadImageTheme(seed, { size = 200, providerTimeout = 4500 } = {}
   return new Promise((resolve) => {
     if (typeof Image === "undefined") { resolve(themeFromSeed(seed)); return; }
 
-    const start = hashSeed(seed) % PROVIDERS.length;
-    const order = PROVIDERS.map((_, offset) => PROVIDERS[(start + offset) % PROVIDERS.length]);
+    // Direct providers first (no server round trip), rotated per seed so no
+    // single provider's outage always lands first. The same-origin proxy is
+    // appended last as the guaranteed-CORS safety net.
+    const direct = PROVIDERS.filter((provider) => !provider.sameOrigin);
+    const start = hashSeed(seed) % direct.length;
+    const order = direct
+      .map((_, offset) => direct[(start + offset) % direct.length])
+      .concat(PROVIDERS.filter((provider) => provider.sameOrigin));
     let index = 0;
     let settled = false;
 
