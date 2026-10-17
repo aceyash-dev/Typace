@@ -2457,3 +2457,34 @@ main { padding-bottom: 108px !important; }
 .preview-sheet { touch-action: pan-y !important; }
 .preview-sheet.is-dragging { cursor: grabbing; }
 .sheet-grabber { cursor: grab; }
+
+/* ==========================================================================
+   PASS 8 — strict black/white base; accent + specimen ink come from a photo.
+   palette.js sets --accent/--accent-dark/--accent-soft/--specimen-ink inline on
+   <html>, and inline custom properties beat every stylesheet token below.
+   ========================================================================== */
+:root,
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-muted: #f4f4f4;
+  --surface-metal: #eaeaea;
+  --text: #0b0b0b;
+  --muted: #6b6b6b;
+  --line: #e3e3e3;
+  --shadow: 4px 4px 0 #0b0b0b;
+  --haldi: #f4f4f4;
+  /* neutral until the photo resolves */
+  --accent: #111111;
+  --accent-dark: #000000;
+  --accent-soft: #ededed;
+  --peacock: #111111;
+  --vermilion: #111111;
+  --rani: #111111;
+  --specimen-ink: #111111;
+}
+/* The specimen glyph uses the hue-tuned ink, not the raw accent. */
+.specimen,
+.font-card .specimen,
+.peek-glyph,
+.preview-sample { color: var(--specimen-ink) !important; }
