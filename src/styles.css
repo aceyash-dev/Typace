@@ -2315,3 +2315,101 @@ h1, h2, .section-heading h2, .preview-head h2 { text-wrap: balance; }
 .app-shell .main-nav.floating-nav.nav-hidden { transform: translate(-50%, 160%) !important; opacity: 0 !important; visibility: hidden !important; }
 .app-shell .main-nav.floating-nav.nav-visible { transform: translate(-50%, 0) !important; opacity: 1 !important; visibility: visible !important; }
 main { padding-bottom: 108px !important; }
+
+/* ==========================================================================
+   PASS 6 — language selector, shimmer loading, download size, preview padding.
+   ========================================================================== */
+
+/* ---- Shimmer while fonts load ------------------------------------------ */
+@keyframes typace-shimmer {
+  from { background-position: -160% 0; }
+  to   { background-position: 260% 0; }
+}
+.skeleton-specimen,
+.skeleton-line,
+.skeleton-chip,
+.skeleton-top {
+  background-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--text) 4%, transparent) 0%,
+    color-mix(in srgb, var(--text) 11%, transparent) 45%,
+    color-mix(in srgb, var(--text) 4%, transparent) 90%);
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  animation: typace-shimmer 1.35s linear infinite;
+}
+/* the specimen canvas of a card still fetching its typeface */
+.browse-page .font-card .specimen-button.is-loading,
+.font-card .specimen-button.is-loading { position: relative !important; overflow: hidden !important; }
+.browse-page .font-card .specimen-button.is-loading::after,
+.font-card .specimen-button.is-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--surface) 72%, transparent) 50%,
+    transparent 100%);
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  animation: typace-shimmer 1.35s linear infinite;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-specimen, .skeleton-line, .skeleton-chip, .skeleton-top,
+  .font-card .specimen-button.is-loading::after { animation: none; }
+}
+
+/* ---- Size shown on the download button, not the card ------------------- */
+.browse-page .font-card .font-card-actions .icon-button.download-button,
+.font-card .font-card-actions .icon-button.download-button,
+.peek-actions .icon-button.download-button {
+  width: auto !important;
+  padding: 0 11px !important;
+  gap: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.download-size {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: .04em !important;
+  color: currentColor !important;
+  white-space: nowrap;
+}
+
+/* ---- Language selector ------------------------------------------------- */
+.copy-lang { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.copy-lang-label { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.copy-lang-field { position: relative; display: inline-flex; align-items: center; }
+.copy-lang-field > .hgi { position: absolute; right: 11px; font-size: 13px; color: var(--muted); pointer-events: none; }
+.lang-select {
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 172px;
+  padding: 9px 34px 9px 13px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface-muted);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.lang-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 560px) {
+  .copy-lang { flex-direction: column; align-items: stretch; gap: 7px; }
+  .copy-lang-field, .lang-select { width: 100%; }
+}
+
+/* ---- Preview vertical padding ------------------------------------------ */
+.preview-sheet .preview-shell { padding-top: 30px !important; padding-bottom: 30px !important; }
+.preview-sheet .preview-head { padding-bottom: 18px !important; }
+.preview-sheet .preview-stage { margin-top: 0 !important; margin-bottom: 18px !important; }
+.preview-sheet .preview-actions { padding-top: 18px !important; padding-bottom: 4px !important; }
+.preview-sheet .preview-nav { padding-bottom: 0 !important; }
+@media (max-width: 760px) {
+  .preview-sheet .preview-shell { padding-top: 24px !important; padding-bottom: 26px !important; }
+  .preview-sheet .preview-head { padding-bottom: 14px !important; }
+}
