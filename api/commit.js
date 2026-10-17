@@ -6,7 +6,7 @@ let cachedAt = 0;
 function sendJSON(res, status, data) {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
     res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
     res.setHeader("X-API-Version", "1.1.0");    res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
     res.setHeader("X-Content-Type-Options", "nosniff");
@@ -106,7 +106,7 @@ async function resolveCommit() {
 
 export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
     res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
     res.setHeader("X-API-Version", "1.1.0");    res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
     res.setHeader("X-Content-Type-Options", "nosniff");
@@ -115,8 +115,8 @@ export default async function handler(req, res) {
         res.setHeader("Cache-Control", "no-store");
         return res.status(204).end();
     }
-    if (req.method !== "GET") {
-        res.setHeader("Allow", "GET, OPTIONS");
+    if (req.method !== "GET" && req.method !== "HEAD") {
+        res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return sendJSON(res, 405, {
             error: "Method not allowed.",
             code: "METHOD_NOT_ALLOWED"
