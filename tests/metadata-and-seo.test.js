@@ -9,8 +9,8 @@ import sitemapHandler from "../api/sitemap.js";
 import commitHandler, { normalizeCommit } from "../api/commit.js";
 import fontsHandler from "../api/fonts.js";
 import searchHandler from "../api/search.js";
-import fontHandler from "../api/fonts/[slug].js";
-import cssHandler from "../api/css/[slug].js";
+import fontHandler from "../api/font.js";
+import cssHandler from "../api/css.js";
 import healthHandler from "../api/health.js";
 
 function mockResponse() {
@@ -74,9 +74,9 @@ test("OpenAPI documents current API paths, schema values, and machine-client hea
     assert.equal("url" in response.body.components.schemas.Commit.properties, false);
 });
 
-test("sitemap exposes canonical discovery pages, not binary font assets", () => {
+test("sitemap exposes canonical discovery pages, not binary font assets", async () => {
     const response = mockResponse();
-    sitemapHandler({ method: "GET" }, response);
+    await sitemapHandler({ method: "GET" }, response);
     assert.equal(response.statusCode, 200);
     assert.match(response.body, /https:\/\/typace\.ace-base\.cc\/browse/);
     assert.doesNotMatch(response.body, /<loc>[^<]*\/fonts\//);
@@ -107,7 +107,7 @@ test("health endpoint rejects unsupported methods", async () => {
     await healthHandler({ method: "POST", headers: { "x-real-ip": "198.51.100.202" } }, response);
     assert.equal(response.statusCode, 405);
     assert.equal(response.body.code, "METHOD_NOT_ALLOWED");
-    assert.equal(response.headers.Allow, "GET, OPTIONS");
+    assert.equal(response.headers.Allow, "GET, HEAD, OPTIONS");
 });
 
 test("commit endpoint rejects unsupported methods without a network request", async () => {
@@ -115,14 +115,14 @@ test("commit endpoint rejects unsupported methods without a network request", as
     await commitHandler({ method: "POST" }, response);
     assert.equal(response.statusCode, 405);
     assert.equal(response.body.code, "METHOD_NOT_ALLOWED");
-    assert.equal(response.headers.Allow, "GET, OPTIONS");
+    assert.equal(response.headers.Allow, "GET, HEAD, OPTIONS");
 });
 
 test("commit endpoint supports CORS preflight", async () => {
     const response = mockResponse();
     await commitHandler({ method: "OPTIONS" }, response);
     assert.equal(response.statusCode, 204);
-    assert.equal(response.headers["Access-Control-Allow-Methods"], "GET, OPTIONS");
+    assert.equal(response.headers["Access-Control-Allow-Methods"], "GET, HEAD, OPTIONS");
 });
 
 test("catalog and search endpoints reject unsupported methods consistently", async () => {
@@ -130,7 +130,7 @@ test("catalog and search endpoints reject unsupported methods consistently", asy
         const response = mockResponse();
         await handler({ method: "POST", query: {} }, response);
         assert.equal(response.statusCode, 405);
-        assert.equal(response.headers.Allow, "GET, OPTIONS");
+        assert.equal(response.headers.Allow, "GET, HEAD, OPTIONS");
         assert.equal(response.body.code, "METHOD_NOT_ALLOWED");
         assert.equal(response.headers["X-Content-Type-Options"], "nosniff");
         assert.equal(response.headers["Cache-Control"], "no-store");
@@ -142,7 +142,7 @@ test("font metadata and CSS endpoints reject unsupported methods consistently", 
         const response = mockResponse();
         await handler({ method: "POST", query: { slug: "test" } }, response);
         assert.equal(response.statusCode, 405);
-        assert.equal(response.headers.Allow, "GET, OPTIONS");
+        assert.equal(response.headers.Allow, "GET, HEAD, OPTIONS");
         assert.equal(response.body.code, "METHOD_NOT_ALLOWED");
         assert.equal(response.headers["X-Content-Type-Options"], "nosniff");
     }
@@ -152,7 +152,7 @@ test("OpenAPI endpoint supports CORS preflight", () => {
     const response = mockResponse();
     openapiHandler({ method: "OPTIONS" }, response);
     assert.equal(response.statusCode, 204);
-    assert.equal(response.headers["Access-Control-Allow-Methods"], "GET, OPTIONS");
+    assert.equal(response.headers["Access-Control-Allow-Methods"], "GET, HEAD, OPTIONS");
     assert.equal(response.headers["Cache-Control"], "no-store");
 });
 
@@ -182,31 +182,31 @@ test("search matches token prefixes rather than arbitrary substrings", async () 
     assert.equal(response.body.some(font => font.name === "Space Grotesk"), false);
 });
 
-test("rate limiter allows ten requests per IP and blocks the eleventh", () => {
+test("rate limiter allows sixty requests per IP and blocks the sixty-first", () => {
     const req = { headers: { "x-real-ip": "198.51.100.204" } };
     const start = 1_800_000_000_000;
-    for (let index = 0; index < 10; index++) {
+    for (let index = 0; index < 60; index++) {
         const result = checkRateLimit(req, start + index);
         assert.equal(result.allowed, true);
-        assert.equal(result.limit, 10);
+        assert.equal(result.limit, 60);
     }
-    const blocked = checkRateLimit(req, start + 10);
+    const blocked = checkRateLimit(req, start + 60);
     assert.equal(blocked.allowed, false);
     assert.equal(blocked.remaining, 0);
     assert.equal(blocked.retryAfter, 60);
     assert.equal(checkRateLimit(req, start + 60_001).allowed, true);
 });
 
-test("catalog endpoint returns 429 after ten requests from one IP", async () => {
+test("catalog endpoint returns 429 after the per-minute limit from one IP", async () => {
     const ip = "198.51.100.205";
     let response;
-    for (let index = 0; index < 11; index++) {
+    for (let index = 0; index < 61; index++) {
         response = mockResponse();
         await fontsHandler({ method: "GET", headers: { "x-real-ip": ip }, query: {} }, response);
     }
     assert.equal(response.statusCode, 429);
     assert.equal(response.body.code, "RATE_LIMIT_EXCEEDED");
-    assert.equal(response.headers["RateLimit-Limit"], "10");
+    assert.equal(response.headers["RateLimit-Limit"], "60");
     assert.equal(response.headers["RateLimit-Remaining"], "0");
     assert.ok(Number(response.headers["Retry-After"]) >= 1);
     assert.equal(response.headers["X-API-Version"], "1.1.0");
@@ -215,7 +215,8 @@ test("catalog endpoint returns 429 after ten requests from one IP", async () => 
 
 test("React shell keeps Grandstander and Hugeicons and removes the legacy inline app", async () => {
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    assert.match(html, /fonts\.googleapis\.com\/css2\?family=Grandstander/);
+    assert.match(html, /href="\/grandstander\.css"/);
+    assert.match(html, /rel="preload" as="font"/);
     assert.match(html, /use\.hugeicons\.com\/font\/icons\.css/);
     assert.match(html, /src="\/src\/main\.jsx"/);
     assert.match(html, /id="root"/);
@@ -229,15 +230,19 @@ test("React landing focuses on the font catalog and uses the existing brand asse
     const preview = await readFile(new URL("../src/components/PreviewDialog.jsx", import.meta.url), "utf8");
     const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-    for (const text of ["The catalog did not load.", "Try again", "PreviewDialog", "fontFaceCss", "/api/openapi.json", "/llms.txt", 'src="/icon.png"']) {
+    const footer = await readFile(new URL("../src/components/SiteFooter.jsx", import.meta.url), "utf8");
+    for (const text of ["The catalog did not load.", "Try again", "PreviewDialog", "fontCssSnippet", "/api/openapi.json", 'src="/icon.png"']) {
         assert.ok(app.includes(text), "missing UI contract: " + text);
     }
+    // The machine-readable docs link lives in the extracted footer component.
+    assert.ok(footer.includes("/llms.txt"), "missing UI contract: /llms.txt");
     assert.ok(!app.includes("Revamp in Progress"), "revamp banner must stay removed");
     assert.ok(!app.includes("SCROLL TO EXPLORE"), "generic exploration copy must stay removed");
     assert.match(styles, /font-family: "Grandstander", cursive/);
     assert.match(styles, /--peacock: #ed7418/);
-    assert.match(html, /family=Grandstander/);
-    assert.match(card, /Download font/);
+    assert.match(html, /\/grandstander\.css/);
+    assert.match(card, /download-button/);
+    assert.match(card, /download-size/);
     assert.match(card, /motion\.article/);
     assert.match(preview, /onCopy/);
   assert.doesNotMatch(preview, /API record|size-slider/);
