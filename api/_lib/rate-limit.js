@@ -1,5 +1,6 @@
 const WINDOW_MS = 60_000;
-const MAX_REQUESTS = 10;
+// Generous by default (a CDN-backed public catalog), tunable via env.
+const MAX_REQUESTS = Number.parseInt(process.env.TYPACE_RATE_LIMIT || "60", 10) || 60;
 const MAX_KEYS = 10_000;
 const buckets = new Map();
 
@@ -65,7 +66,7 @@ export function enforceRateLimit(req, res) {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.status(429).json({
-        error: "Too many requests. Limit is 10 requests per minute per IP.",
+        error: `Too many requests. Limit is ${result.limit} requests per minute per IP.`,
         code: "RATE_LIMIT_EXCEEDED",
         limit: result.limit,
         windowSeconds: 60,
