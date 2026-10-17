@@ -1,7 +1,7 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
 export default function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
     res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
     res.setHeader("X-API-Version", "1.1.0");    res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
     res.setHeader("X-Content-Type-Options", "nosniff");
@@ -9,8 +9,8 @@ export default function handler(req, res) {
         res.setHeader("Cache-Control", "no-store");
         return res.status(204).end();
     }
-    if (req.method !== "GET") {
-        res.setHeader("Allow", "GET, OPTIONS");
+    if (req.method !== "GET" && req.method !== "HEAD") {
+        res.setHeader("Allow", "GET, HEAD, OPTIONS");
         res.setHeader("Cache-Control", "no-store");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
