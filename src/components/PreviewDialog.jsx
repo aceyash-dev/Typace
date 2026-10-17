@@ -20,6 +20,7 @@ const LANGUAGES = [
   { id: "astro", label: "Astro" },
 ];
 const THEMES = [
+  { id: "image", label: "Specimen over the photo" },
   { id: "light", label: "Light specimen" },
   { id: "dark", label: "Dark specimen" },
   { id: "ink", label: "Specimen on colour" },
@@ -45,8 +46,8 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
   const [sample, setSample] = useState(() => readStored("typace-sample", "Aa Bb Cc 0123"));
   const [language, setLanguage] = useState("css");
   const [theme, setTheme] = useState(() => {
-    const stored = readStored("typace-specimen-theme", "light");
-    return ["light", "dark", "ink"].includes(stored) ? stored : "light";
+    const stored = readStored("typace-specimen-theme", "image");
+    return ["image", "light", "dark", "ink"].includes(stored) ? stored : "image";
   });
   const [fontReady, setFontReady] = useState(false);
   const [fontFailed, setFontFailed] = useState(false);
