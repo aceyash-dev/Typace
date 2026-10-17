@@ -31,6 +31,7 @@ Each record includes name, file, type, format, category, url, sizeBytes, created
 - GET /api/search?q=QUERY searches name, file, type, and format. Omit q to retrieve the catalog.
 - GET /api/fonts/SLUG returns one metadata record.
 - GET /api/css/SLUG returns a text/css @font-face declaration with an absolute asset URL, plus a Link preload hint for the font asset.
+- GET /api/image?seed=SEED returns a random image proxied server-side from one of several free providers and served same-origin, so a page can always read its pixels. The winning source is reported in the X-Image-Provider header.
 - GET /api/openapi.json returns the OpenAPI 3.0.3 contract.
 - GET /api/commit returns deployment commit metadata without exposing the private repository URL.
 
