@@ -62,7 +62,17 @@ function keyedProviders() {
         );
         if (!response.ok) return null;
         const data = await response.json();
-        return data?.urls?.small || data?.urls?.regular || null;
+        const url = data?.urls?.small || data?.urls?.regular;
+        if (!url) return null;
+        // Unsplash's API guidelines require crediting the photographer, so the
+        // credit travels back with the image instead of being dropped here.
+        return {
+          url,
+          attribution: {
+            name: data?.user?.name || "Unsplash",
+            url: (data?.user?.links?.html || "https://unsplash.com") + "?utm_source=typace&utm_medium=referral",
+          },
+        };
       },
     });
   }
@@ -79,7 +89,13 @@ function keyedProviders() {
         );
         if (!response.ok) return null;
         const data = await response.json();
-        return data?.photos?.[0]?.src?.small || null;
+        const photo = data?.photos?.[0];
+        const url = photo?.src?.small;
+        if (!url) return null;
+        return {
+          url,
+          attribution: { name: photo?.photographer || "Pexels", url: photo?.url || "https://www.pexels.com" },
+        };
       },
     });
   }
@@ -115,7 +131,9 @@ export default async function handler(req, res) {
 
     for (const provider of order) {
         try {
-            const url = await provider.pick(seed);
+            const picked = await provider.pick(seed);
+            if (!picked) continue;
+            const { url, attribution } = typeof picked === "string" ? { url: picked, attribution: null } : picked;
             if (!url) continue;
             const image = await fetchImage(url);
             if (!image) continue;
@@ -124,6 +142,12 @@ export default async function handler(req, res) {
             res.setHeader("Access-Control-Allow-Origin", "*");
             res.setHeader("Timing-Allow-Origin", "*");
             res.setHeader("X-Image-Provider", provider.id);
+            res.setHeader("Access-Control-Expose-Headers", "X-Image-Provider, X-Image-Attribution, X-Image-Attribution-Url");
+            if (attribution) {
+                // Surfaced so the credit can be shown wherever the photo appears.
+                res.setHeader("X-Image-Attribution", attribution.name);
+                res.setHeader("X-Image-Attribution-Url", attribution.url);
+            }
             res.setHeader("Cache-Control", IMAGE_CACHE);
             res.setHeader("CDN-Cache-Control", "public, s-maxage=604800, stale-while-revalidate=2592000");
             if (req.method === "HEAD") return res.status(200).end();
