@@ -9,12 +9,16 @@ import SkeletonGrid from "./components/SkeletonGrid.jsx";
 import SiteFooter from "./components/SiteFooter.jsx";
 import { copyText, fontCssSnippet, formatCount, normalize, slugFor, usableFont } from "./lib/fonts.js";
 import { track } from "./lib/analytics.js";
+import { pickSeed, loadImageTheme, applyTheme } from "./lib/palette.js";
 
 const API = "/api/fonts";
-// How many additional fonts each scroll trigger reveals, and how many the first
-// paint shows. Kept small and predictable so batches land evenly.
-const LOAD_BATCH = 10;
 const INITIAL_VISIBLE = 20;
+
+// Desktop has the room (and the CPU) for a bigger batch than a phone.
+function loadBatchSize() {
+  if (typeof window === "undefined" || !window.matchMedia) return 10;
+  return window.matchMedia("(min-width: 1025px)").matches ? 20 : 10;
+}
 export default function App() {
   const isBrowse = window.location.pathname === "/browse" || window.location.pathname.startsWith("/browse/");
   const isAccount = window.location.pathname === "/account";
@@ -79,6 +83,14 @@ export default function App() {
     document.documentElement.dataset.theme = theme;
     try { localStorage.setItem("typace-theme", theme); } catch { /* Non-persistent mode is still functional. */ }
   }, [theme]);
+  // The accent and the specimen ink come from a random photo's dominant colour.
+  // Runs once; the seed is persisted so the palette is stable across reloads.
+  useEffect(() => {
+    let active = true;
+    const seed = pickSeed();
+    loadImageTheme(seed).then((palette) => { if (active) applyTheme(palette); });
+    return () => { active = false; };
+  }, []);
   useEffect(() => {
     let active = true;
     fetch("/api/commit", { headers: { Accept: "application/json" }, cache: "no-store" })
@@ -145,7 +157,7 @@ export default function App() {
       if (!entries.some((entry) => entry.isIntersecting)) return;
       setVisibleCount((count) => {
         const total = resultCountRef.current;
-        return count >= total ? count : Math.min(count + LOAD_BATCH, total);
+        return count >= total ? count : Math.min(count + loadBatchSize(), total);
       });
     }, { rootMargin: "400px 0px", threshold: 0 });
     observer.observe(sentinel);
@@ -366,7 +378,7 @@ export default function App() {
             <div className={"font-grid" + (view === "peek" ? " peek-grid" : "") + (!isBrowse ? " showcase-rail" : "")}>
               {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => <FontCard key={font.file} font={font} variant={view} onPreview={openFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
             </div>
-            {isBrowse && visibleCount < filtered.length && <SkeletonGrid count={LOAD_BATCH} compact gridRef={loadSentinelRef} />}
+            {isBrowse && visibleCount < filtered.length && <SkeletonGrid count={loadBatchSize()} compact gridRef={loadSentinelRef} />}
           </>}
         </section>}
 
