@@ -57,6 +57,23 @@ const RECENT_FONT_FILES = new Set([
 let cachedCatalog = null;
 let cachedCatalogAt = 0;
 let catalogPromise = null;
+let lastGoodCatalog = null;
+let catalogBuiltAt = 0;
+let catalogIssue = null;
+
+// A hung filesystem read must not hang the function until the platform kills it.
+const CATALOG_BUILD_TIMEOUT_MS = 8_000;
+const STALE_RETRY_MS = 5_000;
+
+function withTimeout(promise, ms, label) {
+    let timer;
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+            timer = setTimeout(() => reject(new Error(label + " timed out after " + ms + "ms")), ms);
+        })
+    ]).finally(() => clearTimeout(timer));
+}
 
 async function readPanose(filePath) {
     if (categoryCache.has(filePath)) return categoryCache.get(filePath);
@@ -184,7 +201,19 @@ async function getFontMetadata(entry) {
 
 async function buildCatalog() {
     const fontsDirectory = path.join(process.cwd(), "fonts");
-    const entries = await readFontFiles(fontsDirectory);
+    let entries;
+    try {
+        entries = await withTimeout(readFontFiles(fontsDirectory), CATALOG_BUILD_TIMEOUT_MS, "font scan");
+    } catch (error) {
+        if (error && error.code === "ENOENT") {
+            // A missing directory is a deployment problem, not a request failure.
+            // Report it via /api/health instead of taking the endpoint down.
+            catalogIssue = "fonts-directory-missing";
+            return [];
+        }
+        throw error;
+    }
+    catalogIssue = null;
     const fonts = [];
     const batchSize = 16;
 
@@ -206,9 +235,19 @@ export async function listFonts() {
             .then(fonts => {
                 cachedCatalog = fonts;
                 cachedCatalogAt = Date.now();
+                lastGoodCatalog = fonts;
+                catalogBuiltAt = Date.now();
                 return fonts;
             })
             .catch(error => {
+                // Reliability first: never fail a request while a usable snapshot
+                // is still held. Serve it and retry the rebuild shortly.
+                if (lastGoodCatalog) {
+                    catalogIssue = "serving-stale-snapshot";
+                    cachedCatalog = lastGoodCatalog;
+                    cachedCatalogAt = Date.now() - CATALOG_CACHE_TTL_MS + STALE_RETRY_MS;
+                    return lastGoodCatalog;
+                }
                 cachedCatalog = null;
                 cachedCatalogAt = 0;
                 throw error;
@@ -219,6 +258,16 @@ export async function listFonts() {
     }
 
     return catalogPromise;
+}
+
+/** Operational view of the catalog for /api/health. Never throws. */
+export function getCatalogStatus() {
+    return {
+        cached: Boolean(cachedCatalog),
+        stale: Boolean(cachedCatalog) && Date.now() - cachedCatalogAt >= CATALOG_CACHE_TTL_MS,
+        ageSeconds: catalogBuiltAt ? Math.round((Date.now() - catalogBuiltAt) / 1000) : null,
+        issue: catalogIssue
+    };
 }
 
 export function findFont(fonts, slug) {
