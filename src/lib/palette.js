@@ -191,12 +191,10 @@ export function brandTheme() {
 /** Inline custom properties on <html> override every stylesheet token. */
 export function applyTheme(theme) {
   const root = document.documentElement;
-  root.style.setProperty("--accent", theme.accent);
-  root.style.setProperty("--accent-dark", theme.accentDark);
-  root.style.setProperty("--accent-soft", theme.accentSoft);
-  root.style.setProperty("--peacock", theme.accent);
-  root.style.setProperty("--vermilion", theme.accent);
-  root.style.setProperty("--rani", theme.accent);
+  // Deliberately does NOT touch --accent. The photo's colour drives the specimen
+  // ink and the preview background; the interface keeps its own brand palette
+  // (milk + orange) instead of taking on whatever hue the photo happens to have.
+  // Overriding the accent was a mistake: it turned the whole UI blue.
   root.style.setProperty("--specimen-ink", theme.ink);
   root.dataset.accent = theme.isLight ? "light" : "dark";
   root.dataset.accentHue = String(theme.hue);
