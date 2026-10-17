@@ -5,18 +5,22 @@ export const API_VERSION = "1.1.0";
 // Shared response helpers so every endpoint sends identical CORS, versioning,
 // caching and conditional-request headers.
 
-export function applyCommonHeaders(res) {
+export function applyCommonHeaders(res, req) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Timing-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
     res.setHeader("Access-Control-Max-Age", "86400");
-    res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version, ETag, X-Total-Count");
+    res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version, ETag, X-Total-Count, X-Request-Id");
     res.setHeader("X-API-Version", API_VERSION);
     res.setHeader("X-Content-Type-Options", "nosniff");
+    // Traceable request id: echoed when the client supplies one, so a client can
+    // correlate a failure with the platform logs.
+    const incoming = req?.headers?.["x-request-id"];
+    res.setHeader("X-Request-Id", String(incoming || "").slice(0, 128) || crypto.randomUUID());
 }
 
-function weakETag(payload) {
+export function weakETag(payload) {
     return 'W/"' + crypto.createHash("sha1").update(payload).digest("base64url").slice(0, 24) + '"';
 }
 
@@ -25,9 +29,11 @@ function weakETag(payload) {
  * and a matching If-None-Match returns 304 with no body.
  */
 export function sendJSON(req, res, status, data, { cache = "", cdn = "" } = {}) {
-    applyCommonHeaders(res);
+    applyCommonHeaders(res, req);
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     if (status === 405) res.setHeader("Allow", "GET, HEAD, OPTIONS");
+    // Tell well-behaved clients how long to back off on a server-side failure.
+    if (status >= 500) res.setHeader("Retry-After", "5");
 
     if (status === 200 && cache) {
         res.setHeader("Cache-Control", cache);
