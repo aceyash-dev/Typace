@@ -39,8 +39,8 @@ function slugify(value) {
 }
 
 export default async function handler(req, res) {
-    if (req.method !== "GET") {
-        res.setHeader("Allow", "GET");
+    if (req.method !== "GET" && req.method !== "HEAD") {
+        res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return res.status(405).send("Method not allowed.");
     }
     if (!enforceRateLimit(req, res)) return;
