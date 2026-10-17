@@ -2,7 +2,8 @@ import { enforceRateLimit } from "./_lib/rate-limit.js";
 import { listFonts } from "./_lib/fonts.js";
 import { sendJSON } from "./_lib/respond.js";
 
-const CACHE = "public, max-age=60, s-maxage=300, stale-while-revalidate=3600";
+const CACHE = "public, max-age=60, s-maxage=300, stale-while-revalidate=3600, stale-if-error=86400";
+const CDN = "public, s-maxage=300, stale-while-revalidate=3600";
 const FORMATS = new Set(["ttf", "otf", "woff2"]);
 const MAX_LIMIT = 500;
 
@@ -29,7 +30,7 @@ export default async function handler(req, res) {
         const page = offset === 0 && limit >= total ? fonts : fonts.slice(offset, offset + limit);
 
         res.setHeader("X-Total-Count", String(total));
-        return sendJSON(req, res, 200, page, { cache: CACHE });
+        return sendJSON(req, res, 200, page, { cache: CACHE, cdn: CDN });
     } catch (error) {
         console.error("Typace font discovery failed:", error);
         return sendJSON(req, res, 500, { error: "Unable to scan the fonts directory.", code: "FONT_SCAN_FAILED" });
