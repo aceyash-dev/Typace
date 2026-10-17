@@ -80,20 +80,23 @@ function writeSeed(value) {
 }
 
 /** Stable for the session (and across reloads) so the theme does not flicker. */
-export function pickSeed() {
-  const existing = readSeed();
-  if (existing) return existing;
-  const seed = Math.random().toString(36).slice(2, 10);
-  writeSeed(seed);
-  return seed;
+const SEED_HISTORY_KEY = "typace-theme-seed-history";
+function nextUniqueSeed() {
+  let history = [];
+  try { const parsed = JSON.parse(localStorage.getItem(SEED_HISTORY_KEY) || "[]"); if (Array.isArray(parsed)) history = parsed.filter((item) => typeof item === "string"); } catch { /* Storage may be blocked. */ }
+  const seen = new Set(history); let seed = "";
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    let candidate;
+    try { const bytes = new Uint32Array(3); crypto.getRandomValues(bytes); candidate = Array.from(bytes, (value) => value.toString(36)).join("-"); }
+    catch { candidate = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2) + "-" + Math.random().toString(36).slice(2); }
+    if (!seen.has(candidate)) { seed = candidate; break; }
+  }
+  if (!seed) seed = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+  try { localStorage.setItem(SEED_HISTORY_KEY, JSON.stringify([...history, seed].slice(-2048))); } catch { /* Non-persistent mode still works. */ }
+  writeSeed(seed); return seed;
 }
-
-/** A new photo, for a "shuffle" affordance. */
-export function reshuffleSeed() {
-  const seed = Math.random().toString(36).slice(2, 10);
-  writeSeed(seed);
-  return seed;
-}
+export function pickSeed() { return nextUniqueSeed(); }
+export function reshuffleSeed() { return nextUniqueSeed(); }
 
 function rgbToHsl(r, g, b) {
   const rn = r / 255, gn = g / 255, bn = b / 255;

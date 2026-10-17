@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "./Icon.jsx";
+import { applyTheme, loadImageTheme, reshuffleSeed } from "../lib/palette.js";
 import { fontUrl, familyFor, loadFontFace, fontCssSnippet, formatBytes } from "../lib/fonts.js";
 import { track } from "../lib/analytics.js";
 
@@ -51,6 +52,8 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
   });
   const [fontReady, setFontReady] = useState(false);
   const [fontFailed, setFontFailed] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
+  const imageShuffleRef = useRef(0);
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
   const family = font ? familyFor(font) : "";
 
@@ -86,6 +89,15 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
   const snippet = fontCssSnippet(font, language);
   const activeLanguage = LANGUAGES.find((item) => item.id === language) || LANGUAGES[0];
   const sizeLabel = formatBytes(font.sizeBytes ?? font.size ?? font.bytes);
+
+  function shufflePreviewPhoto() {
+    const requestId = ++imageShuffleRef.current;
+    setImageLoading(true);
+    loadImageTheme(reshuffleSeed()).then((palette) => {
+      if (requestId !== imageShuffleRef.current) return;
+      applyTheme(palette); setImageLoading(false);
+    }).catch(() => { if (requestId === imageShuffleRef.current) setImageLoading(false); });
+  }
 
   function startDrag(event) {
     // Never hijack a gesture that starts on something interactive or scrollable.
@@ -196,6 +208,7 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
                     title={item.label}
                   ><span /></button>
                 ))}
+                {theme === "image" && <button className="specimen-theme-shuffle" type="button" onClick={shufflePreviewPhoto} disabled={imageLoading} aria-label={imageLoading ? "Loading a different photo" : "Show a different photo"} title={imageLoading ? "Loading photo…" : "Show a different photo"}><Icon name="refresh" /></button>}
               </div>
             </div>
             <div className="preview-sample" style={{ fontFamily: fontReady ? '"' + family + '", sans-serif' : "inherit", fontSize: "clamp(34px, 8vw, 62px)" }} aria-live="polite">
