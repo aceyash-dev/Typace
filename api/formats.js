@@ -1,4 +1,5 @@
 import { listFonts } from "./_lib/fonts.js";
+import formatsPageHandler from "./_lib/formats-page.js";
 
 const BASE = "https://typace.ace-base.cc";
 
@@ -15,6 +16,8 @@ function escapeHTML(value = "") {
 }
 
 export default async function handler(req, res) {
+    // Serve /formats and /formats/:slug from one function on Vercel Hobby.
+    if (req.query?.slug) return formatsPageHandler(req, res);
     if (req.method !== "GET") return res.status(405).send("Method not allowed.");
 
     try {
