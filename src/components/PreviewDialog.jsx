@@ -1,15 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "./Icon.jsx";
-import { fontUrl, familyFor, loadFontFace, fontCssSnippet } from "../lib/fonts.js";
+import { fontUrl, familyFor, loadFontFace, fontCssSnippet, formatBytes } from "../lib/fonts.js";
 import { track } from "../lib/analytics.js";
 
 const SWIPE_CLOSE = 110;
 const SWIPE_NAV = 78;
-const VARIANTS = [
-  { id: "face", label: "@font-face" },
-  { id: "import", label: "@import" },
-  { id: "link", label: "<link>" },
-  { id: "url", label: "URL" },
+// Pick the stack you are building in and get code that works there, rather than
+// choosing between CSS syntaxes.
+const LANGUAGES = [
+  { id: "css", label: "CSS" },
+  { id: "html", label: "HTML" },
+  { id: "react", label: "React" },
+  { id: "next", label: "Next.js" },
+  { id: "vue", label: "Vue" },
+  { id: "svelte", label: "Svelte" },
+  { id: "tailwind", label: "Tailwind CSS" },
+  { id: "astro", label: "Astro" },
 ];
 const THEMES = [
   { id: "light", label: "Light specimen" },
@@ -35,7 +41,7 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
   const callbacks = useRef({ onClose, onPrev, onNext });
   callbacks.current = { onClose, onPrev, onNext };
   const [sample, setSample] = useState(() => readStored("typace-sample", "Aa Bb Cc 0123"));
-  const [variant, setVariant] = useState("face");
+  const [language, setLanguage] = useState("css");
   const [theme, setTheme] = useState(() => {
     const stored = readStored("typace-specimen-theme", "light");
     return ["light", "dark", "ink"].includes(stored) ? stored : "light";
@@ -74,8 +80,9 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
 
   if (!font) return null;
 
-  const snippet = fontCssSnippet(font, variant);
-  const activeVariant = VARIANTS.find((item) => item.id === variant) || VARIANTS[0];
+  const snippet = fontCssSnippet(font, language);
+  const activeLanguage = LANGUAGES.find((item) => item.id === language) || LANGUAGES[0];
+  const sizeLabel = formatBytes(font.sizeBytes ?? font.size ?? font.bytes);
 
   function startDrag(event) {
     if (event.target.closest("input, textarea, button, a, select, summary, pre")) return;
@@ -174,26 +181,30 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
             <div className="preview-presets" aria-label="Specimen presets"><button type="button" onClick={() => setSample("Aa Bb Cc 0123")}>Aa / 123</button><button type="button" onClick={() => setSample("Sphinx of black quartz, judge my vow.")}>Pangram</button><button type="button" onClick={() => setSample("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz")}>Alphabet</button></div>
           </div>
           <div className="copy-variants">
-            <div className="copy-tabs" role="tablist" aria-label="CSS format">
-              {VARIANTS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={variant === item.id}
-                  className={variant === item.id ? "active" : ""}
-                  onClick={() => setVariant(item.id)}
-                >{item.label}</button>
-              ))}
+            <div className="copy-lang">
+              <label className="copy-lang-label" htmlFor="copy-language">Implementation</label>
+              <div className="copy-lang-field">
+                <select
+                  id="copy-language"
+                  className="lang-select"
+                  value={language}
+                  onChange={(event) => setLanguage(event.target.value)}
+                >
+                  {LANGUAGES.map((item) => (
+                    <option key={item.id} value={item.id}>{item.label}</option>
+                  ))}
+                </select>
+                <Icon name="arrow-down-01" />
+              </div>
             </div>
             <pre className="copy-snippet"><code>{snippet}</code></pre>
           </div>
           <div className="preview-actions">
-            <button className="button button-primary" type="button" onClick={() => onCopy(font, variant)}>
-              <Icon name={copied ? "checkmark-circle-02" : "copy-01"} /> {copied ? "Copied" : "Copy " + activeVariant.label}
+            <button className="button button-primary" type="button" onClick={() => onCopy(font, language)}>
+              <Icon name={copied ? "checkmark-circle-02" : "copy-01"} /> {copied ? "Copied" : "Copy for " + activeLanguage.label}
             </button>
             <a className="button button-secondary" href={fontUrl(font)} download={String(font.file).split("/").pop()} onClick={() => track("download_font", { font: font.name, variant: "sheet" })}>
-              <Icon name="download-01" /> Download
+              <Icon name="download-01" /> Download{sizeLabel ? " · " + sizeLabel : ""}
             </a>
           </div>
           {(onPrev || onNext) && (
