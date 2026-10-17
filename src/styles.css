@@ -2463,28 +2463,52 @@ main { padding-bottom: 108px !important; }
    palette.js sets --accent/--accent-dark/--accent-soft/--specimen-ink inline on
    <html>, and inline custom properties beat every stylesheet token below.
    ========================================================================== */
+/* Brand defaults (milk + orange). palette.js overrides --accent* and
+   --specimen-ink from the photo's dominant colour; if no photo can be read these
+   brand values stay, so a failed image never leaves a surprise colour behind. */
 :root,
 :root[data-theme="light"] {
-  --bg: #ffffff;
-  --surface: #ffffff;
-  --surface-muted: #f4f4f4;
-  --surface-metal: #eaeaea;
-  --text: #0b0b0b;
-  --muted: #6b6b6b;
-  --line: #e3e3e3;
-  --shadow: 4px 4px 0 #0b0b0b;
-  --haldi: #f4f4f4;
-  /* neutral until the photo resolves */
-  --accent: #111111;
-  --accent-dark: #000000;
-  --accent-soft: #ededed;
-  --peacock: #111111;
-  --vermilion: #111111;
-  --rani: #111111;
-  --specimen-ink: #111111;
+  --accent: #ed7418;
+  --accent-dark: #b94b08;
+  --accent-soft: #ffead6;
+  --peacock: #ed7418;
+  --vermilion: #ed7418;
+  --rani: #ed7418;
+  --specimen-ink: #b94b08;
+  --theme-image: none;
 }
 /* The specimen glyph uses the hue-tuned ink, not the raw accent. */
 .specimen,
 .font-card .specimen,
 .peek-glyph,
 .preview-sample { color: var(--specimen-ink) !important; }
+
+/* ==========================================================================
+   PASS 9 — the photo as the preview background.
+   palette.js exposes the resolved image as --theme-image, and the specimen ink
+   above it is the same-hue tint chosen for contrast against that photo.
+   ========================================================================== */
+.preview-stage { position: relative; }
+.preview-stage.is-image {
+  background-image: var(--theme-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Scrim for legibility; its direction follows the photo's own lightness. */
+.preview-stage.is-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, .6);
+  pointer-events: none;
+}
+:root[data-accent="dark"] .preview-stage.is-image::before { background: rgba(14, 11, 8, .62); }
+.preview-stage.is-image > * { position: relative; z-index: 1; }
+/* swatch for the new theme button */
+.specimen-theme-btn.is-image span {
+  background-image: var(--theme-image, none);
+  background-size: cover;
+  background-position: center;
+}
