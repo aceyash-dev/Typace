@@ -152,7 +152,7 @@ export function dominantColor(image, sampleSize = 32) {
  * hue and moves the opposite way: a light source is tinted darker, a dark source
  * is lightened.
  */
-export function themeFromColor({ r, g, b }, provider = "local") {
+export function themeFromColor({ r, g, b }, provider = "brand", image = "") {
   const { h, s, l } = rgbToHsl(r, g, b);
   const isLight = l >= 58;
   const saturation = clamp(s, 36, 88);
@@ -162,6 +162,7 @@ export function themeFromColor({ r, g, b }, provider = "local") {
     isLight,
     hue: Math.round(h),
     provider,
+    image,
     accent: css(h, saturation, accentLightness),
     accentDark: css(h, saturation, clamp(accentLightness - 14, 18, 46)),
     accentSoft: css(h, Math.max(24, saturation - 24), clamp(accentLightness + 34, 80, 95)),
@@ -169,21 +170,21 @@ export function themeFromColor({ r, g, b }, provider = "local") {
   };
 }
 
-/** Deterministic stand-in when no provider can be read. Needs no network. */
-export function themeFromSeed(seed) {
-  const hash = hashSeed(seed);
-  const h = hash % 360;
-  const s = 46 + (hash % 24);
-  const l = 40 + (Math.floor(hash / 7) % 16);
-  const isLight = l >= 58;
+/**
+ * The brand palette (milk + orange), used whenever no photo can be read. This is
+ * deliberately NOT a hash-derived colour: an unreadable image must leave the
+ * interface exactly as designed, never some arbitrary hue.
+ */
+export function brandTheme() {
   return {
-    isLight,
-    hue: h,
-    provider: "local",
-    accent: css(h, s, l),
-    accentDark: css(h, s, clamp(l - 14, 18, 46)),
-    accentSoft: css(h, Math.max(24, s - 22), 92),
-    ink: css(h, s, isLight ? clamp(l - 26, 18, 42) : clamp(l + 26, 62, 86)),
+    isLight: false,
+    hue: 26,
+    provider: "brand",
+    image: "",
+    accent: "#ed7418",
+    accentDark: "#b94b08",
+    accentSoft: "#ffead6",
+    ink: "#b94b08",
   };
 }
 
@@ -200,6 +201,14 @@ export function applyTheme(theme) {
   root.dataset.accent = theme.isLight ? "light" : "dark";
   root.dataset.accentHue = String(theme.hue);
   if (theme.provider) root.dataset.accentProvider = theme.provider;
+  // The photo itself is exposed as a background so the preview can show it.
+  if (theme.image) {
+    root.style.setProperty("--theme-image", 'url("' + theme.image.replace(/"/g, "%22") + '")');
+    root.dataset.imageReady = "true";
+  } else {
+    root.style.removeProperty("--theme-image");
+    root.dataset.imageReady = "false";
+  }
 }
 
 /**
@@ -209,16 +218,20 @@ export function applyTheme(theme) {
  */
 export function loadImageTheme(seed, { size = 200, providerTimeout = 4500 } = {}) {
   return new Promise((resolve) => {
-    if (typeof Image === "undefined") { resolve(themeFromSeed(seed)); return; }
+    if (typeof Image === "undefined") { resolve(brandTheme()); return; }
 
-    // Direct providers first (no server round trip), rotated per seed so no
-    // single provider's outage always lands first. The same-origin proxy is
-    // appended last as the guaranteed-CORS safety net.
+    // The same-origin proxy is tried FIRST. That ordering is the whole point: a
+    // cross-origin image whose final response omits access-control-allow-origin
+    // taints the canvas, so getImageData throws and every direct provider is
+    // skipped — which is how an unreadable photo used to end up as an arbitrary
+    // hash-derived colour. Our own origin can never taint, so the pixel read is
+    // guaranteed. Direct providers follow as a fast fallback if the proxy is down.
+    const proxied = PROVIDERS.filter((provider) => provider.sameOrigin);
     const direct = PROVIDERS.filter((provider) => !provider.sameOrigin);
     const start = hashSeed(seed) % direct.length;
-    const order = direct
-      .map((_, offset) => direct[(start + offset) % direct.length])
-      .concat(PROVIDERS.filter((provider) => provider.sameOrigin));
+    const order = proxied.concat(
+      direct.map((_, offset) => direct[(start + offset) % direct.length])
+    );
     let index = 0;
     let settled = false;
 
@@ -228,7 +241,7 @@ export function loadImageTheme(seed, { size = 200, providerTimeout = 4500 } = {}
       if (settled) return;
       const provider = order[index];
       index += 1;
-      if (!provider) { finish(themeFromSeed(seed)); return; }
+      if (!provider) { finish(brandTheme()); return; }
 
       const image = new Image();
       image.crossOrigin = "anonymous";
@@ -255,7 +268,7 @@ export function loadImageTheme(seed, { size = 200, providerTimeout = 4500 } = {}
           if (color) {
             done = true;
             clearTimeout(timer);
-            finish(themeFromColor(color, provider.id));
+            finish(themeFromColor(color, provider.id, provider.url(seed, size)));
             return;
           }
         } catch {
