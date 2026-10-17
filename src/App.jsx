@@ -216,25 +216,18 @@ export default function App() {
     };
   }, [selectedFont, isBrowse, routeFormat]);
 
-  async function handleCopy(font, variant = "face") {
+  async function handleCopy(font, language = "css") {
     try {
-      // The @font-face variant prefers the server rule; every other variant is
-      // generated locally so copying is instant and always available.
-      let snippet = "";
-      if (variant === "face") {
-        try {
-          const response = await fetch("/api/css/" + encodeURIComponent(font.name), { headers: { Accept: "text/css" } });
-          if (response.ok) snippet = await response.text();
-        } catch { /* fall through to the local rule */ }
-      }
-      if (!snippet || !snippet.includes("@font-face")) snippet = fontCssSnippet(font, variant);
+      // Generated locally from the catalog entry, so it is instant, always
+      // available, and always matches the snippet shown in the preview.
+      const snippet = fontCssSnippet(font, language);
       if (!snippet) throw new Error("No snippet to copy.");
       const ok = await copyText(snippet);
       if (!ok) throw new Error("Clipboard is unavailable.");
-      track("copy_css", { font: font.name, variant });
-      const label = { face: "CSS", import: "@import", link: "<link> tag", url: "font URL" }[variant] || "CSS";
+      track("copy_css", { font: font.name, variant: language });
+      const label = { css: "CSS", html: "HTML", react: "React", next: "Next.js", vue: "Vue", svelte: "Svelte", tailwind: "Tailwind", astro: "Astro" }[language] || "CSS";
       setCopiedFont(font.file);
-      setToast(label + " copied for " + font.name);
+      setToast(label + " snippet copied for " + font.name);
       window.setTimeout(() => setCopiedFont(""), 1800);
       window.setTimeout(() => setToast(""), 2400);
     } catch {
@@ -257,25 +250,35 @@ export default function App() {
           <span className="brand-word">Typace</span>
           <span className="brand-beta">BETA</span>
         </a>
-        {(isBrowse || isAccount || isDevelopers) && <nav className={"main-nav floating-nav" + (navVisible ? " nav-visible" : " nav-hidden")} aria-label="Main navigation">
+        {/* Account lives on the landing page only — inside the app the nav tab covers it. */}
+        {!isBrowse && !isAccount && !isDevelopers && (
+          <div className="header-actions account-menu">
+            <a className="header-account-link" href="/account"><Icon name="user-circle" /><span>Account</span></a>
+            <details className="account-popover">
+              <summary aria-label="Account settings" title="Account settings"><Icon name="settings-02" /></summary>
+              <div className="account-popover-panel">
+                <p className="account-popover-title">Preferences</p>
+                <button className="account-setting" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}><Icon name={theme === "dark" ? "sun-03" : "moon-02"} /><span>{theme === "dark" ? "Light appearance" : "Dark appearance"}</span></button>
+                <button className="account-setting" type="button" onClick={() => { window.dispatchEvent(new Event("typace:cookie-settings")); document.querySelector(".account-popover")?.removeAttribute("open"); }}><Icon name="cookie" /><span>Cookie settings</span></button>
+                <a className="account-setting" href="/cookies" onClick={() => document.querySelector(".account-popover")?.removeAttribute("open")}><Icon name="file-02" /><span>Cookie policy</span><Icon name="arrow-up-right-01" /></a>
+              </div>
+            </details>
+            <a className="header-cta" href="/browse">Browse library <Icon name="arrow-up-right-01" /></a>
+          </div>
+        )}
+      </header>
+
+      {/* Rendered OUTSIDE <header> on purpose. The sticky header uses backdrop-filter,
+          which makes it the containing block for position:fixed children — that is why
+          the docked nav kept rendering at the top of the header instead of the bottom
+          of the viewport. As a sibling of the header it is fixed to the viewport again. */}
+      {(isBrowse || isAccount || isDevelopers) && (
+        <nav className={"main-nav floating-nav" + (navVisible ? " nav-visible" : " nav-hidden")} aria-label="Main navigation">
           <a className={isAccount ? "nav-active" : ""} href="/account" aria-label="Account"><Icon name="user-circle" /><span>Account</span></a>
           <a className={"nav-explore" + (isBrowse ? " nav-active" : "")} href="/browse" aria-label="Explore font library"><Icon name="compass" /><span>Explore</span>{isBrowse && <Icon name="arrow-up-right-01" />}</a>
           <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer"><Icon name="code" /><span>Developer</span></a>
-        </nav>}
-        <div className="header-actions account-menu">
-          {!isBrowse && !isAccount && !isDevelopers && <a className="header-account-link" href="/account"><Icon name="user-circle" /><span>Account</span></a>}
-          <details className="account-popover">
-            <summary aria-label="Account settings" title="Account settings"><Icon name="settings-02" /></summary>
-            <div className="account-popover-panel">
-              <p className="account-popover-title">Preferences</p>
-              <button className="account-setting" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}><Icon name={theme === "dark" ? "sun-03" : "moon-02"} /><span>{theme === "dark" ? "Light appearance" : "Dark appearance"}</span></button>
-              <button className="account-setting" type="button" onClick={() => { window.dispatchEvent(new Event("typace:cookie-settings")); document.querySelector(".account-popover")?.removeAttribute("open"); }}><Icon name="cookie" /><span>Cookie settings</span></button>
-              <a className="account-setting" href="/cookies" onClick={() => document.querySelector(".account-popover")?.removeAttribute("open")}><Icon name="file-02" /><span>Cookie policy</span><Icon name="arrow-up-right-01" /></a>
-            </div>
-          </details>
-          {!isBrowse && !isAccount && !isDevelopers && <a className="header-cta" href="/browse">Browse library <Icon name="arrow-up-right-01" /></a>}
-        </div>
-      </header>
+        </nav>
+      )}
 
       <main>
         {!isBrowse && !isAccount && !isDevelopers && <motion.section className="hero" aria-labelledby="hero-title" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
