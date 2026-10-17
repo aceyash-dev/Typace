@@ -27,14 +27,14 @@ Each record includes name, file, type, format, category, url, sizeBytes, created
 ## API usage
 
 - GET /api/health checks service and catalog availability and returns the catalog record count.
-- GET /api/fonts lists the current catalog as a JSON array.
+- GET /api/fonts lists the current catalog as a JSON array. Supports ?format=, ?category=, ?limit=, and ?offset=, returns an X-Total-Count header, and carries a weak ETag (send If-None-Match for 304).
 - GET /api/search?q=QUERY searches name, file, type, and format. Omit q to retrieve the catalog.
 - GET /api/fonts/SLUG returns one metadata record.
-- GET /api/css/SLUG returns a text/css @font-face declaration with an absolute asset URL.
+- GET /api/css/SLUG returns a text/css @font-face declaration with an absolute asset URL, plus a Link preload hint for the font asset.
 - GET /api/openapi.json returns the OpenAPI 3.0.3 contract.
 - GET /api/commit returns deployment commit metadata without exposing the private repository URL.
 
-All endpoints are public and support GET and OPTIONS. JSON endpoints use stable error objects with error and code fields. Rate-limited responses return HTTP 429 and Retry-After plus RateLimit-Limit, RateLimit-Remaining, and RateLimit-Reset headers. The current in-memory limiter is best-effort per serverless runtime, not a globally coordinated quota.
+All endpoints are public and support GET, HEAD, and OPTIONS. JSON endpoints use stable error objects with error and code fields. Rate limiting defaults to 60 requests per minute per client IP (the TYPACE_RATE_LIMIT environment variable overrides it); excess requests return HTTP 429 and Retry-After plus RateLimit-Limit, RateLimit-Remaining, and RateLimit-Reset headers. The current in-memory limiter is best-effort per serverless runtime, not a globally coordinated quota. Font assets are served with a one-year immutable cache and explicit font MIME types.
 
 Use the returned url and format fields. Do not assume every font is TTF or that every family has all file formats. Verify each font's applicable license before commercial use, embedding, redistribution, modification, or bundling.
 
