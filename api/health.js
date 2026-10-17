@@ -1,5 +1,5 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
-import { listFonts } from "./_lib/fonts.js";
+import { listFonts, getCatalogStatus } from "./_lib/fonts.js";
 
 function setHeaders(res, status = 200) {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -28,12 +28,19 @@ export default async function handler(req, res) {
 
     try {
         const fonts = await listFonts();
+        const catalog = getCatalogStatus();
         return sendJSON(res, 200, {
-            status: "ok",
+            status: catalog.issue ? "degraded" : "ok",
             service: "typace-api",
             apiVersion: "1.1.0",
             checkedAt: new Date().toISOString(),
-            catalog: { status: "ok", count: fonts.length },
+            catalog: {
+                status: catalog.issue ? "degraded" : "ok",
+                count: fonts.length,
+                ageSeconds: catalog.ageSeconds,
+                stale: catalog.stale,
+                issue: catalog.issue
+            },
             links: {
                 catalog: "/api/fonts",
                 search: "/api/search",
