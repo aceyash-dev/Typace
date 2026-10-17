@@ -43,66 +43,6 @@ function baseProviders() {
   ];
 }
 
-/**
- * Providers unlocked by environment variables. Each is skipped silently when its
- * key is absent, so the endpoint works out of the box and gets better as keys
- * are added.
- */
-function keyedProviders() {
-  const providers = [];
-
-  const unsplash = process.env.UNSPLASH_ACCESS_KEY;
-  if (unsplash) {
-    providers.push({
-      id: "unsplash",
-      async pick() {
-        const response = await fetch(
-          "https://api.unsplash.com/photos/random" + encodeURIComponent(unsplash),
-          { signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS) }
-        );
-        if (!response.ok) return null;
-        const data = await response.json();
-        const url = data?.urls?.small || data?.urls?.regular;
-        if (!url) return null;
-        // Unsplash's API guidelines require crediting the photographer, so the
-        // credit travels back with the image instead of being dropped here.
-        return {
-          url,
-          attribution: {
-            name: data?.user?.name || "Unsplash",
-            url: (data?.user?.links?.html || "https://unsplash.com") + "?utm_source=typace&utm_medium=referral",
-          },
-        };
-      },
-    });
-  }
-
-  const pexels = process.env.PEXELS_API_KEY;
-  if (pexels) {
-    providers.push({
-      id: "pexels",
-      async pick(seed) {
-        const page = (hashSeed(seed) % 20) + 1;
-        const response = await fetch(
-          "https://api.pexels.com/v1/curated" + page,
-          { headers: { Authorization: pexels }, signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS) }
-        );
-        if (!response.ok) return null;
-        const data = await response.json();
-        const photo = data?.photos?.[0];
-        const url = photo?.src?.small;
-        if (!url) return null;
-        return {
-          url,
-          attribution: { name: photo?.photographer || "Pexels", url: photo?.url || "https://www.pexels.com" },
-        };
-      },
-    });
-  }
-
-  return providers;
-}
-
 async function fetchImage(url) {
   const response = await fetch(url, {
     redirect: "follow",
@@ -125,7 +65,7 @@ export default async function handler(req, res) {
     if (!enforceRateLimit(req, res)) return;
 
     const seed = cleanSeed(req.query?.seed);
-    const candidates = [...baseProviders(), ...keyedProviders()];
+    const candidates = baseProviders();
     const start = hashSeed(seed) % candidates.length;
     const order = candidates.map((_, offset) => candidates[(start + offset) % candidates.length]);
 
