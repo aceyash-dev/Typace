@@ -42,11 +42,39 @@ async function fetchImage(url) {
     headers: { Accept: "image/*" },
   });
   if (!response.ok) return null;
+
   const type = String(response.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
   if (!type.startsWith("image/")) return null;
-  const buffer = Buffer.from(await response.arrayBuffer());
-  if (!buffer.length || buffer.length > MAX_BYTES) return null;
-  return { buffer, type };
+
+  const declaredLength = Number(response.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_BYTES) {
+    try { await response.body?.cancel(); } catch { /* best-effort cancellation */ }
+    return null;
+  }
+
+  // Enforce the byte cap while streaming, before a large response can consume
+  // unbounded memory. Provider failures fall through to the next candidate.
+  if (!response.body?.getReader) return null;
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_BYTES) {
+        await reader.cancel();
+        return null;
+      }
+      chunks.push(Buffer.from(value));
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  if (!total) return null;
+  return { buffer: Buffer.concat(chunks, total), type };
 }
 
 export default async function handler(req, res) {
