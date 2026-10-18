@@ -87,7 +87,13 @@ export default async function handler(req, res) {
 
   const seed = cleanSeed(req.query?.seed);
   const candidates = baseProviders();
-  const start = hashSeed(seed) % candidates.length;
+  // Rotate the first-choice source across visits. Random seeds alone are not
+  // enough: free image services can return similar photos or repeat a small pool.
+  // The client hint is validated against our own provider IDs; failures still
+  // fall through to every other provider.
+  const requestedProvider = String(req.query?.provider || "");
+  const requestedIndex = candidates.findIndex((provider) => provider.id === requestedProvider);
+  const start = requestedIndex >= 0 ? requestedIndex : hashSeed(seed) % candidates.length;
   const order = candidates.map((_, offset) => candidates[(start + offset) % candidates.length]);
 
   for (const provider of order) {

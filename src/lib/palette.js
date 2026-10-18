@@ -63,7 +63,7 @@ export const PROVIDERS = [
     id: "typace",
     label: "Typace image proxy",
     sameOrigin: true,
-    url: (seed) => "/api/image?seed=" + encodeURIComponent(seed),
+    url: (seed) => "/api/image?seed=" + encodeURIComponent(seed) + "&provider=" + encodeURIComponent(preferredProvider()),
   },
 ];
 
@@ -81,6 +81,10 @@ function writeSeed(value) {
 
 /** Stable for the session (and across reloads) so the theme does not flicker. */
 const SEED_HISTORY_KEY = "typace-theme-seed-history";
+const PROVIDER_CURSOR_KEY = "typace-image-provider-cursor";
+const PROVIDER_HINT_KEY = "typace-image-provider-hint";
+const PHOTO_PROVIDER_IDS = ["picsum", "loremflickr", "dicebear", "robohash"];
+
 function nextUniqueSeed() {
   let history = [];
   try { const parsed = JSON.parse(localStorage.getItem(SEED_HISTORY_KEY) || "[]"); if (Array.isArray(parsed)) history = parsed.filter((item) => typeof item === "string"); } catch { /* Storage may be blocked. */ }
@@ -92,8 +96,20 @@ function nextUniqueSeed() {
     if (!seen.has(candidate)) { seed = candidate; break; }
   }
   if (!seed) seed = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
-  try { localStorage.setItem(SEED_HISTORY_KEY, JSON.stringify([...history, seed].slice(-2048))); } catch { /* Non-persistent mode still works. */ }
+  try {
+    localStorage.setItem(SEED_HISTORY_KEY, JSON.stringify([...history, seed].slice(-2048)));
+    const previous = Number.parseInt(localStorage.getItem(PROVIDER_CURSOR_KEY) || "-1", 10);
+    const cursor = Number.isFinite(previous) ? (previous + 1) % PHOTO_PROVIDER_IDS.length : 0;
+    localStorage.setItem(PROVIDER_CURSOR_KEY, String(cursor));
+    localStorage.setItem(PROVIDER_HINT_KEY, PHOTO_PROVIDER_IDS[cursor]);
+  } catch { /* Non-persistent mode still works. */ }
   writeSeed(seed); return seed;
+}
+function preferredProvider() {
+  try {
+    const value = localStorage.getItem(PROVIDER_HINT_KEY);
+    return PHOTO_PROVIDER_IDS.includes(value) ? value : PHOTO_PROVIDER_IDS[0];
+  } catch { return PHOTO_PROVIDER_IDS[0]; }
 }
 export function pickSeed() { return nextUniqueSeed(); }
 export function reshuffleSeed() { return nextUniqueSeed(); }
