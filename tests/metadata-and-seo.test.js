@@ -12,6 +12,7 @@ import searchHandler from "../api/search.js";
 import fontHandler from "../api/font.js";
 import cssHandler from "../api/css.js";
 import healthHandler from "../api/health.js";
+import { escapeCSSString } from "../api/font-page.js";
 
 function mockResponse() {
     return {
@@ -25,6 +26,16 @@ function mockResponse() {
         end() { return this; }
     };
 }
+
+test("font page CSS family names are safely escaped", () => {
+    const hostile = 'Nice";}</style><script>alert(1)</script>\\font';
+    const escaped = escapeCSSString(hostile);
+    assert.doesNotMatch(escaped, /["<>]/);
+    assert.match(escaped, /\\22 /);
+    assert.match(escaped, /\\3c /i);
+    assert.match(escaped, /\\3e /i);
+    assert.match(escaped, /\\5c /i);
+});
 
 test("font normalization removes accents, punctuation, and supported extensions", () => {
     assert.equal(normalize("Café Font.ttf"), "cafe-font");
@@ -65,6 +76,8 @@ test("OpenAPI documents current API paths, schema values, and machine-client hea
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.openapi, "3.0.3");
     assert.deepEqual(response.body.components.schemas.Font.properties.category.enum, ["serif", "sans-serif", "unknown"]);
+    assert.match(response.body.info.description, /60 per minute per IP by default/);
+    assert.deepEqual(response.body.components.schemas.Health.properties.catalog.properties.status.enum, ["ok", "degraded"]);
     assert.ok(response.body.paths["/api/health"]);
     assert.ok(response.body.paths["/api/fonts"]);
     assert.ok(response.body.paths["/api/search"]);

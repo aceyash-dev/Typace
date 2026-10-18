@@ -32,7 +32,7 @@ export default function handler(req, res) {
         info: {
             title: "Typace API",
             version: "1.1.0",
-            description: "Public font discovery, search, metadata, and CSS delivery API. Unknown classifications and unavailable source dates are not guessed. API requests are limited to 10 per minute per IP; excess requests return HTTP 429 with Retry-After."
+            description: "Public font discovery, search, metadata, and CSS delivery API. Unknown classifications and unavailable source dates are not guessed. API requests are limited to 60 per minute per IP by default (configurable via TYPACE_RATE_LIMIT); excess requests return HTTP 429 with Retry-After."
         },
         servers: [{ url: "https://typace.ace-base.cc", description: "Production API" }],
         externalDocs: { description: "AI and machine-client guide", url: "https://typace.ace-base.cc/llms-full.txt" },
@@ -81,7 +81,7 @@ export default function handler(req, res) {
                         catalog: {
                             type: "object",
                             properties: {
-                                status: { type: "string", enum: ["ok"] },
+                                status: { type: "string", enum: ["ok", "degraded"] },
                                 count: { type: "integer", minimum: 0 }
                             }
                         },

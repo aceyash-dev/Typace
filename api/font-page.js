@@ -8,6 +8,16 @@ function escapeHTML(value = "") {
     }[char]));
 }
 
+export function escapeCSSString(value = "") {
+    // Escape CSS string delimiters, HTML style-tag delimiters, and control characters.
+    return String(value).replace(/[\0-\x1f\x7f"\\<>]/g, char => `\\${char.codePointAt(0).toString(16)} `);
+}
+
+function serializeJSONForHTML(value) {
+    // Prevent data inside script elements from being parsed as HTML markup.
+    return JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
+}
+
 function slugify(value) {
     return String(value || "")
         .normalize("NFKD")
@@ -39,6 +49,7 @@ export default async function handler(req, res) {
         if (!font) return res.status(404).send("Font not found.");
 
         const name = escapeHTML(font.name);
+        const cssFamily = escapeCSSString(font.name);
         const slug = slugify(font.name);
         const type = String(font.type || "").toUpperCase();
         const typeSlug = String(font.type || "").toLowerCase();
@@ -52,7 +63,7 @@ export default async function handler(req, res) {
         const formatURL = `${BASE}/formats/${typeSlug}`;
         const description = `${font.name} is a ${label} (${type}) font available from Typace. Preview it, copy the ready-to-use CSS @font-face rule, or download the original file.`;
 
-        const cssRule = `@font-face {\n  font-family: "${font.name}";\n  src: url("${fileURL}") format("${font.format}");\n  font-display: swap;\n}`;
+        const cssRule = `@font-face {\n  font-family: "${cssFamily}";\n  src: url("${fileURL}") format("${font.format}");\n  font-display: swap;\n}`;
 
         const faqs = [
             [`How do I use ${font.name} in CSS?`,
@@ -128,9 +139,9 @@ export default async function handler(req, res) {
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Typace">
 <meta property="og:title" content="${name} Font | Typace"><meta property="og:description" content="${escapeHTML(description)}"><meta property="og:url" content="${canonical}">
-<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@graph": graph })}</script>
+<script type="application/ld+json">${serializeJSONForHTML({ "@context": "https://schema.org", "@graph": graph })}</script>
 <style>
-@font-face{font-family:"${font.name}";src:url("${fileURL}") format("${font.format}");font-display:swap}
+@font-face{font-family:"${cssFamily}";src:url("${fileURL}") format("${font.format}");font-display:swap}
 body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:860px;margin:0 auto;padding:28px 22px 64px;line-height:1.65;color:#2c2621;background:#fffdf8}
 a{color:inherit}
 header{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:24px;font-size:13px}
@@ -138,7 +149,7 @@ nav.bc{font-size:12px;color:#78675a;margin-bottom:8px}
 nav.bc a{text-decoration:none}
 h1{font-size:clamp(2.1rem,7vw,3.8rem);line-height:1.03;letter-spacing:-.02em;margin:.1em 0 .35em}
 .answer{font-size:1.05rem;max-width:62ch}
-.specimen{font-family:"${font.name}",system-ui,sans-serif;font-size:clamp(1.9rem,9vw,4.4rem);line-height:1.12;margin:22px 0;padding:22px;border:1px solid #eadfd0;border-radius:16px;background:#fff7e9;overflow-wrap:anywhere}
+.specimen{font-family:"${cssFamily}",system-ui,sans-serif;font-size:clamp(1.9rem,9vw,4.4rem);line-height:1.12;margin:22px 0;padding:22px;border:1px solid #eadfd0;border-radius:16px;background:#fff7e9;overflow-wrap:anywhere}
 ul.facts{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
 ul.facts li{border:1px solid #eadfd0;border-radius:999px;padding:6px 12px;font-size:12px}
 pre{padding:16px;background:#f4efe7;border-radius:14px;overflow:auto;font-size:12.5px}
