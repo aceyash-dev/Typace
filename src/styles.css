@@ -2514,3 +2514,5 @@ main { padding-bottom: 108px !important; }
   background-size: cover;
   background-position: center;
 }
+
+.font-new-badge { display: inline-flex; align-items: center; border: 1px solid currentColor; border-radius: 999px; padding: 1px 5px; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.07em; line-height: 1.4; }

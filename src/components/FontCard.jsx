@@ -76,7 +76,7 @@ export default function FontCard({ font, onPreview, onCopy, copied, variant = "c
           <h2>{font.name}</h2>
           <p className="font-file-meta">
             <span>{format}</span>
-            {isNew && <><i className="meta-dot" aria-hidden="true" /><span>New</span></>}
+            {isNew && <><i className="meta-dot" aria-hidden="true" /><span className="font-new-badge">NEW</span></>}
           </p>
         </div>
         <div className="font-card-actions">

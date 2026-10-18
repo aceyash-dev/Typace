@@ -136,6 +136,7 @@ export default function App() {
       return matchesFormat && (!needle || haystack.includes(needle));
     });
     results.sort((a, b) => {
+      if (sort === "new" && Boolean(a.isNew) !== Boolean(b.isNew)) return a.isNew ? -1 : 1;
       const compare = String(a.name).localeCompare(String(b.name), undefined, { sensitivity: "base" });
       return sort === "za" ? -compare : compare;
     });
@@ -304,6 +305,7 @@ export default function App() {
           <a className={isAccount ? "nav-active" : ""} href="/account" aria-label="Account"><Icon name="user-circle" /><span>Account</span></a>
           <a className={"nav-explore" + (isBrowse ? " nav-active" : "")} href="/browse" aria-label="Explore font library"><Icon name="compass" /><span>Explore</span>{isBrowse && <Icon name="arrow-up-right-01" />}</a>
           <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer"><Icon name="code" /><span>Developer</span></a>
+          <a href="https://aero.aryankaushik.space/d/tabgl" target="_blank" rel="noreferrer" aria-label="Aero Dock"><Icon name="grid-view" /><span>Aero Dock</span><Icon name="arrow-up-right-01" /></a>
         </nav>
       )}
 
@@ -361,7 +363,7 @@ export default function App() {
             </label>
             <button className={"mobile-filter-toggle" + (filtersOpen ? " is-open" : "")} type="button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen} aria-controls="catalog-filters" aria-label="Sort and filter fonts"><Icon name="filter" /><span>Filter</span>{(formatFilter !== "all" || sort !== "az") && <i aria-hidden="true" />}</button>
             <div className={"catalog-filters" + (filtersOpen ? " filters-open" : "")} id="catalog-filters">
-              <label className="sort-control"><span className="sr-only">Sort fonts</span><Icon name="sorting-05" /><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="az">Name A–Z</option><option value="za">Name Z–A</option></select></label>
+              <label className="sort-control"><span className="sr-only">Sort fonts</span><Icon name="sorting-05" /><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="new">Newest</option><option value="az">Name A–Z</option><option value="za">Name Z–A</option></select></label>
               <label className="format-control"><span className="sr-only">Filter file format</span><select value={formatFilter} onChange={(event) => { const value = event.target.value; setFormatFilter(value); if (isBrowse) window.history.replaceState({}, "", value === "all" ? "/browse" : "/browse/" + value); }}><option value="all">All formats</option><option value="woff2">WOFF2</option><option value="ttf">TTF</option><option value="otf">OTF</option></select></label>
               <div className="view-switch" role="group" aria-label="Font layout">
                 <button type="button" className={view === "card" ? "active" : ""} onClick={() => setView("card")} aria-pressed={view === "card"} aria-label="Card view"><Icon name="grid-view" /></button>
