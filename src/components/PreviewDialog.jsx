@@ -64,6 +64,13 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
     if (!font) return undefined;
     let active = true;
     const previousOverflow = document.body.style.overflow;
+    const previouslyFocused = document.activeElement;
+    const scrim = sheetRef.current?.parentElement;
+    const backgroundNodes = scrim?.parentElement
+      ? [...scrim.parentElement.children].filter((element) => element !== scrim)
+      : [];
+    const previousInert = backgroundNodes.map((element) => element.inert);
+    backgroundNodes.forEach((element) => { element.inert = true; });
     document.body.style.overflow = "hidden";
     setFontReady(false);
     setFontFailed(false);
@@ -71,8 +78,31 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
       if (active) { setFontReady(result); setFontFailed(!result); }
     });
     const onKeyDown = (event) => {
-      if (event.key === "Escape") callbacks.current.onClose();
-      else if (event.key === "ArrowLeft" && callbacks.current.onPrev) callbacks.current.onPrev();
+      if (event.key === "Escape") {
+        callbacks.current.onClose();
+        return;
+      }
+      if (event.key === "Tab") {
+        const focusable = [...(sheetRef.current?.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) || [])].filter((element) => !element.hasAttribute("hidden"));
+        if (!focusable.length) {
+          event.preventDefault();
+          sheetRef.current?.focus();
+          return;
+        }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === sheetRef.current)) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+        return;
+      }
+      if (event.key === "ArrowLeft" && callbacks.current.onPrev) callbacks.current.onPrev();
       else if (event.key === "ArrowRight" && callbacks.current.onNext) callbacks.current.onNext();
     };
     window.addEventListener("keydown", onKeyDown);
@@ -80,7 +110,9 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
     return () => {
       active = false;
       document.body.style.overflow = previousOverflow;
+      backgroundNodes.forEach((element, index) => { element.inert = previousInert[index]; });
       window.removeEventListener("keydown", onKeyDown);
+      if (previouslyFocused instanceof HTMLElement && previouslyFocused.isConnected) previouslyFocused.focus();
     };
   }, [font]);
 

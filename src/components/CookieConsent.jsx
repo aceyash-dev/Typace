@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const STORAGE_KEY = "typace-cookie-consent-v1";
 const GTM_ID = "GTM-KWB6T7ZN";
@@ -29,16 +29,55 @@ function activateAnalytics() {
 export default function CookieConsent() {
   const [consent, setConsent] = useState(readConsent);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const dialogRef = useRef(null);
+  const previousFocusRef = useRef(null);
   const [analytics, setAnalytics] = useState(() => readConsent()?.analytics ?? false);
 
+  function openSettings() {
+    previousFocusRef.current = document.activeElement;
+    setAnalytics(readConsent()?.analytics ?? false);
+    setSettingsOpen(true);
+  }
+
+  function closeSettings() {
+    setSettingsOpen(false);
+    if (previousFocusRef.current instanceof HTMLElement && previousFocusRef.current.isConnected) {
+      previousFocusRef.current.focus();
+    }
+  }
+
   useEffect(() => {
-    const openSettings = () => {
-      setAnalytics(readConsent()?.analytics ?? false);
-      setSettingsOpen(true);
-    };
     window.addEventListener("typace:cookie-settings", openSettings);
     return () => window.removeEventListener("typace:cookie-settings", openSettings);
   }, []);
+
+  useEffect(() => {
+    if (!settingsOpen) return undefined;
+    const dialog = dialogRef.current;
+    const focusable = [...(dialog?.querySelectorAll(
+      'button:not([disabled]), input:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+    ) || [])];
+    (focusable[0] || dialog)?.focus();
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeSettings();
+        return;
+      }
+      if (event.key !== "Tab" || !focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [settingsOpen]);
 
   useEffect(() => {
     if (consent?.analytics) {
@@ -54,7 +93,7 @@ export default function CookieConsent() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* Current-session choice still applies. */ }
     setConsent(next);
     setAnalytics(value);
-    setSettingsOpen(false);
+    closeSettings();
   }
 
   return (
@@ -72,16 +111,16 @@ export default function CookieConsent() {
           </div>
           <div className="cookie-actions">
             <button type="button" className="cookie-button cookie-quiet" onClick={() => save(false)}>Reject optional</button>
-            <button type="button" className="cookie-button cookie-settings" onClick={() => setSettingsOpen(true)}>Settings</button>
+            <button type="button" className="cookie-button cookie-settings" onClick={openSettings}>Settings</button>
             <button type="button" className="cookie-button cookie-accept" onClick={() => save(true)}>Accept analytics</button>
           </div>
         </section>
       )}
       {settingsOpen && (
-        <section className="cookie-preferences" role="dialog" aria-modal="true" aria-labelledby="cookie-preferences-title">
+        <section ref={dialogRef} tabIndex={-1} className="cookie-preferences" role="dialog" aria-modal="true" aria-labelledby="cookie-preferences-title">
           <div className="cookie-preferences-head">
             <p className="cookie-kicker">PRIVACY CONTROL / 01</p>
-            <button type="button" className="cookie-close" onClick={() => setSettingsOpen(false)} aria-label="Close cookie settings">×</button>
+            <button type="button" className="cookie-close" onClick={closeSettings} aria-label="Close cookie settings">×</button>
           </div>
           <h2 id="cookie-preferences-title">Choose what runs.</h2>
           <p>Essential storage keeps preferences such as your colour theme and consent choice. It cannot be switched off here. Analytics is optional and loads only after you enable it.</p>
