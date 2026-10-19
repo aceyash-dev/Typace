@@ -54,6 +54,13 @@ export default function CookieConsent() {
   useEffect(() => {
     if (!settingsOpen) return undefined;
     const dialog = dialogRef.current;
+    const backgroundNodes = dialog?.parentElement
+      ? [...dialog.parentElement.children].filter(
+          (element) => element !== dialog && !element.classList.contains("cookie-scrim")
+        )
+      : [];
+    const previousInert = backgroundNodes.map((element) => element.inert);
+    backgroundNodes.forEach((element) => { element.inert = true; });
     const focusable = [...(dialog?.querySelectorAll(
       'button:not([disabled]), input:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
     ) || [])];
@@ -76,7 +83,10 @@ export default function CookieConsent() {
       }
     };
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      backgroundNodes.forEach((element, index) => { element.inert = previousInert[index]; });
+    };
   }, [settingsOpen]);
 
   useEffect(() => {
