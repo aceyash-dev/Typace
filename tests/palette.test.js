@@ -15,7 +15,7 @@ test("image providers produce valid URLs with encoded seeds and dimensions", () 
   assert.match(urls.find(({ provider }) => provider.id === "loremflickr").url, /\?lock=\d+$/);
   assert.match(urls.find(({ provider }) => provider.id === "dicebear").url, /\/shapes\/png\?seed=.*&size=240$/);
   assert.match(urls.find(({ provider }) => provider.id === "robohash").url, /\.png\?size=240x240$/);
-  assert.equal(urls.find(({ provider }) => provider.id === "typace").url, "/api/image?seed=theme%20seed%2Fwith%20spaces");
+  assert.equal(urls.find(({ provider }) => provider.id === "typace").url, "/api/image?seed=theme%20seed%2Fwith%20spaces&provider=picsum");
 });
 
 test("brand fallback preserves the designed orange palette without an image", () => {

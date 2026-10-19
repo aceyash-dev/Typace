@@ -67,7 +67,7 @@ export default async function handler(req, res) {
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Typace">
 <meta property="og:title" content="${label} Fonts | Typace"><meta property="og:description" content="${escapeHTML(description)}"><meta property="og:url" content="${canonical}">
-<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@graph": graph })}</script>
+<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026")}</script>
 <style>
 body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:960px;margin:0 auto;padding:28px 22px 64px;line-height:1.6;color:#2c2621;background:#fffdf8}
 a{color:inherit}header{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;font-size:13px}

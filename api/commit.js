@@ -1,4 +1,5 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
+const REPOSITORY = process.env.TYPACE_REPOSITORY || "aceyash-dev/Typace";
 const CACHE_TTL_MS = 60_000;
 let cachedCommit = null;
 let cachedAt = 0;
