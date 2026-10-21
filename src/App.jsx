@@ -305,7 +305,6 @@ export default function App() {
           <a className={isAccount ? "nav-active" : ""} href="/account" aria-label="Account"><Icon name="user-circle" /><span>Account</span></a>
           <a className={"nav-explore" + (isBrowse ? " nav-active" : "")} href="/browse" aria-label="Explore font library"><Icon name="compass" /><span>Explore</span>{isBrowse && <Icon name="arrow-up-right-01" />}</a>
           <a className={isDevelopers ? "nav-active" : ""} href="/developers" aria-label="Developer"><Icon name="code" /><span>Developer</span></a>
-          <a href="https://aero.aryankaushik.space/d/tabgl" target="_blank" rel="noreferrer" aria-label="Aero Dock"><Icon name="grid-view" /><span>Aero Dock</span><Icon name="arrow-up-right-01" /></a>
         </nav>
       )}
 
@@ -341,6 +340,16 @@ export default function App() {
               <h2>Cookie settings</h2><p>Manage optional analytics consent. Essential site functionality remains available either way.</p>
               <button className="account-inline-link account-action-link" type="button" onClick={() => window.dispatchEvent(new Event("typace:cookie-settings"))}>Manage cookie consent <Icon name="arrow-up-right-01" /></button>
               <a className="account-inline-link" href="/cookies">Read cookie policy <Icon name="arrow-up-right-01" /></a>
+            </article>
+            <article className="account-overview-card">
+              <span className="account-card-index">03 / APPS</span><Icon name="grid-view" />
+              <h2>Aero Dock</h2><p>Open the Aero Dock — your launcher for apps and quick links.</p>
+              <a className="account-inline-link" href="https://aero.aryankaushik.space/d/tabgl" target="_blank" rel="noreferrer">Open Aero Dock <Icon name="arrow-up-right-01" /></a>
+            </article>
+            <article className="account-overview-card">
+              <span className="account-card-index">04 / CONTACT</span><Icon name="mail-01" />
+              <h2>Contact us</h2><p>Questions, feedback, or font submissions — reach us by email.</p>
+              <a className="account-inline-link" href="mailto:hello@ace-base.cc">hello@ace-base.cc <Icon name="arrow-up-right-01" /></a>
             </article>
           </div>
         </section>}

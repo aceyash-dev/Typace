@@ -14,6 +14,7 @@ export default function SiteFooter({ commit, isDevelopers, apiDocs }) {
         <a href="/terms">Terms</a>
         <a href="/security">Security</a>
         <a href="/llms.txt">Docs for AI tools</a>
+        <a href="mailto:hello@ace-base.cc">Contact</a>
       </div>
       <span className="build-meta">{commit ? "BUILD " + commit.shortSha : "FONT LIBRARY"} <span aria-hidden="true">·</span> <a href="/api/commit">STATUS</a></span>
     </footer>
