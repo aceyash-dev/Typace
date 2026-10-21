@@ -42,7 +42,7 @@ export function sendJSON(req, res, status, data, { cache = "", cdn = "" } = {}) 
         const etag = weakETag(body);
         res.setHeader("ETag", etag);
         const ifNoneMatch = String(req.headers?.["if-none-match"] || "");
-        if (ifNoneMatch.split(",").some((tag) => tag.trim() === etag)) {
+        if (ifNoneMatch.trim() === "*" || ifNoneMatch.split(",").some((tag) => tag.trim() === etag)) {
             res.status(304).end();
             return;
         }

@@ -4,7 +4,7 @@ import { sendJSON } from "./_lib/respond.js";
 
 const CACHE = "public, max-age=60, s-maxage=300, stale-while-revalidate=3600, stale-if-error=86400";
 const CDN = "public, s-maxage=300, stale-while-revalidate=3600";
-const FORMATS = new Set(["ttf", "otf", "woff2"]);
+const FORMATS = new Set(["ttf", "otf", "woff", "woff2"]);
 const MAX_LIMIT = 500;
 
 export default async function handler(req, res) {
@@ -18,14 +18,17 @@ export default async function handler(req, res) {
         let fonts = await listFonts();
 
         const format = String(req.query?.format || "").toLowerCase();
-        if (format && FORMATS.has(format)) fonts = fonts.filter((font) => font.type === format);
+        if (format && !FORMATS.has(format)) {
+            return sendJSON(req, res, 400, { error: "Unsupported font format.", code: "INVALID_FORMAT", allowed: [...FORMATS] });
+        }
+        if (format) fonts = fonts.filter((font) => font.type === format);
 
         const category = String(req.query?.category || "").toLowerCase();
         if (category) fonts = fonts.filter((font) => String(font.category || "").toLowerCase() === category);
 
         const total = fonts.length;
         const requested = Number.parseInt(req.query?.limit, 10);
-        const limit = Number.isFinite(requested) ? Math.min(MAX_LIMIT, Math.max(0, requested)) : total;
+        const limit = Number.isFinite(requested) ? Math.min(MAX_LIMIT, Math.max(1, requested)) : total;
         const offset = Math.max(0, Number.parseInt(req.query?.offset, 10) || 0);
         const page = offset === 0 && limit >= total ? fonts : fonts.slice(offset, offset + limit);
 
