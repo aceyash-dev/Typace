@@ -14,6 +14,13 @@ function analyticsAllowed() {
 
 export function track(event, params = {}) {
   if (typeof window === "undefined" || !analyticsAllowed()) return;
+
+  // A plain dataLayer event only triggers GTM custom-event rules; it does not
+  // automatically send a GA4 event. Use the consent-gated Google tag command.
+  if (typeof window.gtag === "function") {
+    window.gtag("event", event, params);
+    return;
+  }
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({ event, ...params });
 }

@@ -357,7 +357,7 @@ export default function App() {
           {isBrowse && <div className="library-toolbar">
             <label className="search-box">
               <Icon name="search-01" /><span className="sr-only">Search fonts</span>
-              <input ref={searchRef} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search fonts…" autoComplete="off" />
+              <input ref={searchRef} type="search" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && query.trim()) track("font_search", { result_count: filtered.length }); }} placeholder="Search fonts…" autoComplete="off" />
               {query && <button type="button" className="clear-search" onClick={() => { setQuery(""); searchRef.current?.focus(); }} aria-label="Clear search"><Icon name="cancel-01" /></button>}
               <kbd>/</kbd>
             </label>
