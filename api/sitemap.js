@@ -1,5 +1,6 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
 import { listFonts } from "./_lib/fonts.js";
+import { applyCommonHeaders } from "./_lib/respond.js";
 
 const BASE_URL = "https://typace.ace-base.cc";
 
@@ -39,6 +40,8 @@ function slugify(value) {
 }
 
 export default async function handler(req, res) {
+    applyCommonHeaders(res, req);
+    if (req.method === "OPTIONS") return res.status(204).end();
     if (req.method !== "GET" && req.method !== "HEAD") {
         res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return res.status(405).send("Method not allowed.");

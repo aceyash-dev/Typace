@@ -1,4 +1,5 @@
 import { listFonts, findFont } from "./_lib/fonts.js";
+import { applyCommonHeaders } from "./_lib/respond.js";
 
 const BASE = "https://typace.ace-base.cc";
 
@@ -42,7 +43,12 @@ function sizeLabel(bytes) {
 }
 
 export default async function handler(req, res) {
-    if (req.method !== "GET") return res.status(405).send("Method not allowed.");
+    applyCommonHeaders(res, req);
+    if (req.method === "OPTIONS") return res.status(204).end();
+    if (req.method !== "GET" && req.method !== "HEAD") {
+        res.setHeader("Allow", "GET, HEAD, OPTIONS");
+        return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+    }
 
     try {
         const font = findFont(await listFonts(), req.query?.slug);

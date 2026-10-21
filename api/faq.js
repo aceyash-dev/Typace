@@ -1,3 +1,5 @@
+import { applyCommonHeaders } from "./_lib/respond.js";
+
 const BASE = "https://typace.ace-base.cc";
 
 function escapeHTML(value = "") {
@@ -37,7 +39,12 @@ const HOWTO = [
 ];
 
 export default function handler(req, res) {
-    if (req.method !== "GET") return res.status(405).send("Method not allowed.");
+    applyCommonHeaders(res, req);
+    if (req.method === "OPTIONS") return res.status(204).end();
+    if (req.method !== "GET" && req.method !== "HEAD") {
+        res.setHeader("Allow", "GET, HEAD, OPTIONS");
+        return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+    }
 
     const canonical = `${BASE}/faq`;
     const description = "Answers to common questions about Typace: what it is, how to add a font to your website, supported formats, licensing, and the catalog API.";

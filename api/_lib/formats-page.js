@@ -1,4 +1,5 @@
 import { listFonts } from "./fonts.js";
+import { applyCommonHeaders } from "./respond.js";
 
 const BASE = "https://typace.ace-base.cc";
 
@@ -21,10 +22,15 @@ function slugify(value) {
 }
 
 export default async function handler(req, res) {
-    if (req.method !== "GET") return res.status(405).send("Method not allowed.");
+    applyCommonHeaders(res, req);
+    if (req.method === "OPTIONS") return res.status(204).end();
+    if (req.method !== "GET" && req.method !== "HEAD") {
+        res.setHeader("Allow", "GET, HEAD, OPTIONS");
+        return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+    }
 
     const key = String(req.query?.slug || "").toLowerCase();
-    const format = FORMATS[key];
+    const format = Object.hasOwn(FORMATS, key) ? FORMATS[key] : null;
     if (!format) return res.status(404).send("Font format not found.");
 
     try {
