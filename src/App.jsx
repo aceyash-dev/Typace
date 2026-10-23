@@ -344,7 +344,7 @@ export default function App() {
             <article className="account-overview-card">
               <span className="account-card-index">03 / APPS</span><Icon name="grid-view" />
               <h2>Aero Dock</h2><p>Open the Aero Dock — your launcher for apps and quick links.</p>
-              <a className="account-inline-link" href="https://aero.aryankaushik.space/d/tabgl" target="_blank" rel="noreferrer">Open Aero Dock <Icon name="arrow-up-right-01" /></a>
+              <a className="account-inline-link" href="https://intridium.com/d/tabgl" target="_blank" rel="noreferrer">Open Aero Dock <Icon name="arrow-up-right-01" /></a>
             </article>
             <article className="account-overview-card">
               <span className="account-card-index">04 / CONTACT</span><Icon name="mail-01" />
