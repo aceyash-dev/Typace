@@ -8,6 +8,13 @@ function escapeHTML(value = "") {
     }[char]));
 }
 
+function serializeJSONForHTML(value) {
+    return JSON.stringify(value)
+        .replace(/</g, "\\u003c")
+        .replace(/>/g, "\\u003e")
+        .replace(/&/g, "\\u0026");
+}
+
 // Direct, self-contained answers. Each is written to be quotable on its own by
 // an answer engine, without needing the surrounding page for context.
 const QA = [
@@ -70,7 +77,7 @@ export default function handler(req, res) {
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Typace">
 <meta property="og:title" content="Typace FAQ"><meta property="og:description" content="${escapeHTML(description)}"><meta property="og:url" content="${canonical}">
-<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@graph": graph })}</script>
+<script type="application/ld+json">${serializeJSONForHTML({ "@context": "https://schema.org", "@graph": graph })}</script>
 <style>
 body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:800px;margin:0 auto;padding:28px 22px 64px;line-height:1.68;color:#2c2621;background:#fffdf8}
 a{color:inherit}

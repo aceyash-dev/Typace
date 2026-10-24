@@ -46,7 +46,10 @@ export default async function handler(req, res) {
         res.setHeader("Link", `<${fileUrl}>; rel=preload; as=font; type="font/${font.type}"; crossorigin`);
         const etag = weakETag(css);
         res.setHeader("ETag", etag);
-        if (String(req.headers["if-none-match"] || "").split(",").some((tag) => tag.trim() === etag)) return res.status(304).end();
+        if (String(req.headers["if-none-match"] || "").split(",").some((tag) => {
+            const candidate = tag.trim();
+            return candidate === "*" || candidate === etag;
+        })) return res.status(304).end();
         if (req.method === "HEAD") return res.status(200).end();
         return res.status(200).send(css);
     } catch (error) {

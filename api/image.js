@@ -41,10 +41,16 @@ async function fetchImage(url) {
     signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
     headers: { Accept: "image/*" },
   });
-  if (!response.ok) return null;
+  if (!response.ok) {
+    try { await response.body?.cancel(); } catch { /* best-effort cancellation */ }
+    return null;
+  }
 
   const type = String(response.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
-  if (!type.startsWith("image/")) return null;
+  if (!type.startsWith("image/")) {
+    try { await response.body?.cancel(); } catch { /* best-effort cancellation */ }
+    return null;
+  }
 
   const declaredLength = Number(response.headers.get("content-length"));
   if (Number.isFinite(declaredLength) && declaredLength > MAX_BYTES) {
@@ -54,7 +60,10 @@ async function fetchImage(url) {
 
   // Enforce the byte cap while streaming, before a large response can consume
   // unbounded memory. Provider failures fall through to the next candidate.
-  if (!response.body?.getReader) return null;
+  if (!response.body?.getReader) {
+    try { await response.body?.cancel(); } catch { /* best-effort cancellation */ }
+    return null;
+  }
   const reader = response.body.getReader();
   const chunks = [];
   let total = 0;
@@ -69,6 +78,9 @@ async function fetchImage(url) {
       }
       chunks.push(Buffer.from(value));
     }
+  } catch (error) {
+    try { await reader.cancel(); } catch { /* best-effort cancellation */ }
+    throw error;
   } finally {
     reader.releaseLock();
   }

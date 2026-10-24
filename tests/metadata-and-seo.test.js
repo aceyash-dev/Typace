@@ -13,6 +13,8 @@ import fontHandler from "../api/font.js";
 import cssHandler from "../api/css.js";
 import healthHandler from "../api/health.js";
 import { escapeCSSString } from "../api/font-page.js";
+import { safeDecodePathSegment } from "../src/lib/routes.js";
+import { downloadNameFor, fontSizeLabel, fontTypeLabel } from "../src/lib/fonts.js";
 
 function mockResponse() {
     return {
@@ -80,7 +82,15 @@ test("OpenAPI documents current API paths, schema values, and machine-client hea
     assert.deepEqual(response.body.components.schemas.Health.properties.catalog.properties.status.enum, ["ok", "degraded"]);
     assert.ok(response.body.paths["/api/health"]);
     assert.ok(response.body.paths["/api/fonts"]);
+    assert.ok(response.body.paths["/api/font"]);
+    assert.ok(response.body.paths["/api/formats"]);
+    assert.ok(response.body.paths["/api/faq"]);
+    assert.ok(response.body.paths["/api/sitemap"]);
     assert.ok(response.body.paths["/api/search"]);
+    assert.ok(response.body.tags.some(tag => tag.name === "Assets"));
+    assert.ok(response.body.paths["/api/image"].get.parameters.some(parameter => parameter.name === "provider"));
+    assert.ok(response.body.components.schemas.Font.properties.type.enum.includes("woff"));
+    assert.ok(response.body.paths["/api/fonts"].get.parameters.find(parameter => parameter.name === "format").schema.enum.includes("woff"));
     assert.ok(response.body.paths["/api/css/{slug}"]);
     assert.ok(response.body.paths["/api/commit"]);
     assert.deepEqual(response.body.components.schemas.Commit.properties.source.enum, ["deployment", "github"]);
@@ -240,6 +250,7 @@ test("React shell keeps Grandstander and Hugeicons and removes the legacy inline
 test("React landing focuses on the font catalog and uses the existing brand assets", async () => {
     const app = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
     const card = await readFile(new URL("../src/components/FontCard.jsx", import.meta.url), "utf8");
+    const actions = await readFile(new URL("../src/components/FontActions.jsx", import.meta.url), "utf8");
     const preview = await readFile(new URL("../src/components/PreviewDialog.jsx", import.meta.url), "utf8");
     const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
@@ -254,8 +265,8 @@ test("React landing focuses on the font catalog and uses the existing brand asse
     assert.match(styles, /font-family: "Grandstander", cursive/);
     assert.match(styles, /--peacock: #ed7418/);
     assert.match(html, /\/grandstander\.css/);
-    assert.match(card, /download-button/);
-    assert.match(card, /download-size/);
+    assert.match(actions, /download-button/);
+    assert.match(actions, /download-size/);
     assert.match(card, /motion\.article/);
     assert.match(preview, /onCopy/);
   assert.doesNotMatch(preview, /API record|size-slider/);
@@ -347,4 +358,31 @@ test("privacy, terms, cookie, security, and disclosure files are present", async
     assert.match(vite, /security\.txt/);
     assert.match(security, /Canonical: https:\/\/typace\.ace-base\.cc\/.well-known\/security\.txt/);
     assert.match(security, /Policy: https:\/\/typace\.ace-base\.cc\/security/);
+});
+
+
+test("malformed font deep-link escapes are rejected without throwing", () => {
+    assert.equal(safeDecodePathSegment("space-grotesk"), "space-grotesk");
+    assert.equal(safeDecodePathSegment("%E0%A4%A"), null);
+});
+
+test("symbol-only search queries return no matches instead of the whole catalog", async () => {
+    const response = mockResponse();
+    await searchHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.207" }, query: { q: "!!!" } }, response);
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.body, []);
+});
+
+test("CSS endpoint honors the If-None-Match wildcard for an existing resource", async () => {
+    const response = mockResponse();
+    await cssHandler({ method: "GET", headers: { "if-none-match": "*", "x-real-ip": "198.51.100.208" }, query: { slug: "Ace Script" } }, response);
+    assert.equal(response.statusCode, 304);
+});
+
+
+test("font-card display metadata is normalized by shared helpers", () => {
+    assert.equal(fontTypeLabel({ type: "woff2" }), "WOFF2");
+    assert.equal(fontSizeLabel({ size: 2048 }), "2 KB");
+    assert.equal(downloadNameFor({ file: "/fonts/Example.woff2" }), "Example.woff2");
+    assert.equal(downloadNameFor({}), "font");
 });
