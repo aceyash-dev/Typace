@@ -250,6 +250,7 @@ test("React shell keeps Grandstander and Hugeicons and removes the legacy inline
 test("React landing focuses on the font catalog and uses the existing brand assets", async () => {
     const app = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
     const card = await readFile(new URL("../src/components/FontCard.jsx", import.meta.url), "utf8");
+    const actions = await readFile(new URL("../src/components/FontActions.jsx", import.meta.url), "utf8");
     const preview = await readFile(new URL("../src/components/PreviewDialog.jsx", import.meta.url), "utf8");
     const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
@@ -264,8 +265,8 @@ test("React landing focuses on the font catalog and uses the existing brand asse
     assert.match(styles, /font-family: "Grandstander", cursive/);
     assert.match(styles, /--peacock: #ed7418/);
     assert.match(html, /\/grandstander\.css/);
-    assert.match(card, /download-button/);
-    assert.match(card, /download-size/);
+    assert.match(actions, /download-button/);
+    assert.match(actions, /download-size/);
     assert.match(card, /motion\.article/);
     assert.match(preview, /onCopy/);
   assert.doesNotMatch(preview, /API record|size-slider/);
