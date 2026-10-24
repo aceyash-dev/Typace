@@ -89,7 +89,8 @@ export default function handler(req, res) {
                         },
                         links: { type: "object", additionalProperties: { type: "string" } },
                         error: { type: "string" },
-                        code: { type: "string" }
+                        code: { type: "string" },
+                        allowed: { type: "array", items: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] } }
                     }
                 },
                 Error: {
@@ -186,6 +187,7 @@ export default function handler(req, res) {
                     ],
                     responses: {
                         "200": ok("Current catalog", { type: "array", items: fontRef }),
+                        "400": ok("Invalid font format", errorRef),
                         "304": { description: "Not modified — the client's cached copy is still valid." },
                         "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Catalog could not be read", errorRef)
