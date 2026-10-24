@@ -141,7 +141,7 @@ export function fontCssSnippet(font, language = "css") {
       "// tailwind.config.js\n" +
       "module.exports = {\n" +
       "  theme: {\n    extend: {\n      fontFamily: {\n" +
-      "        " + slug + ": [" + JSON.stringify(rawFamily) + ', "sans-serif"],\n' +
+      "        " + JSON.stringify(slug) + ": [" + JSON.stringify(rawFamily) + ', "sans-serif"],\n' +
       "      },\n    },\n  },\n};\n\n" +
       '<p class="font-' + slug + '">The quick brown fox</p>',
 
