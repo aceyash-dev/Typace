@@ -1,5 +1,6 @@
 import { listFonts, findFont } from "./_lib/fonts.js";
 import { applyCommonHeaders } from "./_lib/respond.js";
+import { enforceRateLimit } from "./_lib/rate-limit.js";
 
 const BASE = "https://typace.ace-base.cc";
 
@@ -49,10 +50,14 @@ export default async function handler(req, res) {
         res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
+    if (!enforceRateLimit(req, res)) return;
 
     try {
         const font = findFont(await listFonts(), req.query?.slug);
-        if (!font) return res.status(404).send("Font not found.");
+        if (!font) {
+            res.setHeader("Content-Type", "text/plain; charset=utf-8");
+            return res.status(404).send("Font not found.");
+        }
 
         const name = escapeHTML(font.name);
         const cssFamily = escapeCSSString(font.name);

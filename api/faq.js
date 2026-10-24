@@ -1,5 +1,6 @@
 import { applyCommonHeaders } from "./_lib/respond.js";
 
+import { enforceRateLimit } from "./_lib/rate-limit.js";
 const BASE = "https://typace.ace-base.cc";
 
 function escapeHTML(value = "") {
@@ -52,6 +53,7 @@ export default function handler(req, res) {
         res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
+    if (!enforceRateLimit(req, res)) return;
 
     const canonical = `${BASE}/faq`;
     const description = "Answers to common questions about Typace: what it is, how to add a font to your website, supported formats, licensing, and the catalog API.";
