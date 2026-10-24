@@ -9,6 +9,7 @@ import SkeletonGrid from "./components/SkeletonGrid.jsx";
 import SiteFooter from "./components/SiteFooter.jsx";
 import { copyText, fontCssSnippet, formatCount, normalize, slugFor, usableFont } from "./lib/fonts.js";
 import { track } from "./lib/analytics.js";
+import { safeDecodePathSegment } from "./lib/routes.js";
 import { pickSeed, loadImageTheme, applyTheme } from "./lib/palette.js";
 
 const API = "/api/fonts";
@@ -172,7 +173,9 @@ export default function App() {
 
   const deepSlug = (() => {
     const match = window.location.pathname.match(/^\/browse\/font\/(.+)$/);
-    return match ? decodeURIComponent(match[1]).replace(/\/+$/, "") : "";
+    if (!match) return "";
+    const decoded = safeDecodePathSegment(match[1]);
+    return decoded === null ? "" : decoded.replace(/\/+$/, "");
   })();
 
   function openFont(font) {
@@ -202,7 +205,11 @@ export default function App() {
     const onPop = () => {
       const match = window.location.pathname.match(/^\/browse\/font\/(.+)$/);
       if (match && fonts.length) {
-        const slug = decodeURIComponent(match[1]);
+        const slug = safeDecodePathSegment(match[1]);
+        if (slug === null) {
+          setSelectedFont(null);
+          return;
+        }
         setSelectedFont(fonts.find((item) => slugFor(item) === slug) || null);
       } else {
         setSelectedFont(null);

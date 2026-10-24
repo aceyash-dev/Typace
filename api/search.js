@@ -24,6 +24,7 @@ export default async function handler(req, res) {
         const query = String(Array.isArray(req.query?.q) ? req.query.q[0] || "" : req.query?.q || "").trim().slice(0, 200);
         if (!query) return sendJSON(res, 200, fonts);
         const terms = normalize(query).split("-").filter(Boolean);
+        if (!terms.length) return sendJSON(res, 200, []);
         return sendJSON(res, 200, fonts.filter(font => {
             const tokens = normalize(`${font.name} ${font.file} ${font.type} ${font.format}`)
                 .split("-")

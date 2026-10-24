@@ -39,7 +39,9 @@ export default function handler(req, res) {
         tags: [
             { name: "Catalog", description: "Discover published font assets." },
             { name: "Search", description: "Search the current font catalog." },
-            { name: "CSS", description: "Generate web font CSS for a published font." }
+            { name: "CSS", description: "Generate web font CSS for a published font." },
+            { name: "Assets", description: "Proxy supported image assets." },
+            { name: "Pages", description: "HTML discovery and documentation pages." }
         ],
         components: {
             schemas: {
@@ -121,13 +123,53 @@ export default function handler(req, res) {
                     summary: "Proxy a random image for palette extraction",
                     description: "Fetches a random image from one of several free, keyless providers server-side and returns it same-origin. This exists because a browser can only read pixels from a CORS-enabled image. The response reports the winning source in X-Image-Provider, and returns 502 IMAGE_UNAVAILABLE when no provider is reachable.",
                     parameters: [
-                        { name: "seed", in: "query", description: "Stable seed selecting the image.", schema: { type: "string" } }
+                        { name: "seed", in: "query", description: "Stable seed selecting the image.", schema: { type: "string" } },
+                        { name: "provider", in: "query", description: "Optional first-choice provider; failures still fall back to the others.", schema: { type: "string", enum: ["picsum", "loremflickr", "dicebear", "robohash"] } }
                     ],
                     responses: {
                         "200": { description: "Image bytes, with an image/* content type." },
                         "429": ok("Rate limit exceeded", errorRef),
                         "502": ok("No image provider available", errorRef)
                     }
+                }
+            },
+            "/api/font": {
+                get: {
+                    tags: ["Catalog"],
+                    operationId: "getFontAlias",
+                    summary: "Get font metadata using the singular route alias",
+                    parameters: [{ name: "slug", in: "query", description: "Font name or slug.", schema: { type: "string" } }],
+                    responses: {
+                        "200": ok("Font metadata", fontRef),
+                        "404": ok("Font not found", errorRef),
+                        "429": ok("Rate limit exceeded", errorRef),
+                        "500": ok("Font lookup failed", errorRef)
+                    }
+                }
+            },
+            "/api/formats": {
+                get: {
+                    tags: ["Pages"],
+                    operationId: "getFormatsPage",
+                    summary: "Render the HTML font-format directory",
+                    parameters: [{ name: "slug", in: "query", description: "Optional format slug for a detail page.", schema: { type: "string", enum: ["ttf", "otf", "woff2"] } }],
+                    responses: { "200": { description: "HTML format directory or format detail page.", content: { "text/html": { schema: { type: "string" } } } } }
+                }
+            },
+            "/api/faq": {
+                get: {
+                    tags: ["Pages"],
+                    operationId: "getFaqPage",
+                    summary: "Render the HTML FAQ and structured data",
+                    responses: { "200": { description: "HTML FAQ page.", content: { "text/html": { schema: { type: "string" } } } } }
+                }
+            },
+            "/api/sitemap": {
+                get: {
+                    tags: ["Pages"],
+                    operationId: "getSitemap",
+                    summary: "Return the XML sitemap",
+                    responses: { "200": { description: "XML sitemap.", content: { "application/xml": { schema: { type: "string" } } } } }
                 }
             },
             "/api/fonts": {
@@ -137,7 +179,7 @@ export default function handler(req, res) {
                     summary: "List published fonts",
                     description: "Returns the current authoritative catalog as a JSON array. Supports optional filtering and pagination. Responses carry a weak ETag — send it back as If-None-Match to receive 304. The X-Total-Count header reports how many fonts match the filters.",
                     parameters: [
-                        { name: "format", in: "query", description: "Filter by file format.", schema: { type: "string", enum: ["ttf", "otf", "woff2"] } },
+                        { name: "format", in: "query", description: "Filter by file format.", schema: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] } },
                         { name: "category", in: "query", description: "Filter by font category.", schema: { type: "string", enum: ["serif", "sans-serif", "unknown"] } },
                         { name: "limit", in: "query", description: "Maximum records to return (1-500).", schema: { type: "integer", minimum: 1, maximum: 500 } },
                         { name: "offset", in: "query", description: "Number of records to skip.", schema: { type: "integer", minimum: 0 } }

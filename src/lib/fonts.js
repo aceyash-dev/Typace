@@ -33,6 +33,7 @@ function fontFormat(font) {
 // resilient fallback when the CSS API is unreachable, so copying never fails.
 export function buildFontFace(font) {
   if (!usableFont(font)) return "";
+  const rawFamily = String(font.name || "");
   const family = String(font.name || "").replace(/["\\]/g, "\\$&");
   const format = fontFormat(font);
   const url = fontUrl(font).replace(/["\\]/g, (character) => encodeURIComponent(character));
@@ -71,12 +72,14 @@ const indent = (block) => block.split("\n").map((line) => (line ? "  " + line : 
 export function fontCssSnippet(font, language = "css") {
   if (!usableFont(font)) return "";
 
+  const rawFamily = String(font.name || "");
   const family = String(font.name || "").replace(/["\\]/g, "\\$&");
   const slug = slugFor(font) || "typeface";
   const absUrl = absoluteUrl(fontUrl(font));
   const absFace = buildFontFace(font).replace(/url\("([^"]+)"\)/, 'url("' + absUrl + '")');
   const cssStack = 'font-family: "' + family + '", sans-serif;';
-  const reactStack = "fontFamily: '" + '"' + family + '", sans-serif' + "'";
+  const cssStackAttribute = cssStack.replace(/&/g, "&amp;").replace(/\"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const reactStack = "fontFamily: " + JSON.stringify('"' + rawFamily + '", sans-serif');
   const cssEndpoint = absoluteUrl("/api/css/" + encodeURIComponent(font.name));
   const faceBlock = indent(absFace);
 
@@ -123,14 +126,14 @@ export function fontCssSnippet(font, language = "css") {
       "// tailwind.config.js\n" +
       "module.exports = {\n" +
       "  theme: {\n    extend: {\n      fontFamily: {\n" +
-      "        " + slug + ": [" + JSON.stringify(family) + ', "sans-serif"],\n' +
+      "        " + slug + ": [" + JSON.stringify(rawFamily) + ', "sans-serif"],\n' +
       "      },\n    },\n  },\n};\n\n" +
       '<p class="font-' + slug + '">The quick brown fox</p>',
 
     astro:
       "---\n// src/layouts/Base.astro\n---\n\n" +
       "<style is:global>\n" + faceBlock + "\n</style>\n\n" +
-      '<p style="' + cssStack + '">The quick brown fox</p>',
+      '<p style="' + cssStackAttribute + '">The quick brown fox</p>',
   };
 
   return snippets[language] || snippets.css;

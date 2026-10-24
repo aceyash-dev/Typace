@@ -13,6 +13,7 @@ import fontHandler from "../api/font.js";
 import cssHandler from "../api/css.js";
 import healthHandler from "../api/health.js";
 import { escapeCSSString } from "../api/font-page.js";
+import { safeDecodePathSegment } from "../src/lib/routes.js";
 
 function mockResponse() {
     return {
@@ -80,7 +81,15 @@ test("OpenAPI documents current API paths, schema values, and machine-client hea
     assert.deepEqual(response.body.components.schemas.Health.properties.catalog.properties.status.enum, ["ok", "degraded"]);
     assert.ok(response.body.paths["/api/health"]);
     assert.ok(response.body.paths["/api/fonts"]);
+    assert.ok(response.body.paths["/api/font"]);
+    assert.ok(response.body.paths["/api/formats"]);
+    assert.ok(response.body.paths["/api/faq"]);
+    assert.ok(response.body.paths["/api/sitemap"]);
     assert.ok(response.body.paths["/api/search"]);
+    assert.ok(response.body.tags.some(tag => tag.name === "Assets"));
+    assert.ok(response.body.paths["/api/image"].get.parameters.some(parameter => parameter.name === "provider"));
+    assert.ok(response.body.components.schemas.Font.properties.type.enum.includes("woff"));
+    assert.ok(response.body.paths["/api/fonts"].get.parameters.find(parameter => parameter.name === "format").schema.enum.includes("woff"));
     assert.ok(response.body.paths["/api/css/{slug}"]);
     assert.ok(response.body.paths["/api/commit"]);
     assert.deepEqual(response.body.components.schemas.Commit.properties.source.enum, ["deployment", "github"]);
@@ -347,4 +356,23 @@ test("privacy, terms, cookie, security, and disclosure files are present", async
     assert.match(vite, /security\.txt/);
     assert.match(security, /Canonical: https:\/\/typace\.ace-base\.cc\/.well-known\/security\.txt/);
     assert.match(security, /Policy: https:\/\/typace\.ace-base\.cc\/security/);
+});
+
+
+test("malformed font deep-link escapes are rejected without throwing", () => {
+    assert.equal(safeDecodePathSegment("space-grotesk"), "space-grotesk");
+    assert.equal(safeDecodePathSegment("%E0%A4%A"), null);
+});
+
+test("symbol-only search queries return no matches instead of the whole catalog", async () => {
+    const response = mockResponse();
+    await searchHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.207" }, query: { q: "!!!" } }, response);
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.body, []);
+});
+
+test("CSS endpoint honors the If-None-Match wildcard for an existing resource", async () => {
+    const response = mockResponse();
+    await cssHandler({ method: "GET", headers: { "if-none-match": "*", "x-real-ip": "198.51.100.208" }, query: { slug: "Ace Script" } }, response);
+    assert.equal(response.statusCode, 304);
 });
