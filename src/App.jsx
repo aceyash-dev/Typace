@@ -2,12 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import Icon from "./components/Icon.jsx";
 import FontCard from "./components/FontCard.jsx";
+import FontPeekTile from "./components/FontPeekTile.jsx";
 import PreviewDialog from "./components/PreviewDialog.jsx";
 import CookieConsent from "./components/CookieConsent.jsx";
 import LegalPage from "./components/LegalPage.jsx";
 import SkeletonGrid from "./components/SkeletonGrid.jsx";
 import SiteFooter from "./components/SiteFooter.jsx";
-import { copyText, fontCssSnippet, formatCount, normalize, slugFor, usableFont } from "./lib/fonts.js";
+import { copyText, fontCssSnippet, formatCount, normalize, slugFor, usableFont, FONT_VIEW } from "./lib/fonts.js";
 import { track } from "./lib/analytics.js";
 import { safeDecodePathSegment } from "./lib/routes.js";
 import { pickSeed, loadImageTheme, applyTheme } from "./lib/palette.js";
@@ -177,6 +178,10 @@ export default function App() {
     const decoded = safeDecodePathSegment(match[1]);
     return decoded === null ? "" : decoded.replace(/\/+$/, "");
   })();
+
+  function handleDownload(font, variant) {
+    track("download_font", { font: font.name, variant });
+  }
 
   function openFont(font) {
     if (font) track("open_font", { font: font.name, format: font.type });
@@ -394,7 +399,12 @@ export default function App() {
           {!loading && !error && filtered.length === 0 && <div className="empty-state"><Icon name="search-remove" /><h3>No fonts found.</h3><p>Try a shorter search or clear the filters.</p><button className="button button-secondary" type="button" onClick={() => { setQuery(""); setFormatFilter("all"); }}>Clear search</button></div>}
           {!loading && !error && filtered.length > 0 && <>
             <div className={"font-grid" + (view === "peek" ? " peek-grid" : "") + (!isBrowse ? " showcase-rail" : "")}>
-              {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => <FontCard key={font.file} font={font} variant={view} onPreview={openFont} onCopy={handleCopy} copied={copiedFont === font.file} />)}
+              {(isBrowse ? filtered.slice(0, visibleCount) : featuredFonts).map((font) => {
+                const cardProps = { font, onPreview: openFont, onCopy: handleCopy, onDownload: handleDownload, copied: copiedFont === font.file };
+                return view === FONT_VIEW.PEEK
+                  ? <FontPeekTile key={font.file} {...cardProps} />
+                  : <FontCard key={font.file} {...cardProps} />;
+              })}
             </div>
             {isBrowse && visibleCount < filtered.length && <SkeletonGrid count={loadBatchSize()} compact gridRef={loadSentinelRef} />}
           </>}

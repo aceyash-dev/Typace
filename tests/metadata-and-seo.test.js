@@ -14,6 +14,7 @@ import cssHandler from "../api/css.js";
 import healthHandler from "../api/health.js";
 import { escapeCSSString } from "../api/font-page.js";
 import { safeDecodePathSegment } from "../src/lib/routes.js";
+import { downloadNameFor, fontSizeLabel, fontTypeLabel } from "../src/lib/fonts.js";
 
 function mockResponse() {
     return {
@@ -375,4 +376,12 @@ test("CSS endpoint honors the If-None-Match wildcard for an existing resource", 
     const response = mockResponse();
     await cssHandler({ method: "GET", headers: { "if-none-match": "*", "x-real-ip": "198.51.100.208" }, query: { slug: "Ace Script" } }, response);
     assert.equal(response.statusCode, 304);
+});
+
+
+test("font-card display metadata is normalized by shared helpers", () => {
+    assert.equal(fontTypeLabel({ type: "woff2" }), "WOFF2");
+    assert.equal(fontSizeLabel({ size: 2048 }), "2 KB");
+    assert.equal(downloadNameFor({ file: "/fonts/Example.woff2" }), "Example.woff2");
+    assert.equal(downloadNameFor({}), "font");
 });

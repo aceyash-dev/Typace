@@ -62,6 +62,21 @@ export function formatBytes(bytes) {
     : (value / (1024 * 1024)).toFixed(2) + " MB";
 }
 
+export const FONT_VIEW = Object.freeze({ CARD: "card", PEEK: "peek" });
+
+export function fontTypeLabel(font) {
+  return String(font?.type || "font").toUpperCase();
+}
+
+export function fontSizeLabel(font) {
+  return formatBytes(font?.sizeBytes ?? font?.size ?? font?.bytes);
+}
+
+export function downloadNameFor(font) {
+  const name = String(font?.file || font?.name || "font").split(/[\\/]/).pop();
+  return name || "font";
+}
+
 const indent = (block) => block.split("\n").map((line) => (line ? "  " + line : line)).join("\n");
 
 /**
