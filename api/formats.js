@@ -1,6 +1,7 @@
 import { listFonts } from "./_lib/fonts.js";
 import formatsPageHandler from "./_lib/formats-page.js";
 import { applyCommonHeaders } from "./_lib/respond.js";
+import { enforceRateLimit } from "./_lib/rate-limit.js";
 
 const BASE = "https://typace.ace-base.cc";
 
@@ -19,12 +20,14 @@ function escapeHTML(value = "") {
 export default async function handler(req, res) {
     applyCommonHeaders(res, req);
     if (req.method === "OPTIONS") return res.status(204).end();
-    // Serve /formats and /formats/:slug from one function on Vercel Hobby.
-    if (req.query?.slug) return formatsPageHandler(req, res);
     if (req.method !== "GET" && req.method !== "HEAD") {
         res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
+    if (!enforceRateLimit(req, res)) return;
+    // Serve /formats and /formats/:slug from one function on Vercel Hobby.
+    // Keep both forms behind the same per-client request limit.
+    if (req.query?.slug) return formatsPageHandler(req, res);
 
     try {
         const fonts = await listFonts();

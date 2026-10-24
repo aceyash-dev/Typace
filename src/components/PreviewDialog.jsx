@@ -102,6 +102,11 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
         }
         return;
       }
+      // Arrow keys navigate fonts only when the user isn't operating a text or
+      // selection control; otherwise caret movement changes the preview itself.
+      if (event.target instanceof Element && event.target.closest(
+        'input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="textbox"], [role="combobox"]'
+      )) return;
       if (event.key === "ArrowLeft" && callbacks.current.onPrev) callbacks.current.onPrev();
       else if (event.key === "ArrowRight" && callbacks.current.onNext) callbacks.current.onNext();
     };
