@@ -31,6 +31,19 @@ Requires Node.js 24.x (matches the Vercel runtime).
 
 The React/Vite production build is written to dist. The public font files in fonts/ are served as static assets and are not bundled or rewritten by the UI build. Grandstander and the existing Hugeicons icon font are retained. The home page presents six representative specimens; `/browse` contains the full searchable catalogue. Optional Google Tag Manager analytics are loaded only after explicit consent through the cookie preference UI.
 
+## Stylesheet layout
+
+Styles are split into modules under `src/styles/`, imported in cascade order by `src/styles/index.css` (the only stylesheet `src/main.jsx` imports):
+
+- `tokens.css` — colour, type, radius and shadow tokens, plus a literal palette that is identical in light and dark.
+- `base.css` — reset, element defaults, focus rings, global guards.
+- `layout.css` and `layout/navigation.css` — page shell, header, footer, and the desktop/mobile navigation.
+- `components/` — card, controls, skeleton, peek, preview sheet, cookie sheet, specimen, copy snippets.
+- `pages/` — home, browse, legal, account, developers.
+- `utilities.css` — small single-purpose helpers.
+
+Module order is the cascade order: tokens, base, layout, components, pages, utilities. Add new rules to the module that owns the selector rather than appending an override block.
+
 ## API and AI clients
 
 The live GET /api/fonts response is the authoritative list of published font assets. Use the catalog's url and format values. Available formats depend on the live catalog. Categories can be unknown and source dates can be null; do not invent metadata or infer licensing.
