@@ -3,58 +3,51 @@
 
 User-agent: *
 Allow: /
-
 Disallow: /admin/
 Disallow: /private/
 Disallow: /drafts/
 Disallow: /account
-Disallow: /api/css/
 Disallow: /node_modules/
 Disallow: /.git/
 Disallow: /.github/
 Disallow: /tests/
 Disallow: /*.map$
 
-# Answer engines and AI crawlers are welcome. The catalog API, font pages,
+# Answer engines and AI crawlers are welcome. The catalog API, font CSS, font pages,
 # format pages, FAQ, and llms.txt are all intended for machine consumption.
-
 User-agent: GPTBot
-Allow: /
-
 User-agent: OAI-SearchBot
-Allow: /
-
 User-agent: ChatGPT-User
-Allow: /
-
 User-agent: ClaudeBot
-Allow: /
-
+User-agent: Claude-User
+User-agent: Claude-SearchBot
 User-agent: Claude-Web
-Allow: /
-
 User-agent: anthropic-ai
-Allow: /
-
 User-agent: PerplexityBot
-Allow: /
-
 User-agent: Perplexity-User
-Allow: /
-
 User-agent: Google-Extended
-Allow: /
-
+User-agent: GoogleOther
 User-agent: Applebot-Extended
-Allow: /
-
+User-agent: Bytespider
+User-agent: Amazonbot
 User-agent: CCBot
-Allow: /
-
 User-agent: cohere-ai
-Allow: /
-
+User-agent: DuckAssistBot
+User-agent: MistralAI-User
 User-agent: meta-externalagent
+User-agent: meta-externalfetcher
+User-agent: Diffbot
+User-agent: YouBot
+User-agent: PhindBot
 Allow: /
+Disallow: /admin/
+Disallow: /private/
+Disallow: /drafts/
+Disallow: /account
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /.github/
+Disallow: /tests/
+Disallow: /*.map$
 
 Sitemap: https://typace.ace-base.cc/sitemap.xml
