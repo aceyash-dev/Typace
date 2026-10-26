@@ -47,7 +47,9 @@ async function fetchImage(url) {
   }
 
   const type = String(response.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
-  if (!type.startsWith("image/")) {
+  // Only serve raster formats from the proxy. SVG can contain active content.
+  const allowedTypes = new Set(["image/png", "image/jpeg", "image/webp", "image/gif", "image/avif"]);
+  if (!allowedTypes.has(type)) {
     try { await response.body?.cancel(); } catch { /* best-effort cancellation */ }
     return null;
   }

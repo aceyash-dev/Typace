@@ -1,0 +1,22 @@
+/* utilities.css
+   Small single-purpose helpers.
+   Part of the Typace stylesheet split — see src/styles/index.css. */
+
+.result-count {margin-left: auto; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums;}
+.empty-state {display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 260px; gap: 12px; color: var(--muted); font-size: 13px;}
+.error-state {display: flex; align-items: flex-start; gap: 15px; max-width: 650px; margin: 28px auto; padding: 24px; border: 1px solid var(--paper-warm); border-radius: var(--radius); background: var(--accent-soft);}
+.error-state h3 {margin: 0; font-family: var(--display-font); font-size: 23px;}
+.empty-state h3 {margin: 0; font-family: var(--display-font); font-size: 23px;}
+.error-state p {margin: 8px 0 16px; color: var(--muted); font-size: 12px; line-height: 1.7;}
+.empty-state p {margin: 8px 0 16px; color: var(--muted); font-size: 12px; line-height: 1.7;}
+.empty-state > .hgi {color: var(--accent); font-size: 30px;}
+.sr-only {position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); border: 0;}
+@media (max-width: 700px) {
+  .result-count {width: 100%; margin: 4px 0 0;}
+}
+.error-state {border-radius: 0;}
+.empty-state {border-radius: 0;}
+.empty-state {border-radius: 3px; box-shadow: none;}
+.empty-state {border-radius: 16px; box-shadow: var(--shadow);}
+:where(a, button, summary, input, select, textarea, [role="button"]) {-webkit-tap-highlight-color: transparent; tap-highlight-color: transparent;}
+:where(a, button, summary, input, select, textarea, [role="button"]):focus-visible {outline: 2px solid var(--accent); outline-offset: 3px;}

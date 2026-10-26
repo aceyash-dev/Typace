@@ -1,0 +1,22 @@
+/* Typace stylesheet entry point.
+   Modules load in cascade order: tokens -> base -> layout -> components -> pages -> utilities.
+   Split from the former 2.5k-line src/styles.css; see issue #45. */
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./layout.css";
+@import "./layout/navigation.css";
+@import "./components/controls.css";
+@import "./components/card.css";
+@import "./components/skeleton.css";
+@import "./components/preview.css";
+@import "./components/cookie.css";
+@import "./components/specimen.css";
+@import "./components/copy.css";
+@import "./pages/home.css";
+@import "./pages/browse.css";
+@import "./components/peek.css";
+@import "./pages/legal.css";
+@import "./pages/account.css";
+@import "./pages/developers.css";
+@import "./utilities.css";

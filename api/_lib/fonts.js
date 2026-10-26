@@ -11,10 +11,8 @@ export const FONT_TYPES = {
 const categoryCache = new Map();
 const CATALOG_CACHE_TTL_MS = 30_000;
 
-// This explicit batch was added in the 2026-10-09 font import.
-// Keep "New" tied to actual catalog additions, not to the current view mode.
-const RECENT_FONT_BATCH_AT = Date.parse("2026-10-09T18:20:59Z");
-const RECENT_FONT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+// Curated list for the latest known catalog import. Replace this set when a newer batch is added.
+// Membership, not elapsed wall-clock time, keeps the Newest filter useful between imports.
 const RECENT_FONT_FILES = new Set([
     "Akrobat.ttf",
     "BEDANE.otf",
@@ -193,9 +191,7 @@ async function getFontMetadata(entry) {
             .join("/")}`,
         createdAt: null,
         updatedAt: null,
-        isNew: Date.now() - RECENT_FONT_BATCH_AT >= 0 &&
-            Date.now() - RECENT_FONT_BATCH_AT < RECENT_FONT_WINDOW_MS &&
-            RECENT_FONT_FILES.has(relativePath.split(path.sep).join("/").split("/").pop())
+        isNew: RECENT_FONT_FILES.has(relativePath.split(path.sep).join("/").split("/").pop())
     };
 }
 
@@ -206,10 +202,10 @@ async function buildCatalog() {
         entries = await withTimeout(readFontFiles(fontsDirectory), CATALOG_BUILD_TIMEOUT_MS, "font scan");
     } catch (error) {
         if (error && error.code === "ENOENT") {
-            // A missing directory is a deployment problem, not a request failure.
-            // Report it via /api/health instead of taking the endpoint down.
+            // A missing directory is a deployment problem, not a valid empty catalog.
+            // Throw so listFonts() can retain the last known-good snapshot.
             catalogIssue = "fonts-directory-missing";
-            return [];
+            throw error;
         }
         throw error;
     }
