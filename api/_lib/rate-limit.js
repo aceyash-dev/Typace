@@ -5,11 +5,10 @@ const MAX_KEYS = 10_000;
 const buckets = new Map();
 
 function getClientKey(req) {
+    // On Vercel, x-real-ip is set by the platform. Do not trust
+    // client-supplied x-forwarded-for values, which can be trivially spoofed.
     const realIp = req.headers?.["x-real-ip"];
-    const forwarded = req.headers?.["x-forwarded-for"];
-    const candidate = Array.isArray(realIp)
-        ? realIp[0]
-        : realIp || (Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(",")[0]);
+    const candidate = Array.isArray(realIp) ? realIp[0] : realIp;
     const ip = String(candidate || "").trim().slice(0, 128);
     return ip || "unknown";
 }
