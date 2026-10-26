@@ -40,7 +40,7 @@ test("font page CSS family names are safely escaped", () => {
 });
 
 test("font normalization removes accents, punctuation, and supported extensions", () => {
-    assert.equal(normalize("CafÃ© Font.ttf"), "cafe-font");
+    assert.equal(normalize("Café Font.ttf"), "cafe-font");
     assert.equal(normalize("Ace Script.woff2"), "ace-script");
 });
 
@@ -284,7 +284,7 @@ test("React landing focuses on the font catalog and uses the existing brand asse
     const styles = await readStyles();
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     const footer = await readFile(new URL("../src/components/SiteFooter.jsx", import.meta.url), "utf8");
-    for (const text of ["The catalog did not load.", "Try again", "PreviewDialog", "fontCssSnippet", "/api/openapi.json", 'src="/icon.png"']) {
+    for (const text of ["The catalog did not load.", "Try again", "PreviewDialog", "fontCssSnippet", "/api/openapi.json", 'src="/icon-192.png"']) {
         assert.ok(app.includes(text), "missing UI contract: " + text);
     }
     // The machine-readable docs link lives in the extracted footer component.
