@@ -206,10 +206,10 @@ async function buildCatalog() {
         entries = await withTimeout(readFontFiles(fontsDirectory), CATALOG_BUILD_TIMEOUT_MS, "font scan");
     } catch (error) {
         if (error && error.code === "ENOENT") {
-            // A missing directory is a deployment problem, not a request failure.
-            // Report it via /api/health instead of taking the endpoint down.
+            // A missing directory is a deployment problem, not a valid empty catalog.
+            // Throw so listFonts() can retain the last known-good snapshot.
             catalogIssue = "fonts-directory-missing";
-            return [];
+            throw error;
         }
         throw error;
     }
