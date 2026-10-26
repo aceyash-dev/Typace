@@ -237,7 +237,7 @@ export default function App() {
     let descriptionText = "";
     let canonicalHref = "";
     if (selectedFont) {
-      title = selectedFont.name + " Font â Preview & CSS | Typace";
+      title = selectedFont.name + " Font Ã¢ÂÂ Preview & CSS | Typace";
       descriptionText = "Preview " + selectedFont.name + ", copy its CSS as @font-face, @import, or a <link> tag, or download the original " + String(selectedFont.type || "font").toUpperCase() + " file from Typace.";
       canonicalHref = "https://typace.ace-base.cc/font/" + slugFor(selectedFont);
     } else if (isBrowse && routeFormat !== "all") {
@@ -271,7 +271,7 @@ export default function App() {
       window.setTimeout(() => setCopiedFont(""), 1800);
       window.setTimeout(() => setToast(""), 2400);
     } catch {
-      setToast("Couldnât copy. Try again, or download the font file instead.");
+      setToast("CouldnÃ¢ÂÂt copy. Try again, or download the font file instead.");
       window.setTimeout(() => setToast(""), 3200);
     }
   }
@@ -286,11 +286,11 @@ export default function App() {
     <div className={"app-shell" + (isBrowse ? " browse-page" : isAccount ? " account-page" : isDevelopers ? " developers-route" : " home-page")}>
       <header className="site-header">
         <a className="brand" href="/" aria-label="Typace home">
-          <img className="brand-image" src="/icon.png" alt="" width="38" height="38" />
+          <img className="brand-image" src="/icon-192.png" alt="" width="38" height="38" />
           <span className="brand-word">Typace</span>
           <span className="brand-beta">BETA</span>
         </a>
-        {/* Account lives on the landing page only â inside the app the nav tab covers it. */}
+        {/* Account lives on the landing page only Ã¢ÂÂ inside the app the nav tab covers it. */}
         {!isBrowse && !isAccount && !isDevelopers && (
           <div className="header-actions account-menu">
             <a className="header-account-link" href="/account"><Icon name="user-circle" /><span>Account</span></a>
@@ -309,7 +309,7 @@ export default function App() {
       </header>
 
       {/* Rendered OUTSIDE <header> on purpose. The sticky header uses backdrop-filter,
-          which makes it the containing block for position:fixed children â that is why
+          which makes it the containing block for position:fixed children Ã¢ÂÂ that is why
           the docked nav kept rendering at the top of the header instead of the bottom
           of the viewport. As a sibling of the header it is fixed to the viewport again. */}
       {(isBrowse || isAccount || isDevelopers) && (
@@ -355,12 +355,12 @@ export default function App() {
             </article>
             <article className="account-overview-card">
               <span className="account-card-index">03 / APPS</span><Icon name="grid-view" />
-              <h2>Intridium Dock</h2><p>Open the Intridium Dock â your launcher for apps and quick links.</p>
+              <h2>Intridium Dock</h2><p>Open the Intridium Dock Ã¢ÂÂ your launcher for apps and quick links.</p>
               <a className="account-inline-link" href="https://intridium.com/d/tabgl" target="_blank" rel="noreferrer">Open Intridium Dock <Icon name="arrow-up-right-01" /></a>
             </article>
             <article className="account-overview-card">
               <span className="account-card-index">04 / CONTACT</span><Icon name="mail-01" />
-              <h2>Contact us</h2><p>Questions, feedback, or font submissions â reach us by email.</p>
+              <h2>Contact us</h2><p>Questions, feedback, or font submissions Ã¢ÂÂ reach us by email.</p>
               <a className="account-inline-link" href="mailto:hello@ace-base.cc">hello@ace-base.cc <Icon name="arrow-up-right-01" /></a>
             </article>
           </div>
@@ -378,13 +378,13 @@ export default function App() {
           {isBrowse && <div className="library-toolbar">
             <label className="search-box">
               <Icon name="search-01" /><span className="sr-only">Search fonts</span>
-              <input ref={searchRef} type="search" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && query.trim()) track("font_search", { result_count: filtered.length }); }} placeholder="Search fontsâ¦" autoComplete="off" />
+              <input ref={searchRef} type="search" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && query.trim()) track("font_search", { result_count: filtered.length }); }} placeholder="Search fontsÃ¢ÂÂ¦" autoComplete="off" />
               {query && <button type="button" className="clear-search" onClick={() => { setQuery(""); searchRef.current?.focus(); }} aria-label="Clear search"><Icon name="cancel-01" /></button>}
               <kbd>/</kbd>
             </label>
             <button className={"mobile-filter-toggle" + (filtersOpen ? " is-open" : "")} type="button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen} aria-controls="catalog-filters" aria-label="Sort and filter fonts"><Icon name="filter" /><span>Filter</span>{(formatFilter !== "all" || sort !== "az") && <i aria-hidden="true" />}</button>
             <div className={"catalog-filters" + (filtersOpen ? " filters-open" : "")} id="catalog-filters">
-              <label className="sort-control"><span className="sr-only">Sort fonts</span><Icon name="sorting-05" /><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="new">Newest</option><option value="az">Name AâZ</option><option value="za">Name ZâA</option></select></label>
+              <label className="sort-control"><span className="sr-only">Sort fonts</span><Icon name="sorting-05" /><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="new">Newest</option><option value="az">Name AÃ¢ÂÂZ</option><option value="za">Name ZÃ¢ÂÂA</option></select></label>
               <label className="format-control"><span className="sr-only">Filter file format</span><select value={formatFilter} onChange={(event) => { const value = event.target.value; setFormatFilter(value); if (isBrowse) window.history.replaceState({}, "", value === "all" ? "/browse" : "/browse/" + value); }}><option value="all">All formats</option><option value="woff2">WOFF2</option><option value="ttf">TTF</option><option value="otf">OTF</option></select></label>
               <div className="view-switch" role="group" aria-label="Font layout">
                 <button type="button" className={view === "card" ? "active" : ""} onClick={() => setView("card")} aria-pressed={view === "card"} aria-label="Card view"><Icon name="grid-view" /></button>
@@ -394,7 +394,7 @@ export default function App() {
           </div>}
           {isBrowse && <div className="browse-result-line"><span className="result-count" aria-live="polite">{loading ? <span className="skeleton-line skeleton-count" aria-hidden="true" /> : formatCount(filtered.length) + (filtered.length === 1 ? " font" : " fonts")}</span>{(query || formatFilter !== "all" || routeFormat !== "all") && <button type="button" className="text-link clear-filters" onClick={() => { setQuery(""); setFormatFilter("all"); window.history.replaceState({}, "", "/browse"); }}>Clear filters <Icon name="cancel-01" /></button>}</div>}
 
-          {loading && <SkeletonGrid count={isBrowse ? 8 : 6} label="Loading fontsâ¦" />}
+          {loading && <SkeletonGrid count={isBrowse ? 8 : 6} label="Loading fontsÃ¢ÂÂ¦" />}
           {!loading && error && <div className="error-state" role="alert"><span className="error-icon"><Icon name="alert-circle" /></span><div><h3>The catalog did not load.</h3><p>{error}</p><button className="button button-primary" type="button" onClick={() => loadCatalog()}><Icon name="refresh" /> Try again</button></div></div>}
           {!loading && !error && filtered.length === 0 && <div className="empty-state"><Icon name="search-remove" /><h3>No fonts found.</h3><p>Try a shorter search or clear the filters.</p><button className="button button-secondary" type="button" onClick={() => { setQuery(""); setFormatFilter("all"); }}>Clear search</button></div>}
           {!loading && !error && filtered.length > 0 && <>

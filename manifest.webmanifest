@@ -1,5 +1,5 @@
 {
-  "name": "Typace — Font Library",
+  "name": "Typace â Font Library",
   "short_name": "Typace",
   "description": "A font library for previewing typefaces, copying ready-to-use CSS, and downloading font files.",
   "start_url": "/",
@@ -14,10 +14,22 @@
   ],
   "icons": [
     {
-      "src": "/icon.png",
-      "sizes": "1145x1374",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
