@@ -54,6 +54,7 @@ export default function handler(req, res) {
                         type: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] },
                         format: { type: "string", enum: ["truetype", "opentype", "woff", "woff2"] },
                         category: { type: "string", enum: ["serif", "sans-serif", "unknown"] },
+                        sizeBytes: { type: "integer", minimum: 0, nullable: true, description: "Font file size in bytes when the filesystem stat succeeds." },
                         url: { type: "string", format: "uri-reference" },
                         createdAt: { type: "string", format: "date-time", nullable: true },
                         updatedAt: { type: "string", format: "date-time", nullable: true },
@@ -84,7 +85,10 @@ export default function handler(req, res) {
                             type: "object",
                             properties: {
                                 status: { type: "string", enum: ["ok", "degraded"] },
-                                count: { type: "integer", minimum: 0 }
+                                count: { type: "integer", minimum: 0 },
+                                ageSeconds: { type: "integer", minimum: 0, nullable: true },
+                                stale: { type: "boolean" },
+                                issue: { type: "string", nullable: true }
                             }
                         },
                         links: { type: "object", additionalProperties: { type: "string" } },
@@ -184,7 +188,7 @@ export default function handler(req, res) {
                     tags: ["Catalog"],
                     operationId: "listFonts",
                     summary: "List published fonts",
-                    description: "Returns the current authoritative catalog as a JSON array. Supports optional filtering and pagination. Responses carry a weak ETag â send it back as If-None-Match to receive 304. The X-Total-Count header reports how many fonts match the filters.",
+                    description: "Returns the current authoritative catalog as a JSON array. Supports optional filtering and pagination. Responses carry a weak ETag Ã¢ÂÂ send it back as If-None-Match to receive 304. The X-Total-Count header reports how many fonts match the filters.",
                     parameters: [
                         { name: "format", in: "query", description: "Filter by file format.", schema: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] } },
                         { name: "category", in: "query", description: "Filter by font category.", schema: { type: "string", enum: ["serif", "sans-serif", "unknown"] } },
@@ -194,7 +198,7 @@ export default function handler(req, res) {
                     responses: {
                         "200": ok("Current catalog", { type: "array", items: fontRef }),
                         "400": ok("Invalid font format", errorRef),
-                        "304": { description: "Not modified â the client's cached copy is still valid." },
+                        "304": { description: "Not modified Ã¢ÂÂ the client's cached copy is still valid." },
                         "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Catalog could not be read", errorRef)
                     }
