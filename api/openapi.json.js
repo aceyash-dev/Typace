@@ -89,8 +89,7 @@ export default function handler(req, res) {
                         },
                         links: { type: "object", additionalProperties: { type: "string" } },
                         error: { type: "string" },
-                        code: { type: "string" },
-                        allowed: { type: "array", items: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] } }
+                        code: { type: "string" }
                     }
                 },
                 Error: {
@@ -98,7 +97,8 @@ export default function handler(req, res) {
                     required: ["error"],
                     properties: {
                         error: { type: "string" },
-                        code: { type: "string" }
+                        code: { type: "string" },
+                        allowed: { type: "array", items: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] } }
                     }
                 }
             }
@@ -178,7 +178,7 @@ export default function handler(req, res) {
                     tags: ["Catalog"],
                     operationId: "listFonts",
                     summary: "List published fonts",
-                    description: "Returns the current authoritative catalog as a JSON array. Supports optional filtering and pagination. Responses carry a weak ETag — send it back as If-None-Match to receive 304. The X-Total-Count header reports how many fonts match the filters.",
+                    description: "Returns the current authoritative catalog as a JSON array. Supports optional filtering and pagination. Responses carry a weak ETag â send it back as If-None-Match to receive 304. The X-Total-Count header reports how many fonts match the filters.",
                     parameters: [
                         { name: "format", in: "query", description: "Filter by file format.", schema: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] } },
                         { name: "category", in: "query", description: "Filter by font category.", schema: { type: "string", enum: ["serif", "sans-serif", "unknown"] } },
@@ -188,7 +188,7 @@ export default function handler(req, res) {
                     responses: {
                         "200": ok("Current catalog", { type: "array", items: fontRef }),
                         "400": ok("Invalid font format", errorRef),
-                        "304": { description: "Not modified — the client's cached copy is still valid." },
+                        "304": { description: "Not modified â the client's cached copy is still valid." },
                         "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Catalog could not be read", errorRef)
                     }
