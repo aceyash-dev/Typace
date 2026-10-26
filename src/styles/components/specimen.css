@@ -1,0 +1,34 @@
+/* components/specimen.css
+   Specimen stage theming (light / dark / ink).
+   Part of the Typace stylesheet split — see src/styles/index.css. */
+
+.specimen {display: block; max-width: 100%; overflow: hidden; color: var(--text); font-size: clamp(70px, 8vw, 112px); letter-spacing: -.08em; line-height: 1.15; white-space: nowrap;}
+.specimen-caption {display: block; width: 100%; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap;}
+@media (max-width: 390px) {
+  .specimen {font-size: 92px;}
+}
+.specimen {color: var(--peacock); font-size: clamp(74px, 8vw, 110px);}
+.specimen-caption {color: var(--muted); font-weight: 600;}
+.specimen-caption {font-size: 10px; letter-spacing: .01em;}
+.specimen {font-size: clamp(68px, 7vw, 104px); letter-spacing: -.075em;}
+.specimen-caption {font-size: 10px; line-height: 1.6;}
+@media (max-width: 700px) {
+  .specimen {font-size: clamp(48px, 14vw, 74px);}
+  .specimen-caption {font-size: 9px; line-height: 1.4;}
+}
+.specimen-theme {display: inline-flex; align-items: center; gap: 6px;}
+.specimen-theme-btn {display: inline-grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease;}
+.specimen-theme-btn span {display: block; width: 13px; height: 13px; border-radius: 50%;}
+.specimen-theme-btn.is-light span {background: var(--paper-bright); box-shadow: inset 0 0 0 1px var(--line);}
+.specimen-theme-btn.is-dark span {background: var(--stage-dark);}
+.specimen-theme-btn.is-ink span {background: var(--accent);}
+.specimen-theme-btn.active {border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft);}
+@media (max-width: 760px) {
+  .specimen-theme-btn {width: 28px; height: 28px;}
+}
+.specimen {color: var(--accent) !important;}
+.specimen-theme-btn.is-image span {background-image: var(--theme-image, none); background-size: cover; background-position: center;}
+.specimen-theme-shuffle {display:inline-grid; place-items:center; width:28px; height:28px; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--muted); cursor:pointer; transition:color .15s ease,border-color .15s ease,background .15s ease;}
+.specimen-theme-shuffle:hover:not(:disabled) {color:var(--accent-dark); border-color:var(--accent);}
+.specimen-theme-shuffle:focus-visible {outline:2px solid var(--accent); outline-offset:2px;}
+.specimen-theme-shuffle:disabled {cursor:wait; opacity:.6;}

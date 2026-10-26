@@ -1,0 +1,68 @@
+/* components/skeleton.css
+   Loading skeletons and font-load shimmer.
+   Part of the Typace stylesheet split — see src/styles/index.css. */
+
+@keyframes font-pulse { 50% { opacity:.35; } }
+.font-skeleton-grid {pointer-events: none;}
+.load-sentinel-grid {pointer-events: none;}
+.skeleton-card {display: flex; flex-direction: column; gap: 12px; min-height: 0;}
+.skeleton-card::before {content: none;}
+.skeleton-card:hover {transform: none; box-shadow: 0 5px 18px rgba(48,37,29,.055); border-color: var(--line);}
+.skeleton-line {position: relative; overflow: hidden; border-radius: 8px; background: color-mix(in srgb, var(--surface-muted) 82%, var(--surface));}
+.skeleton-specimen {position: relative; overflow: hidden; border-radius: 8px; background: color-mix(in srgb, var(--surface-muted) 82%, var(--surface));}
+.skeleton-chip {position: relative; overflow: hidden; border-radius: 8px; background: color-mix(in srgb, var(--surface-muted) 82%, var(--surface));}
+.skeleton-line::after {content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(100deg, transparent 20%, color-mix(in srgb, var(--surface) 92%, transparent) 50%, transparent 80%); animation: skeleton-sweep 1.5s ease-in-out infinite;}
+.skeleton-specimen::after {content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(100deg, transparent 20%, color-mix(in srgb, var(--surface) 92%, transparent) 50%, transparent 80%); animation: skeleton-sweep 1.5s ease-in-out infinite;}
+.skeleton-chip::after {content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(100deg, transparent 20%, color-mix(in srgb, var(--surface) 92%, transparent) 50%, transparent 80%); animation: skeleton-sweep 1.5s ease-in-out infinite;}
+.skeleton-specimen {flex: 1 1 auto; min-height: 148px; border-radius: 12px;}
+.skeleton-title {width: 60%; height: 14px;}
+.skeleton-actions {display: flex; gap: 8px;}
+.skeleton-actions .skeleton-chip {width: 34px; height: 34px; border-radius: 10px;}
+.skeleton-count {display: inline-block; width: 72px; height: 12px; border-radius: 6px; vertical-align: middle;}
+.skeleton-card:nth-child(2) .skeleton-line::after {animation-delay: .12s;}
+.skeleton-card:nth-child(2) .skeleton-specimen::after {animation-delay: .12s;}
+.skeleton-card:nth-child(2) .skeleton-chip::after {animation-delay: .12s;}
+.skeleton-card:nth-child(3) .skeleton-line::after {animation-delay: .24s;}
+.skeleton-card:nth-child(3) .skeleton-specimen::after {animation-delay: .24s;}
+.skeleton-card:nth-child(3) .skeleton-chip::after {animation-delay: .24s;}
+.skeleton-card:nth-child(4) .skeleton-line::after {animation-delay: .36s;}
+.skeleton-card:nth-child(4) .skeleton-specimen::after {animation-delay: .36s;}
+.skeleton-card:nth-child(4) .skeleton-chip::after {animation-delay: .36s;}
+.skeleton-card:nth-child(5n) .skeleton-line::after {animation-delay: .18s;}
+.skeleton-card:nth-child(5n) .skeleton-specimen::after {animation-delay: .18s;}
+.skeleton-card:nth-child(5n) .skeleton-chip::after {animation-delay: .18s;}
+@keyframes skeleton-sweep { 100% { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line::after {animation: none;}
+  .skeleton-specimen::after {animation: none;}
+  .skeleton-chip::after {animation: none;}
+}
+.skeleton-card {display: flex !important; flex-direction: column !important; gap: 0 !important; min-height: 0 !important;}
+.skeleton-card .skeleton-specimen {flex: 1 1 auto !important; min-height: 178px !important; margin: 0 !important; border-radius: 0 !important;}
+.skeleton-bottom {display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 16px 16px; border-top: 1px solid color-mix(in srgb, var(--line) 40%, transparent);}
+.skeleton-bottom .skeleton-title {width: 96px; height: 14px;}
+.skeleton-card .skeleton-actions {margin: 0;}
+@media (max-width: 760px) {
+  .skeleton-bottom {padding: 13px 14px 14px;}
+}
+@keyframes typace-shimmer {
+  from { background-position: -160% 0; }
+  to   { background-position: 260% 0; }
+}
+.skeleton-specimen {background-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--text) 4%, transparent) 0%,
+    color-mix(in srgb, var(--text) 11%, transparent) 45%,
+    color-mix(in srgb, var(--text) 4%, transparent) 90%); background-size: 220% 100%; background-repeat: no-repeat; animation: typace-shimmer 1.35s linear infinite;}
+.skeleton-line {background-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--text) 4%, transparent) 0%,
+    color-mix(in srgb, var(--text) 11%, transparent) 45%,
+    color-mix(in srgb, var(--text) 4%, transparent) 90%); background-size: 220% 100%; background-repeat: no-repeat; animation: typace-shimmer 1.35s linear infinite;}
+.skeleton-chip {background-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--text) 4%, transparent) 0%,
+    color-mix(in srgb, var(--text) 11%, transparent) 45%,
+    color-mix(in srgb, var(--text) 4%, transparent) 90%); background-size: 220% 100%; background-repeat: no-repeat; animation: typace-shimmer 1.35s linear infinite;}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-specimen {animation: none;}
+  .skeleton-line {animation: none;}
+  .skeleton-chip {animation: none;}
+}

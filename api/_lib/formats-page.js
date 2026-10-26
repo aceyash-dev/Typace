@@ -1,5 +1,6 @@
 import { listFonts } from "./fonts.js";
 import { applyCommonHeaders } from "./respond.js";
+import { enforceRateLimit } from "./rate-limit.js";
 
 const BASE = "https://typace.ace-base.cc";
 
@@ -28,6 +29,7 @@ export default async function handler(req, res) {
         res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
+    if (!enforceRateLimit(req, res)) return;
 
     const key = String(req.query?.slug || "").toLowerCase();
     const format = Object.hasOwn(FORMATS, key) ? FORMATS[key] : null;
