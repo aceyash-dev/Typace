@@ -1,0 +1,69 @@
+/* base.css
+   Reset, element defaults, focus rings, global guards.
+   Part of the Typace stylesheet split — see src/styles/index.css. */
+
+:root {font-family: "Grandstander", cursive; color: var(--ink); background: var(--bg-warm); font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; color-scheme: light;}
+* {box-sizing: border-box;}
+html {min-width: 320px; scroll-behavior: smooth; scroll-padding-top: 24px;}
+body {margin: 0; min-width: 320px; background: var(--bg); color: var(--text); transition: background .2s ease, color .2s ease;}
+body {font-family: inherit;}
+button {font-family: inherit;}
+input {font-family: inherit;}
+select {font-family: inherit;}
+button {font-size: inherit;}
+input {font-size: inherit;}
+select {font-size: inherit;}
+button {-webkit-tap-highlight-color: transparent;}
+a {-webkit-tap-highlight-color: transparent;}
+select {-webkit-tap-highlight-color: transparent;}
+button {color: inherit;}
+a {color: inherit; text-decoration: none;}
+button:focus-visible {outline: 3px solid var(--accent); outline-offset: 3px;}
+a:focus-visible {outline: 3px solid var(--accent); outline-offset: 3px;}
+input:focus-visible {outline: 3px solid var(--accent); outline-offset: 3px;}
+select:focus-visible {outline: 3px solid var(--accent); outline-offset: 3px;}
+button:disabled {cursor: not-allowed; opacity: .55;}
+:root {color-scheme: light;}
+html {scroll-padding-top: 32px;}
+body {background-color: var(--bg); background-image: linear-gradient(to right, color-mix(in srgb, var(--line) 20%, transparent) 1px, transparent 1px); background-size: 40px 100%;}
+::selection {background: var(--accent); color: var(--paper);}
+.hgi {display: inline-block; flex: 0 0 auto; font-size: 18px; line-height: 1; vertical-align: middle;}
+body {background-image:
+    radial-gradient(ellipse at 8% 4%, color-mix(in srgb, var(--accent) 5%, transparent), transparent 28rem),
+    linear-gradient(to right, color-mix(in srgb, var(--line) 18%, transparent) 1px, transparent 1px); background-size: auto, 48px 100%;}
+@media (max-width: 760px) {
+  main {padding-bottom: calc(94px + env(safe-area-inset-bottom));}
+}
+@media (max-width:760px) {
+  main {padding-bottom:calc(100px + env(safe-area-inset-bottom));}
+}
+body {background-image: radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--accent-soft) 44%, transparent), transparent 34rem);}
+@media (prefers-reduced-motion: reduce) {
+  * {scroll-behavior:auto; animation-duration:.01ms; animation-iteration-count:1; transition-duration:.01ms !important;}
+  *::before {scroll-behavior:auto; animation-duration:.01ms; animation-iteration-count:1; transition-duration:.01ms !important;}
+  *::after {scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
+}
+@media (min-width: 761px) and (max-width: 1024px) {
+  main {padding-bottom: calc(92px + env(safe-area-inset-bottom));}
+}
+html {-webkit-text-size-adjust: 100%; text-size-adjust: 100%;}
+html {overflow-x: clip;}
+body {overflow-x: clip;}
+body {min-height: 100dvh;}
+@media (max-width: 760px) {
+  html {scroll-padding-top: 84px; scroll-padding-bottom: 108px;}
+  main {padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important;}
+}
+h1 {text-wrap: balance;}
+h2 {text-wrap: balance;}
+:target {scroll-margin-top: 90px;}
+@media (max-width: 1024px) {
+  main {padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;}
+}
+@media (max-width: 1024px) {
+  main {padding-bottom: 108px !important;}
+}
+@media (min-width: 1025px) {
+  main {padding-bottom: 0 !important;}
+}
+main {padding-bottom: 108px !important;}
