@@ -1,6 +1,7 @@
 import { listFonts } from "./_lib/fonts.js";
 import formatsPageHandler from "./_lib/formats-page.js";
 import { applyCommonHeaders } from "./_lib/respond.js";
+import { enforceRateLimit } from "./_lib/rate-limit.js";
 
 const BASE = "https://typace.ace-base.cc";
 
@@ -19,17 +20,18 @@ function escapeHTML(value = "") {
 export default async function handler(req, res) {
     applyCommonHeaders(res, req);
     if (req.method === "OPTIONS") return res.status(204).end();
-    // Serve /formats and /formats/:slug from one function on Vercel Hobby.
-    if (req.query?.slug) return formatsPageHandler(req, res);
     if (req.method !== "GET" && req.method !== "HEAD") {
         res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
+    // The detail handler applies its own limiter. Only limit the directory here.
+    if (req.query?.slug) return formatsPageHandler(req, res);
+    if (!enforceRateLimit(req, res)) return;
 
     try {
         const fonts = await listFonts();
         const canonical = `${BASE}/formats`;
-        const description = "Browse the Typace font library by file format — WOFF2, TrueType (TTF), and OpenType (OTF) — with per-font CSS and downloads.";
+        const description = "Browse the Typace font library by file format â WOFF2, TrueType (TTF), and OpenType (OTF) â with per-font CSS and downloads.";
 
         const items = FORMATS.map(([slug, label, copy]) => {
             const count = fonts.filter(font => font.type === slug).length;
@@ -40,7 +42,7 @@ export default async function handler(req, res) {
             ["What font formats does Typace offer?",
              "Typace publishes WOFF2 webfonts, TrueType (TTF), and OpenType (OTF) files. Every catalog record reports its exact format, so you never have to guess."],
             ["Which format should I use on the web?",
-             "Prefer WOFF2 for browsers — it is the smallest and is supported everywhere modern. Use TTF or OTF when you need the original desktop file."],
+             "Prefer WOFF2 for browsers â it is the smallest and is supported everywhere modern. Use TTF or OTF when you need the original desktop file."],
             ["How do I load a Typace font?",
              "Open any font page to copy a ready-to-use @font-face rule, an @import, a <link> tag, or the plain asset URL."]
         ];
@@ -60,7 +62,7 @@ export default async function handler(req, res) {
         const html = `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Font Formats — WOFF2, TTF &amp; OTF | Typace</title>
+<title>Font Formats â WOFF2, TTF &amp; OTF | Typace</title>
 <meta name="description" content="${escapeHTML(description)}">
 <link rel="canonical" href="${canonical}">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
@@ -80,7 +82,7 @@ h2{margin-top:32px;font-size:1.3rem}h3{margin:18px 0 4px;font-size:1rem}
 footer{margin-top:40px;padding-top:18px;border-top:1px solid #eadfd0;font-size:12px;color:#78675a}
 </style></head>
 <body>
-<header><a href="/">Typace</a> · <a href="/browse">Browse</a> · <a href="/formats">Formats</a> · <a href="/developers">Developers</a></header>
+<header><a href="/">Typace</a> Â· <a href="/browse">Browse</a> Â· <a href="/formats">Formats</a> Â· <a href="/developers">Developers</a></header>
 <main>
 <h1>Fonts by format</h1>
 <p class="answer">Typace publishes fonts as WOFF2 webfonts, TrueType (TTF), and OpenType (OTF). Pick a format to browse every published file, or open a font page for ready-to-use CSS.</p>
@@ -88,7 +90,7 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid #eadfd0;font-size:1
 <h2>Frequently asked questions</h2>
 ${faqs.map(([q, a]) => `<h3>${escapeHTML(q)}</h3><p>${escapeHTML(a)}</p>`).join("")}
 </main>
-<footer><a href="/">Typace</a> · <a href="/browse">Browse all fonts</a> · <a href="/llms.txt">llms.txt</a></footer>
+<footer><a href="/">Typace</a> Â· <a href="/browse">Browse all fonts</a> Â· <a href="/llms.txt">llms.txt</a></footer>
 </body></html>`;
 
         res.setHeader("Content-Type", "text/html; charset=utf-8");
