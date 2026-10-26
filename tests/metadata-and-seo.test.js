@@ -40,7 +40,7 @@ test("font page CSS family names are safely escaped", () => {
 });
 
 test("font normalization removes accents, punctuation, and supported extensions", () => {
-    assert.equal(normalize("Café Font.ttf"), "cafe-font");
+    assert.equal(normalize("CafÃ© Font.ttf"), "cafe-font");
     assert.equal(normalize("Ace Script.woff2"), "ace-script");
 });
 
@@ -98,6 +98,18 @@ test("OpenAPI documents current API paths, schema values, and machine-client hea
     assert.ok(response.body.paths["/api/commit"]);
     assert.deepEqual(response.body.components.schemas.Commit.properties.source.enum, ["deployment", "github"]);
     assert.equal("url" in response.body.components.schemas.Commit.properties, false);
+});
+
+test("PWA manifest icon sizes match the actual PNG dimensions", async () => {
+    const manifest = JSON.parse(await readFile(new URL("../manifest.webmanifest", import.meta.url), "utf8"));
+    assert.ok(manifest.icons.some(icon => icon.sizes === "192x192"));
+    assert.ok(manifest.icons.some(icon => icon.sizes === "512x512"));
+    assert.ok(manifest.icons.some(icon => icon.purpose === "maskable"));
+    for (const icon of manifest.icons) {
+        const bytes = await readFile(new URL(`../${icon.src.slice(1)}`, import.meta.url));
+        assert.equal(bytes.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+        assert.equal(`${bytes.readUInt32BE(16)}x${bytes.readUInt32BE(20)}`, icon.sizes);
+    }
 });
 
 test("sitemap exposes canonical discovery pages, not binary font assets", async () => {
