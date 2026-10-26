@@ -27,8 +27,21 @@ export default async function handler(req, res) {
         if (category) fonts = fonts.filter((font) => String(font.category || "").toLowerCase() === category);
 
         const total = fonts.length;
-        const requested = Number.parseInt(req.query?.limit, 10);
-        const limit = Number.isFinite(requested) ? Math.min(MAX_LIMIT, Math.max(1, requested)) : total;
+        const rawLimit = req.query?.limit;
+        if (rawLimit !== undefined && rawLimit !== null && rawLimit !== "") {
+            const value = Array.isArray(rawLimit) ? rawLimit[0] : rawLimit;
+            if (typeof value !== "string" && typeof value !== "number") {
+                return sendJSON(req, res, 400, { error: "Limit must be a positive integer.", code: "INVALID_LIMIT" });
+            }
+            const text = String(value);
+            if (!/^[1-9]\d*$/.test(text) || !Number.isSafeInteger(Number(text))) {
+                return sendJSON(req, res, 400, { error: "Limit must be a positive integer.", code: "INVALID_LIMIT" });
+            }
+        }
+        const requested = rawLimit === undefined || rawLimit === null || rawLimit === ""
+            ? total
+            : Number(Array.isArray(rawLimit) ? rawLimit[0] : rawLimit);
+        const limit = Math.min(MAX_LIMIT, requested);
         const offset = Math.max(0, Number.parseInt(req.query?.offset, 10) || 0);
         const page = offset === 0 && limit >= total ? fonts : fonts.slice(offset, offset + limit);
 
