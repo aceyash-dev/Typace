@@ -1,0 +1,143 @@
+/* components/card.css
+   Font card: specimen button, metadata, actions, grid.
+   Part of the Typace stylesheet split — see src/styles/index.css. */
+
+.font-grid {display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;}
+.font-card {min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;}
+.specimen-button {display: flex; flex-direction: column; justify-content: center; width: 100%; min-height: 150px; padding: 13px 0 10px; overflow: hidden; border: 0; background: transparent; text-align: left; cursor: pointer;}
+.font-card-name h2 {overflow: hidden; margin: 0 0 5px; font-size: 13px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap;}
+.font-card-name p {overflow: hidden; max-width: 220px; margin: 0; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap;}
+@media (max-width: 1000px) {
+  .font-grid {grid-template-columns: repeat(2, minmax(0, 1fr));}
+}
+@media (max-width: 700px) {
+  .font-card-name {width: 100%;}
+  .font-card-name p {max-width: 100%; font-size: 9px;}
+  .font-card-actions {width: 100%; justify-content: flex-end;}
+}
+@media (max-width: 390px) {
+  .font-grid {grid-template-columns: 1fr;}
+  .font-card {padding: 14px;}
+  .font-card-bottom {flex-direction: row; align-items: center;}
+  .font-card-name {min-width: 0;}
+  .font-card-actions {width: auto;}
+  .specimen-button {min-height: 125px;}
+}
+.font-card:nth-child(4n + 1) {border-top: 7px solid var(--rani);}
+.font-card:nth-child(4n + 2) {border-top: 7px solid var(--haldi);}
+.font-card:nth-child(4n + 3) {border-top: 7px solid var(--peacock);}
+.font-card:nth-child(4n + 4) {border-top: 7px solid var(--vermilion);}
+@media (max-width: 700px) {
+  .font-card {box-shadow: 3px 3px 0 var(--text);}
+}
+.font-grid {grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line);}
+.font-card {position: relative; padding: 16px 17px 14px; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; background: var(--surface); box-shadow: none;}
+.font-card:nth-child(6n + 2) {background: color-mix(in srgb, var(--haldi) 34%, var(--surface));}
+.font-card:nth-child(6n + 4) {background: color-mix(in srgb, var(--peacock) 9%, var(--surface));}
+.font-card:nth-child(6n + 5) {background: color-mix(in srgb, var(--accent) 8%, var(--surface));}
+.font-card-name h2 {font-size: 14px;}
+.font-card-name p {font-size: 10px;}
+.font-card-actions .hgi {font-size: 15px;}
+@media (max-width: 900px) {
+  .font-grid {grid-template-columns: repeat(2, minmax(0, 1fr));}
+}
+@media (max-width: 620px) {
+  .font-grid {grid-template-columns: 1fr;}
+  .font-card {padding: 14px;}
+  .specimen-button {min-height: 145px;}
+}
+.font-grid {grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px;}
+.font-card {padding: 20px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); box-shadow: none;}
+.font-card:nth-child(n) {background: var(--surface);}
+.specimen-button {min-height: 168px; padding: 18px 0 16px; gap: 7px;}
+.font-card-bottom {display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-top: 16px; border-top: 1px solid var(--line);}
+.font-card-name {min-width: 0;}
+.font-card-name h2 {overflow-wrap: anywhere;}
+.font-card-name p {overflow-wrap: anywhere;}
+.font-card-actions {display: flex; flex: 0 0 auto; gap: 6px;}
+.font-card-actions .icon-button {width: 36px; height: 36px;}
+@media (max-width: 980px) {
+  .font-grid {gap: 14px;}
+  .font-card {padding: 17px;}
+  .font-card-actions {gap: 4px;}
+  .font-card-actions .icon-button {width: 33px; height: 33px;}
+}
+@media (max-width: 700px) {
+  .font-card-bottom {align-items: flex-start; flex-direction: column; gap: 12px;}
+}
+.font-card {position: relative; overflow: hidden; border-radius: 3px; box-shadow: inset 0 2px 0 rgba(255,255,255,.82), inset 0 -5px 16px rgba(121,71,29,.035); transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;}
+:root[data-theme="dark"] .font-card {box-shadow: inset 0 1px 0 rgba(255,247,233,.035), inset 0 -5px 16px rgba(0,0,0,.08);}
+.font-card::before {content: "✳"; position: absolute; top: 12px; right: 13px; z-index: 1; color: color-mix(in srgb, var(--accent) 56%, transparent); font-size: 11px; pointer-events: none;}
+.specimen-button {position: relative; margin: 8px 0 12px; padding: 20px 8px; border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--surface-muted) 24%, transparent), transparent 28%, transparent 72%, color-mix(in srgb, var(--surface-muted) 28%, transparent)); box-shadow: inset 0 3px 9px rgba(110,66,26,.035), inset 0 -3px 9px rgba(110,66,26,.025);}
+.font-card-bottom {padding-top: 18px;}
+@media (max-width: 700px) {
+  .font-card::before {top: 8px; right: 8px;}
+}
+.font-card {border-radius: 3px; box-shadow: none;}
+.font-card:hover {border-color: var(--accent); box-shadow: 0 8px 24px rgba(48,37,29,.045); transform: translateY(-2px);}
+.font-card {transform-origin: 50% 60%; will-change: transform, opacity;}
+.font-card .specimen-button {transition: background .2s ease;}
+.font-card:hover .specimen-button {background: color-mix(in srgb, var(--surface-muted) 55%, var(--surface));}
+.font-card-actions .icon-button {border: 0; box-shadow: none; background: transparent;}
+.font-card-actions .icon-button:hover {color: var(--accent-dark); transform: translateY(-1px);}
+.font-card-actions .open-button {color: var(--accent-dark);}
+.font-card-actions .open-button .hgi {font-size: 19px;}
+@media (prefers-reduced-motion: reduce) {
+  .font-card .specimen-button {transition: none;}
+}
+.font-card {border-radius: 16px; box-shadow: var(--shadow);}
+.font-card {border-color: var(--line); background: color-mix(in srgb, var(--surface) 95%, var(--accent-soft)); transition: border-color .22s ease, background .22s ease, box-shadow .22s ease;}
+.font-card:hover {border-color: color-mix(in srgb, var(--accent) 52%, var(--line)); box-shadow: 0 14px 34px rgba(65,42,24,.09);}
+.specimen-button {border-radius: 12px; background: color-mix(in srgb, var(--surface-muted) 64%, var(--surface));}
+.font-card-actions .icon-button {border-radius: 10px;}
+@media (max-width:760px) {
+  .font-card {box-shadow:0 6px 20px rgba(65,42,24,.045);}
+}
+.font-file-meta {display: grid; gap: 5px;}
+.font-file-meta span:first-child {overflow-wrap: anywhere;}
+.font-file-meta span:last-child {color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase;}
+@media (max-width: 700px) {
+  .font-grid {grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; border: 0;}
+  .font-card {min-width: 0; padding: 11px 10px 10px; border: 1px solid var(--line); border-top: 4px solid var(--accent) !important; border-radius: 14px; overflow: hidden;}
+  .specimen-button {min-height: 126px; padding: 12px 0; gap: 10px;}
+  .font-card-bottom {display: grid; gap: 9px; padding-top: 10px;}
+  .font-card-name h2 {overflow-wrap: anywhere; font-size: 13px;}
+  .font-card-name p {gap: 4px; font-size: 10px;}
+  .font-file-meta span:last-child {font-size: 9px;}
+  .font-card-actions {justify-content: space-between; gap: 4px;}
+  .font-card-actions .icon-button {width: 30px; height: 30px;}
+}
+.font-file-meta {display: block; margin: 0;}
+.font-file-meta span {color: var(--accent-dark); font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;}
+@media (min-width: 1600px) {
+  .font-grid {grid-template-columns: repeat(4, minmax(0, 1fr));}
+}
+.font-card {display: flex !important; flex-direction: column !important; gap: 0 !important; padding: 0 !important; border: 1px solid color-mix(in srgb, var(--line) 55%, transparent) !important; border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent) !important; border-radius: 16px !important; background: var(--surface) !important; overflow: hidden !important; height: 100% !important; transition: border-color .2s ease, box-shadow .2s ease !important;}
+.font-card:hover {border-color: color-mix(in srgb, var(--accent) 42%, var(--line)) !important; box-shadow: 0 16px 36px rgba(48,37,29,.10) !important; transform: none !important;}
+.font-card::before {content: none;}
+.font-card .specimen-button {display: flex !important; flex-direction: column !important; align-items: flex-start !important; justify-content: center !important; gap: 12px !important; width: 100% !important; min-height: 178px !important; margin: 0 !important; padding: 24px 18px !important; border: 0 !important; border-radius: 0 !important; background: color-mix(in srgb, var(--surface-muted) 48%, var(--surface)) !important; text-align: left !important; cursor: pointer !important;}
+.font-card .specimen {font-size: clamp(46px, 12vw, 64px) !important; line-height: 1 !important; color: var(--accent) !important;}
+.font-card .specimen-caption {display: block !important; font-size: 12.5px !important; line-height: 1.4 !important; color: var(--muted) !important;}
+.font-card .specimen-button.is-loading .specimen {opacity: .35;}
+.font-card .specimen-button.is-loading .specimen-caption {opacity: .35;}
+.font-card .specimen-button.is-failed .specimen {opacity: .5;}
+.font-card .font-card-bottom {display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; margin: 0 !important; padding: 15px 16px 16px !important; border-top: 1px solid color-mix(in srgb, var(--line) 40%, transparent) !important;}
+.font-card .font-card-name h2 {margin: 0 0 4px !important; font-size: 15px !important; font-weight: 800 !important; letter-spacing: -.01em !important; overflow-wrap: anywhere !important;}
+.font-card .font-file-meta {display: flex !important; align-items: center !important; gap: 7px !important; margin: 0 !important;}
+.font-card .font-file-meta span {color: var(--muted) !important; font-size: 10px !important; font-weight: 700 !important; letter-spacing: .08em !important; text-transform: uppercase !important;}
+.font-file-meta .meta-dot {width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: .45;}
+.font-card .font-card-actions {display: flex !important; gap: 2px !important; width: auto !important; justify-content: flex-end !important; margin: 0 !important;}
+.font-card .font-card-actions .icon-button {width: 34px !important; height: 34px !important; border: 0 !important; background: transparent !important; color: var(--muted) !important; border-radius: 10px !important; box-shadow: none !important;}
+.font-card .font-card-actions .icon-button:hover {color: var(--accent-dark) !important; background: color-mix(in srgb, var(--accent-soft) 65%, transparent) !important; transform: none;}
+.font-card .specimen-button.is-loading {position: relative !important; overflow: hidden !important;}
+.font-card .specimen-button.is-loading::after {content: ""; position: absolute; inset: 0; background-image: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--surface) 72%, transparent) 50%,
+    transparent 100%); background-size: 220% 100%; background-repeat: no-repeat; animation: typace-shimmer 1.35s linear infinite; pointer-events: none;}
+@media (prefers-reduced-motion: reduce) {
+  .font-card .specimen-button.is-loading::after {animation: none;}
+}
+.font-card .font-card-actions .icon-button.download-button {width: auto !important; padding: 0 11px !important; gap: 6px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;}
+.download-size {font-size: 10px !important; font-weight: 800 !important; letter-spacing: .04em !important; color: currentColor !important; white-space: nowrap;}
+.font-card .specimen {color: var(--accent) !important;}
+.font-new-badge {display: inline-flex; align-items: center; border: 1px solid currentColor; border-radius: 999px; padding: 1px 5px; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.07em; line-height: 1.4;}
