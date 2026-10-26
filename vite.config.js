@@ -8,6 +8,9 @@ const dist = resolve(root, "dist");
 const staticFiles = [
   "favicon.ico",
   "icon.png",
+  "icon-192.png",
+  "icon-512.png",
+  "icon-512-maskable.png",
   "og-image.png",
   "manifest.webmanifest",
   "humans.txt",

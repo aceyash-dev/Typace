@@ -286,7 +286,7 @@ export default function App() {
     <div className={"app-shell" + (isBrowse ? " browse-page" : isAccount ? " account-page" : isDevelopers ? " developers-route" : " home-page")}>
       <header className="site-header">
         <a className="brand" href="/" aria-label="Typace home">
-          <img className="brand-image" src="/icon.png" alt="" width="38" height="38" />
+          <img className="brand-image" src="/icon-192.png" alt="" width="38" height="38" />
           <span className="brand-word">Typace</span>
           <span className="brand-beta">BETA</span>
         </a>

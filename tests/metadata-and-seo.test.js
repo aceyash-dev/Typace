@@ -100,6 +100,18 @@ test("OpenAPI documents current API paths, schema values, and machine-client hea
     assert.equal("url" in response.body.components.schemas.Commit.properties, false);
 });
 
+test("PWA manifest icon sizes match the actual PNG dimensions", async () => {
+    const manifest = JSON.parse(await readFile(new URL("../manifest.webmanifest", import.meta.url), "utf8"));
+    assert.ok(manifest.icons.some(icon => icon.sizes === "192x192"));
+    assert.ok(manifest.icons.some(icon => icon.sizes === "512x512"));
+    assert.ok(manifest.icons.some(icon => icon.purpose === "maskable"));
+    for (const icon of manifest.icons) {
+        const bytes = await readFile(new URL(`../${icon.src.slice(1)}`, import.meta.url));
+        assert.equal(bytes.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+        assert.equal(`${bytes.readUInt32BE(16)}x${bytes.readUInt32BE(20)}`, icon.sizes);
+    }
+});
+
 test("sitemap exposes canonical discovery pages, not binary font assets", async () => {
     const response = mockResponse();
     await sitemapHandler({ method: "GET" }, response);
@@ -272,7 +284,7 @@ test("React landing focuses on the font catalog and uses the existing brand asse
     const styles = await readStyles();
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     const footer = await readFile(new URL("../src/components/SiteFooter.jsx", import.meta.url), "utf8");
-    for (const text of ["The catalog did not load.", "Try again", "PreviewDialog", "fontCssSnippet", "/api/openapi.json", 'src="/icon.png"']) {
+    for (const text of ["The catalog did not load.", "Try again", "PreviewDialog", "fontCssSnippet", "/api/openapi.json", 'src="/icon-192.png"']) {
         assert.ok(app.includes(text), "missing UI contract: " + text);
     }
     // The machine-readable docs link lives in the extracted footer component.
