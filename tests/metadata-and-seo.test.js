@@ -65,9 +65,8 @@ test("live catalog is sorted and never invents classifications or source dates",
         assert.equal(font.updatedAt, null);
         assert.equal(typeof font.isNew, "boolean");
     }
-    const batchAge = Date.now() - Date.parse("2026-10-09T18:20:59Z");
-    const batchIsRecent = batchAge >= 0 && batchAge < 7 * 24 * 60 * 60 * 1000;
-    assert.equal(fonts.find(font => font.file === "Akrobat.ttf")?.isNew, batchIsRecent);
+    // The curated latest-import set remains stable until a newer batch replaces it.
+    assert.equal(fonts.find(font => font.file === "Akrobat.ttf")?.isNew, true);
     assert.equal(fonts.find(font => font.file === "Aboreto.ttf")?.isNew, false);
     assert.deepEqual(fonts.map(font => font.name), [...fonts.map(font => font.name)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })));
 });
@@ -78,6 +77,10 @@ test("OpenAPI documents current API paths, schema values, and machine-client hea
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.openapi, "3.0.3");
     assert.deepEqual(response.body.components.schemas.Font.properties.category.enum, ["serif", "sans-serif", "unknown"]);
+    assert.equal(response.body.components.schemas.Font.properties.sizeBytes.type, "integer");
+    assert.equal(response.body.components.schemas.Health.properties.catalog.properties.ageSeconds.type, "integer");
+    assert.equal(response.body.components.schemas.Health.properties.catalog.properties.stale.type, "boolean");
+    assert.equal(response.body.components.schemas.Health.properties.catalog.properties.issue.type, "string");
     assert.match(response.body.info.description, /60 per minute per IP by default/);
     assert.deepEqual(response.body.components.schemas.Health.properties.catalog.properties.status.enum, ["ok", "degraded"]);
     assert.ok(response.body.paths["/api/health"]);
