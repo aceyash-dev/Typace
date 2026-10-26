@@ -1,0 +1,70 @@
+/* tokens.css
+   Design tokens: colour, type, radius, shadow scales.
+   Part of the Typace stylesheet split — see src/styles/index.css. */
+
+:root {
+  --bg: #fbf5e9;
+  --surface: #fffdf8;
+  --surface-muted: #f3e7d4;
+  --text: #30251f;
+  --muted: #78685b;
+  --line: color-mix(in srgb, #6f4d37 19%, transparent);
+  --accent: #ed7418;
+  --accent-dark: #b94b08;
+  --accent-soft: #ffead6;
+  --display-font: "Grandstander", cursive;
+  --radius: 16px;
+  --shadow: 0 10px 30px rgba(65, 42, 24, .055);
+  --peacock: #ed7418;
+  --haldi: #ed7418;
+  --vermilion: #ed7418;
+  --rani: #ed7418;
+  --surface-metal: #f9e9d3;
+  --specimen-ink: #b94b08;
+  --theme-image: none;
+}
+:root[data-theme="light"] {
+  --accent: #ed7418;
+  --accent-dark: #b94b08;
+  --accent-soft: #ffead6;
+  --peacock: #ed7418;
+  --vermilion: #ed7418;
+  --rani: #ed7418;
+  --specimen-ink: #b94b08;
+  --theme-image: none;
+}
+:root[data-theme="dark"] {
+  --peacock: #ff9b48;
+  --haldi: #ff9b48;
+  --vermilion: #ff9b48;
+  --rani: #ed7418;
+  --bg: #211a16;
+  --surface: #2b221d;
+  --surface-muted: #382a22;
+  --text: #f7eee1;
+  --muted: #c5b4a2;
+  --line: color-mix(in srgb, #d6b89d 22%, transparent);
+  --accent: #ed8952;
+  --accent-dark: #ffb184;
+  --accent-soft: #3c2b22;
+  --surface-metal: #49372a;
+  --shadow: 0 12px 34px rgba(0, 0, 0, .16);
+  color-scheme: dark;
+}
+:root {
+  /* Literal palette: fixed colours, identical in light and dark. */
+  --ink: #30251d;
+  --ink-soft: #78675a;
+  --ink-inverse: #f7eee1;
+  --paper: #fffdf7;
+  --paper-soft: #fffaf2;
+  --paper-bright: #fffdf8;
+  --paper-warm: #f9e9d3;
+  --paper-line: #e8d8c4;
+  --brand-orange: #ed7418;
+  --brand-orange-deep: #b94b08;
+  --stage-dark: #17120e;
+  --stage-dark-line: #2c221b;
+  --bg-warm: #fff7e9;
+  --surface-warm: #ffead6;
+}

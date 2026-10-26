@@ -1,7 +1,7 @@
 import test from "node:test";
 import { existsSync } from "node:fs";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { normalize, findFont, listFonts } from "../api/_lib/fonts.js";
 import { checkRateLimit } from "../api/_lib/rate-limit.js";
 import openapiHandler from "../api/openapi.json.js";
@@ -247,12 +247,26 @@ test("React shell keeps Grandstander and Hugeicons and removes the legacy inline
     assert.doesNotMatch(html, /function loadFonts\(\)|let previewRequestId/);
 });
 
+
+// The stylesheet is split into modules under src/styles; read them all in load order.
+async function readStyles() {
+    const root = new URL("../src/styles/", import.meta.url);
+    const entry = await readFile(new URL("index.css", root), "utf8");
+    const modules = [...entry.matchAll(/@import "\.\/(.+?)";/g)].map((match) => match[1]);
+    const order = modules.length ? modules : (await readdir(root, { recursive: true })).filter((name) => name.endsWith(".css"));
+    let css = "";
+    for (const name of order) {
+        css += await readFile(new URL(name, root), "utf8") + "\n";
+    }
+    return css;
+}
+
 test("React landing focuses on the font catalog and uses the existing brand assets", async () => {
     const app = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
     const card = await readFile(new URL("../src/components/FontCard.jsx", import.meta.url), "utf8");
     const actions = await readFile(new URL("../src/components/FontActions.jsx", import.meta.url), "utf8");
     const preview = await readFile(new URL("../src/components/PreviewDialog.jsx", import.meta.url), "utf8");
-    const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+    const styles = await readStyles();
     const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
     const footer = await readFile(new URL("../src/components/SiteFooter.jsx", import.meta.url), "utf8");
     for (const text of ["The catalog did not load.", "Try again", "PreviewDialog", "fontCssSnippet", "/api/openapi.json", 'src="/icon.png"']) {
@@ -285,7 +299,7 @@ test("React UI behavior is separated into reusable components, hooks, and utilit
 });
 
 test("React styles are responsive, accessible, and honor reduced-motion preferences", async () => {
-    const css = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+    const css = await readStyles();
     assert.match(css, /@media \(max-width: 700px\)/);
     assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
     assert.match(css, /--display-font: "Grandstander"/);

@@ -154,7 +154,13 @@ export default function handler(req, res) {
                     operationId: "getFormatsPage",
                     summary: "Render the HTML font-format directory",
                     parameters: [{ name: "slug", in: "query", description: "Optional format slug for a detail page.", schema: { type: "string", enum: ["ttf", "otf", "woff2"] } }],
-                    responses: { "200": { description: "HTML format directory or format detail page.", content: { "text/html": { schema: { type: "string" } } } } }
+                    responses: {
+                        "200": { description: "HTML format directory or format detail page.", content: { "text/html": { schema: { type: "string" } } } },
+                        "404": { description: "Format not found" },
+                        "405": ok("Method not allowed", errorRef),
+                        "429": ok("Rate limit exceeded", errorRef),
+                        "500": ok("Catalog unavailable", errorRef)
+                    }
                 }
             },
             "/api/faq": {

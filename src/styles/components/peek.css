@@ -1,0 +1,29 @@
+/* components/peek.css
+   Peek view: compact specimen wall tiles.
+   Part of the Typace stylesheet split — see src/styles/index.css. */
+
+.font-grid.peek-grid {grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; align-items: stretch;}
+.peek-tile {display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;}
+.peek-tile:hover {border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow: 0 10px 26px rgba(65,42,24,.08); transform: translateY(-2px);}
+.peek-sample {display: flex; flex: 1 1 auto; align-items: center; justify-content: center; min-height: 132px; padding: 18px 14px; border: 0; background: transparent; cursor: pointer; text-align: center;}
+.peek-glyph {display: block; width: 100%; max-width: 100%; overflow: hidden; color: var(--text); font-size: clamp(24px, 3.2vw, 40px); line-height: 1.05; letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap;}
+.peek-glyph.is-loading {opacity: .3;}
+.peek-glyph.is-failed {opacity: .5;}
+.peek-bar {display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-top: 1px solid var(--line);}
+.peek-format {color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .12em;}
+.peek-actions {display: flex; gap: 2px;}
+.peek-actions .icon-button {width: 30px; height: 30px; border: 0; background: transparent; color: var(--muted);}
+.peek-actions .icon-button:hover {color: var(--accent-dark); background: var(--surface-muted);}
+@media (max-width: 760px) {
+  .font-grid.peek-grid {grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;}
+  .peek-sample {min-height: 104px; padding: 14px 10px;}
+  .peek-glyph {font-size: clamp(20px, 7vw, 30px);}
+}
+.peek-tags {display: inline-flex; align-items: center; gap: 6px; min-width: 0;}
+.peek-new {display: inline-flex; align-items: center; padding: 2px 5px; border-radius: 5px; background: var(--accent); color: var(--paper-soft); font-size: 8px; font-weight: 800; letter-spacing: .1em;}
+@media (max-width: 760px) {
+  .font-grid.peek-grid {gap: 9px;}
+  .peek-glyph {font-size: clamp(19px, 6.5vw, 28px);}
+}
+.peek-actions .icon-button.download-button {width: auto !important; padding: 0 11px !important; gap: 6px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;}
+.peek-glyph {color: var(--accent) !important;}
