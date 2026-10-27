@@ -1,0 +1,5 @@
+/* Keep the consent panel above its own backdrop. Preferences retain their
+   existing stacking level and, as later DOM content, can still cover the banner. */
+.cookie-banner {
+  z-index: 1199;
+}
