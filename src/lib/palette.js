@@ -111,7 +111,7 @@ function preferredProvider() {
     return PHOTO_PROVIDER_IDS.includes(value) ? value : PHOTO_PROVIDER_IDS[0];
   } catch { return PHOTO_PROVIDER_IDS[0]; }
 }
-export function pickSeed() { return nextUniqueSeed(); }
+export function pickSeed() { return readSeed() || nextUniqueSeed(); }
 export function reshuffleSeed() { return nextUniqueSeed(); }
 
 function rgbToHsl(r, g, b) {
