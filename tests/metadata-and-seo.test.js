@@ -345,6 +345,21 @@ test("React styles are responsive, accessible, and honor reduced-motion preferen
     assert.match(css, /:focus-visible/);
 });
 
+test("deployment config pins the function region and lets MCP use POST", async () => {
+    const config = JSON.parse(await readFile(new URL("../vercel.json", import.meta.url), "utf8"));
+    // Functions and the rate-limit store must sit in the same region, or every
+    // check pays a cross-continent round trip.
+    assert.deepEqual(config.regions, ["bom1"], "functions should run in the store's region");
+
+    const mcpIndex = config.headers.findIndex(rule => rule.source === "/api/mcp");
+    const apiIndex = config.headers.findIndex(rule => rule.source === "/api/(.*)");
+    assert.ok(mcpIndex >= 0, "/api/mcp needs its own header rule");
+    assert.ok(mcpIndex > apiIndex, "the MCP rule must come after the blanket rule to override it");
+
+    const methods = config.headers[mcpIndex].headers.find(header => header.key === "Access-Control-Allow-Methods");
+    assert.match(methods.value, /POST/, "the blanket /api rule would otherwise block MCP's POST");
+});
+
 test("Vite build scripts and modern React dependencies are configured", async () => {
     const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
     assert.equal(pkg.scripts.build, "vite build");
