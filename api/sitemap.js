@@ -1,5 +1,5 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
-import { listFonts } from "./_lib/fonts.js";
+import { listFonts, fontSlug } from "./_lib/fonts.js";
 import { applyCommonHeaders } from "./_lib/respond.js";
 
 const BASE_URL = "https://typace.ace-base.cc";
@@ -28,17 +28,6 @@ function escapeXml(value) {
         .replace(/'/g, "&apos;");
 }
 
-// Kept in sync with slugFor() in src/lib/fonts.js so sitemap URLs match the
-// shareable specimen deep links the app generates.
-function slugify(value) {
-    return String(value || "")
-        .normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-}
-
 export default async function handler(req, res) {
     applyCommonHeaders(res, req);
     if (req.method === "OPTIONS") return res.status(204).end();
@@ -52,7 +41,7 @@ export default async function handler(req, res) {
     try {
         const fonts = await listFonts();
         fontPages = fonts
-            .map(font => ({ path: `/font/${slugify(font.name)}`, changefreq: "monthly", priority: "0.7" }))
+            .map(font => ({ path: `/font/${fontSlug(font.name)}`, changefreq: "monthly", priority: "0.7" }))
             .filter(page => page.path !== "/font/");
     } catch {
         // The sitemap still lists the static pages if the catalog is unavailable.

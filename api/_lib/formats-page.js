@@ -1,4 +1,4 @@
-import { listFonts } from "./fonts.js";
+import { listFonts, fontSlug } from "./fonts.js";
 import { applyCommonHeaders } from "./respond.js";
 import { enforceRateLimit } from "./rate-limit.js";
 
@@ -14,12 +14,6 @@ function escapeHTML(value = "") {
     return String(value).replace(/[&<>"']/g, char => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     }[char]));
-}
-
-function slugify(value) {
-    return String(value || "")
-        .normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
 export default async function handler(req, res) {
@@ -43,7 +37,7 @@ export default async function handler(req, res) {
 
         const items = fonts
             .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }))
-            .map(font => `<li><a href="/font/${slugify(font.name)}"><strong>${escapeHTML(font.name)}</strong><span>${escapeHTML(font.name)} is available as a ${escapeHTML(label)} (${escapeHTML(type.toUpperCase())}) font through Typace.</span></a></li>`)
+            .map(font => `<li><a href="/font/${fontSlug(font.name)}"><strong>${escapeHTML(font.name)}</strong><span>${escapeHTML(font.name)} is available as a ${escapeHTML(label)} (${escapeHTML(type.toUpperCase())}) font through Typace.</span></a></li>`)
             .join("");
 
         const faqs = [
@@ -57,7 +51,7 @@ export default async function handler(req, res) {
               isPartOf: { "@type": "WebSite", name: "Typace", url: `${BASE}/` }, numberOfItems: fonts.length },
             { "@type": "ItemList", "@id": `${canonical}#list`, numberOfItems: fonts.length,
               itemListElement: fonts.slice(0, 100).map((font, index) => ({
-                  "@type": "ListItem", position: index + 1, name: font.name, url: `${BASE}/font/${slugify(font.name)}` })) },
+                  "@type": "ListItem", position: index + 1, name: font.name, url: `${BASE}/font/${fontSlug(font.name)}` })) },
             { "@type": "BreadcrumbList", "@id": `${canonical}#breadcrumb`, itemListElement: [
                 { "@type": "ListItem", position: 1, name: "Home", item: `${BASE}/` },
                 { "@type": "ListItem", position: 2, name: "Formats", item: `${BASE}/formats` },
