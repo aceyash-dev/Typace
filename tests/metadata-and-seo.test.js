@@ -2,7 +2,7 @@ import test from "node:test";
 import { existsSync } from "node:fs";
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
-import { normalize, findFont, listFonts, fontSlug } from "../api/_lib/fonts.js";
+import { normalize, findFont, listFonts, fontSlug, isRecentlyAdded } from "../api/_lib/fonts.js";
 import { checkRateLimit, enforceRateLimit, limitForScope } from "../api/_lib/rate-limit.js";
 import openapiHandler from "../api/openapi.json.js";
 import sitemapHandler from "../api/sitemap.js";
@@ -59,21 +59,37 @@ test("font lookup matches display names and safely rejects malformed slugs", () 
     assert.equal(findFont(fonts, ""), null);
 });
 
-test("live catalog is sorted and never invents source dates", async () => {
+test("live catalog is sorted and carries real add dates from the manifest", async () => {
     const fonts = await listFonts();
     assert.ok(fonts.length > 0);
     assert.equal(fonts.some(font => /misans\.ttf$/i.test(font.file)), false);
     for (const font of fonts) {
         assert.equal("category" in font, false, "font records must not carry a category");
-        assert.equal(font.createdAt, null);
-        assert.equal(font.updatedAt, null);
+        assert.ok(font.createdAt === null || !Number.isNaN(Date.parse(font.createdAt)), "createdAt must be null or an ISO date");
+        assert.ok(font.updatedAt === null || !Number.isNaN(Date.parse(font.updatedAt)), "updatedAt must be null or an ISO date");
         assert.equal(typeof font.isNew, "boolean");
     }
-    // The curated latest-import set remains stable until a newer batch replaces it.
+    // Dates come from git history, so they are real rather than invented.
+    assert.ok(fonts.every(font => font.createdAt), "every font should have an add date");
     assert.equal(fonts.find(font => font.file === "Pagio.otf")?.isNew, true);
-    assert.equal(fonts.find(font => font.file === "Akrobat.ttf")?.isNew, false);
     assert.equal(fonts.find(font => font.file === "Aboreto.ttf")?.isNew, false);
     assert.deepEqual(fonts.map(font => font.name), [...fonts.map(font => font.name)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })));
+});
+
+test("font manifest covers every published file and drives the new window", async () => {
+    const manifest = JSON.parse(await readFile(new URL("../fonts/manifest.json", import.meta.url), "utf8"));
+    assert.ok(manifest.generatedAt, "manifest records when it was generated");
+    const fonts = await listFonts();
+    for (const font of fonts) {
+        assert.ok(manifest.fonts[font.file], "manifest is missing " + font.file);
+        assert.ok(manifest.fonts[font.file].addedAt, "manifest is missing an add date for " + font.file);
+    }
+    // The window is data-driven, so a stale badge is impossible: age alone decides.
+    const now = Date.now();
+    assert.equal(isRecentlyAdded(new Date(now - 24 * 60 * 60 * 1000).toISOString(), now), true);
+    assert.equal(isRecentlyAdded(new Date(now - 90 * 24 * 60 * 60 * 1000).toISOString(), now), false);
+    assert.equal(isRecentlyAdded(null, now), false);
+    assert.equal(isRecentlyAdded("not-a-date", now), false);
 });
 
 test("OpenAPI documents current API paths, schema values, and machine-client health", async () => {

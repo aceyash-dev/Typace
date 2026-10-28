@@ -10,17 +10,44 @@ export const FONT_TYPES = {
 
 const CATALOG_CACHE_TTL_MS = 30_000;
 
-// Curated list for the latest known catalog import. Replace this set when a newer batch is added.
-// Membership, not elapsed wall-clock time, keeps the Newest filter useful between imports.
-const RECENT_FONT_FILES = new Set([
-    "Alcazar Bastion.ttf",
-    "Clarendon.otf",
-    "Hut Sut Ralston.ttf",
-    "Indus.ttf",
-    "LOKICOLA.ttf",
-    "Pagio.otf",
-    "Puma.ttf"
-]);
+// How long an addition counts as "new". A window rather than a fixed batch list:
+// the manifest carries real add dates, so this decays on its own and nobody has
+// to remember to update a set when fonts are added.
+const NEW_WINDOW_DAYS = Number.parseInt(process.env.TYPACE_NEW_WINDOW_DAYS || "14", 10) || 14;
+const NEW_WINDOW_MS = NEW_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+const MANIFEST_TTL_MS = 30_000;
+
+let manifestCache = null;
+let manifestCachedAt = 0;
+
+/**
+ * fonts/manifest.json, generated from git history by scripts/font-manifest.mjs.
+ * Absent manifest means every date is unknown, which degrades to createdAt null
+ * and nothing flagged new — never to a guess.
+ */
+async function readManifest() {
+    const now = Date.now();
+    if (manifestCache && now - manifestCachedAt < MANIFEST_TTL_MS) return manifestCache;
+    try {
+        const raw = await fs.readFile(path.join(process.cwd(), "fonts", "manifest.json"), "utf8");
+        const parsed = JSON.parse(raw);
+        manifestCache = parsed && typeof parsed === "object" && parsed.fonts && typeof parsed.fonts === "object"
+            ? parsed.fonts
+            : {};
+    } catch {
+        manifestCache = {};
+    }
+    manifestCachedAt = now;
+    return manifestCache;
+}
+
+export function isRecentlyAdded(addedAt, now = Date.now()) {
+    const timestamp = Date.parse(String(addedAt || ""));
+    if (!Number.isFinite(timestamp)) return false;
+    const age = now - timestamp;
+    // Tolerate a small clock skew so a just-committed font is not "from the future".
+    return age <= NEW_WINDOW_MS && age > -24 * 60 * 60 * 1000;
+}
 
 let cachedCatalog = null;
 let cachedCatalogAt = 0;
@@ -163,7 +190,7 @@ async function readFontFiles(directory, relativeDirectory = "") {
     return files;
 }
 
-async function getFontMetadata(entry) {
+async function getFontMetadata(entry, manifest = {}) {
     const { name: fileName, relativePath, absolutePath } = entry;
     const extension = path.extname(fileName).toLowerCase();
     const metadata = FONT_TYPES[extension];
@@ -180,9 +207,9 @@ async function getFontMetadata(entry) {
             .split(path.sep)
             .map(encodeURIComponent)
             .join("/")}`,
-        createdAt: null,
-        updatedAt: null,
-        isNew: RECENT_FONT_FILES.has(relativePath.split(path.sep).join("/").split("/").pop())
+        createdAt: manifest[fileName]?.addedAt || null,
+        updatedAt: manifest[fileName]?.updatedAt || null,
+        isNew: isRecentlyAdded(manifest[fileName]?.addedAt)
     };
 }
 
@@ -201,12 +228,13 @@ async function buildCatalog() {
         throw error;
     }
     catalogIssue = null;
+    const manifest = await readManifest();
     const fonts = [];
     const batchSize = 16;
 
     for (let index = 0; index < entries.length; index += batchSize) {
         const batch = entries.slice(index, index + batchSize);
-        fonts.push(...await Promise.all(batch.map(getFontMetadata)));
+        fonts.push(...await Promise.all(batch.map((entry) => getFontMetadata(entry, manifest))));
     }
 
     return fonts.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));

@@ -138,7 +138,13 @@ export default function App() {
       return matchesFormat && (!needle || haystack.includes(needle));
     });
     results.sort((a, b) => {
-      if (sort === "new" && Boolean(a.isNew) !== Boolean(b.isNew)) return a.isNew ? -1 : 1;
+      // Newest is the real add date from the manifest, not a "new" flag, so a
+      // font keeps its position after the badge has aged out.
+      if (sort === "new") {
+        const left = Date.parse(String(a.createdAt || "")) || 0;
+        const right = Date.parse(String(b.createdAt || "")) || 0;
+        if (left !== right) return right - left;
+      }
       const compare = String(a.name).localeCompare(String(b.name), undefined, { sensitivity: "base" });
       return sort === "za" ? -compare : compare;
     });

@@ -22,7 +22,7 @@
 
 The live GET /api/fonts response is the authoritative list of published font assets. Do not hardcode font names or assume every format exists for every family.
 
-Each record includes name, file, type, format, url, sizeBytes, createdAt, updatedAt, and isNew. Dates and sizeBytes may be null. isNew marks assets added in a recent catalog batch; do not treat it as a general popularity or quality signal. Do not infer designers, foundries, licenses, glyph coverage, variable axes, weight, style, or OpenType features without a reliable published source.
+Each record includes name, file, type, format, url, sizeBytes, createdAt, updatedAt, and isNew. createdAt and updatedAt are real git add and modify dates; sizeBytes may be null. isNew is true for 14 days after createdAt. isNew marks assets added in a recent catalog batch; do not treat it as a general popularity or quality signal. Do not infer designers, foundries, licenses, glyph coverage, variable axes, weight, style, or OpenType features without a reliable published source.
 
 ## API usage
 

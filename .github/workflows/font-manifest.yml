@@ -1,0 +1,51 @@
+name: font manifest
+
+# fonts/manifest.json carries each typeface's add date, which the catalog uses
+# for the Newest sort and the "new" badge. The filesystem cannot supply it on
+# Vercel (every mtime is the build time), so it is derived from git history here
+# and committed back.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "fonts/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: font-manifest
+  cancel-in-progress: true
+
+jobs:
+  manifest:
+    # The commit this workflow makes must not re-trigger it.
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # --diff-filter=A --follow needs the full history to find the commit
+          # that first added each file.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Rebuild the manifest from git history
+        run: node scripts/font-manifest.mjs
+
+      - name: Commit if it changed
+        run: |
+          if git diff --quiet -- fonts/manifest.json; then
+            echo "manifest already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add fonts/manifest.json
+          git commit -m "chore(fonts): refresh manifest [skip ci]"
+          git push
