@@ -25,8 +25,9 @@ function hashSeed(seed) {
 }
 
 /**
- * Independent free image sources, each CORS-enabled so the canvas stays
- * readable. They are tried in a seed-rotated order: any one of them failing
+ * Independent free image sources — all keyless, each CORS-enabled so the canvas
+ * stays readable. Adding a provider that needs an API key is not supported: the
+ * proxy has no credentials and the client cannot hold any. They are tried in a seed-rotated order: any one of them failing
  * (outage, block, tainted canvas) simply moves on to the next, and if all of
  * them fail we still resolve a palette locally without touching the network.
  */
@@ -57,8 +58,9 @@ export const PROVIDERS = [
   },
   {
     // Same-origin proxy. Not subject to CORS, so it is the one source that can
-    // never be blocked by the browser — and it is where the keyed providers
-    // (Unsplash, Pexels) live, since those cannot be called from a page at all.
+    // never be blocked by the browser. It serves the same keyless providers as
+    // the direct entries above — no API key is used anywhere in this pipeline,
+    // so nothing here needs credentials to be provisioned or rotated.
     // Always tried last, after every direct provider.
     id: "typace",
     label: "Typace image proxy",

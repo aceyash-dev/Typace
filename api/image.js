@@ -25,14 +25,22 @@ function cleanSeed(value) {
   return String(value || "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64) || "typace";
 }
 
-/** Free providers. Keep URL construction valid and seed-stable. */
+/**
+ * Keyless providers, in rotation order. None of these require an API key, an
+ * account, or any credential: the proxy holds no image-service secrets, so a
+ * provider that needed one could not be served here anyway.
+ */
+export const KEYLESS_PROVIDER_IDS = ["picsum", "loremflickr", "dicebear", "robohash"];
+
+/** Keep URL construction valid and seed-stable. */
 function baseProviders() {
-  return [
-    { id: "picsum", pick: (seed) => "https://picsum.photos/seed/" + encodeURIComponent(seed) + "/240/240" },
-    { id: "loremflickr", pick: (seed) => "https://loremflickr.com/240/240/abstract?lock=" + (hashSeed(seed) % 9999) },
-    { id: "dicebear", pick: (seed) => "https://api.dicebear.com/9.x/shapes/png?seed=" + encodeURIComponent(seed) + "&size=240" },
-    { id: "robohash", pick: (seed) => "https://robohash.org/" + encodeURIComponent(seed) + ".png?size=240x240" },
-  ];
+  const pickers = {
+    picsum: (seed) => "https://picsum.photos/seed/" + encodeURIComponent(seed) + "/240/240",
+    loremflickr: (seed) => "https://loremflickr.com/240/240/abstract?lock=" + (hashSeed(seed) % 9999),
+    dicebear: (seed) => "https://api.dicebear.com/9.x/shapes/png?seed=" + encodeURIComponent(seed) + "&size=240",
+    robohash: (seed) => "https://robohash.org/" + encodeURIComponent(seed) + ".png?size=240x240",
+  };
+  return KEYLESS_PROVIDER_IDS.map((id) => ({ id, pick: pickers[id] }));
 }
 
 async function fetchImage(url) {

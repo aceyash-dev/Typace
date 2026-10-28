@@ -15,7 +15,8 @@ import healthHandler from "../api/health.js";
 import { escapeCSSString } from "../api/font-page.js";
 import { safeDecodePathSegment } from "../src/lib/routes.js";
 import { downloadNameFor, fontSizeLabel, fontTypeLabel, slugFor } from "../src/lib/fonts.js";
-import { pickSeed } from "../src/lib/palette.js";
+import { pickSeed, PROVIDERS } from "../src/lib/palette.js";
+import { KEYLESS_PROVIDER_IDS } from "../api/image.js";
 import formatsHandler from "../api/formats.js";
 
 function mockResponse() {
@@ -443,6 +444,24 @@ test("theme seed is reused on reload instead of being regenerated", () => {
     } finally {
         if (previous === undefined) delete globalThis.localStorage;
         else globalThis.localStorage = previous;
+    }
+});
+
+test("image providers are keyless and stay in sync across client, proxy, and OpenAPI", () => {
+    // The palette extractor and the proxy must agree on the provider set, and no
+    // provider may need a credential the proxy does not hold.
+    const direct = PROVIDERS.filter(provider => !provider.sameOrigin).map(provider => provider.id);
+    assert.deepEqual(direct, KEYLESS_PROVIDER_IDS);
+
+    const response = mockResponse();
+    openapiHandler({ method: "GET" }, response);
+    const parameter = response.body.paths["/api/image"].get.parameters.find(entry => entry.name === "provider");
+    assert.deepEqual(parameter.schema.enum, KEYLESS_PROVIDER_IDS);
+
+    for (const provider of PROVIDERS) {
+        const url = provider.url("test-seed", 200);
+        assert.doesNotMatch(url, /api[_-]?key|access[_-]?key|client[_-]?id|authorization|token=/i,
+            provider.id + " must not require a key");
     }
 });
 
