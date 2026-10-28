@@ -253,7 +253,7 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
             </div>
             <label className="sample-label" htmlFor="sample-text">Try your own text</label>
             <input id="sample-text" className="sample-input" value={sample} maxLength={180} onChange={(event) => setSample(event.target.value)} placeholder="Type something…" />
-            <div className="preview-presets" aria-label="Specimen presets"><button type="button" onClick={() => setSample("Aa Bb Cc 0123")}>Aa / 123</button><button type="button" onClick={() => setSample("Sphinx of black quartz, judge my vow.")}>Pangram</button><button type="button" onClick={() => setSample("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz")}>Alphabet</button></div>
+            <div className="preview-presets" role="group" aria-label="Specimen presets"><button type="button" onClick={() => setSample("Aa Bb Cc 0123")}>Aa / 123</button><button type="button" onClick={() => setSample("Sphinx of black quartz, judge my vow.")}>Pangram</button><button type="button" onClick={() => setSample("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz")}>Alphabet</button></div>
           </div>
           <div className="copy-variants">
             <div className="copy-lang">
@@ -283,7 +283,7 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
             </a>
           </div>
           {(onPrev || onNext) && (
-            <div className="preview-nav" aria-label="Browse typefaces">
+            <div className="preview-nav" role="group" aria-label="Browse typefaces">
               <button className="icon-button" type="button" onClick={onPrev} disabled={!onPrev} aria-label="Previous typeface"><Icon name="arrow-left-01" /></button>
               <span className="preview-nav-hint">Swipe to browse</span>
               <button className="icon-button" type="button" onClick={onNext} disabled={!onNext} aria-label="Next typeface"><Icon name="arrow-right-01" /></button>
