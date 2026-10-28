@@ -45,18 +45,6 @@ export const PROVIDERS = [
       "https://loremflickr.com/" + size + "/" + size + "/abstract?lock=" + (hashSeed(seed) % 9999),
   },
   {
-    id: "dicebear",
-    label: "DiceBear",
-    url: (seed, size) =>
-      "https://api.dicebear.com/9.x/shapes/png?seed=" + encodeURIComponent(seed) + "&size=" + size,
-  },
-  {
-    id: "robohash",
-    label: "Robohash",
-    url: (seed, size) =>
-      "https://robohash.org/" + encodeURIComponent(seed) + ".png?size=" + size + "x" + size,
-  },
-  {
     // Same-origin proxy. Not subject to CORS, so it is the one source that can
     // never be blocked by the browser. It serves the same keyless providers as
     // the direct entries above — no API key is used anywhere in this pipeline,
@@ -85,7 +73,7 @@ function writeSeed(value) {
 const SEED_HISTORY_KEY = "typace-theme-seed-history";
 const PROVIDER_CURSOR_KEY = "typace-image-provider-cursor";
 const PROVIDER_HINT_KEY = "typace-image-provider-hint";
-const PHOTO_PROVIDER_IDS = ["picsum", "loremflickr", "dicebear", "robohash"];
+const PHOTO_PROVIDER_IDS = ["picsum", "loremflickr"];
 
 function nextUniqueSeed() {
   let history = [];

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { PROVIDERS, brandTheme, themeFromColor } from "../src/lib/palette.js";
 
 test("image providers produce valid URLs with encoded seeds and dimensions", () => {
+  // Every provider must be a photograph source; generated avatars were removed.
   const seed = "theme seed/with spaces";
   const urls = PROVIDERS.map((provider) => ({ provider, url: provider.url(seed, 240) }));
 
@@ -13,8 +14,6 @@ test("image providers produce valid URLs with encoded seeds and dimensions", () 
 
   assert.match(urls.find(({ provider }) => provider.id === "picsum").url, /\/240\/240$/);
   assert.match(urls.find(({ provider }) => provider.id === "loremflickr").url, /\?lock=\d+$/);
-  assert.match(urls.find(({ provider }) => provider.id === "dicebear").url, /\/shapes\/png\?seed=.*&size=240$/);
-  assert.match(urls.find(({ provider }) => provider.id === "robohash").url, /\.png\?size=240x240$/);
   assert.equal(urls.find(({ provider }) => provider.id === "typace").url, "/api/image?seed=theme%20seed%2Fwith%20spaces&provider=picsum");
 });
 

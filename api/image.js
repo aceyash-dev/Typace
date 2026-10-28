@@ -35,7 +35,7 @@ function cleanSeed(value) {
  * `access-control-allow-origin`, otherwise the canvas is tainted and the
  * palette extractor cannot sample it.
  */
-export const DIRECT_PROVIDER_IDS = ["picsum", "loremflickr", "dicebear", "robohash"];
+export const DIRECT_PROVIDER_IDS = ["picsum", "loremflickr"];
 
 /**
  * Every keyless provider the proxy will try, in rotation order. None of these
@@ -49,12 +49,13 @@ export const KEYLESS_PROVIDER_IDS = [...DIRECT_PROVIDER_IDS, "cataas", "placekea
 /**
  * Keep URL construction valid and seed-stable. cataas and placekeanu have no
  * seed parameter of their own; variety comes from the rotation, not the seed.
+ * Every source here returns a photograph. Generated avatars and geometric
+ * patterns were removed: they carry almost no colour information, so they made
+ * a worse accent than the brand fallback they replaced.
  */
 const PICKERS = {
   picsum: (seed) => "https://picsum.photos/seed/" + encodeURIComponent(seed) + "/240/240",
   loremflickr: (seed) => "https://loremflickr.com/240/240/abstract?lock=" + (hashSeed(seed) % 9999),
-  dicebear: (seed) => "https://api.dicebear.com/9.x/shapes/png?seed=" + encodeURIComponent(seed) + "&size=240",
-  robohash: (seed) => "https://robohash.org/" + encodeURIComponent(seed) + ".png?size=240x240",
   cataas: () => "https://cataas.com/cat?width=240&height=240",
   placekeanu: () => "https://placekeanu.com/240/240",
 };
