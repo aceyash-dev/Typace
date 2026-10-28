@@ -1,4 +1,4 @@
-import { listFonts, findFont } from "./_lib/fonts.js";
+import { listFonts, findFont, fontSlug } from "./_lib/fonts.js";
 import { applyCommonHeaders } from "./_lib/respond.js";
 import { enforceRateLimit } from "./_lib/rate-limit.js";
 
@@ -18,15 +18,6 @@ export function escapeCSSString(value = "") {
 function serializeJSONForHTML(value) {
     // Prevent data inside script elements from being parsed as HTML markup.
     return JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
-}
-
-function slugify(value) {
-    return String(value || "")
-        .normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
 }
 
 function formatLabel(font) {
@@ -61,7 +52,7 @@ export default async function handler(req, res) {
 
         const name = escapeHTML(font.name);
         const cssFamily = escapeCSSString(font.name);
-        const slug = slugify(font.name);
+        const slug = fontSlug(font.name);
         const type = String(font.type || "").toUpperCase();
         const typeSlug = String(font.type || "").toLowerCase();
         const label = formatLabel(font);

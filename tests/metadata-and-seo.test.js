@@ -2,7 +2,7 @@ import test from "node:test";
 import { existsSync } from "node:fs";
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
-import { normalize, findFont, listFonts } from "../api/_lib/fonts.js";
+import { normalize, findFont, listFonts, fontSlug } from "../api/_lib/fonts.js";
 import { checkRateLimit } from "../api/_lib/rate-limit.js";
 import openapiHandler from "../api/openapi.json.js";
 import sitemapHandler from "../api/sitemap.js";
@@ -14,7 +14,9 @@ import cssHandler from "../api/css.js";
 import healthHandler from "../api/health.js";
 import { escapeCSSString } from "../api/font-page.js";
 import { safeDecodePathSegment } from "../src/lib/routes.js";
-import { downloadNameFor, fontSizeLabel, fontTypeLabel } from "../src/lib/fonts.js";
+import { downloadNameFor, fontSizeLabel, fontTypeLabel, slugFor } from "../src/lib/fonts.js";
+import { pickSeed } from "../src/lib/palette.js";
+import formatsHandler from "../api/formats.js";
 
 function mockResponse() {
     return {
@@ -98,6 +100,8 @@ test("OpenAPI documents current API paths, schema values, and machine-client hea
     assert.ok(response.body.paths["/api/commit"]);
     assert.deepEqual(response.body.components.schemas.Commit.properties.source.enum, ["deployment", "github"]);
     assert.equal("url" in response.body.components.schemas.Commit.properties, false);
+    assert.doesNotMatch(response.body.paths["/api/fonts"].get.description, /[\u00c2\u00e2][\u0080-\u00bf]/);
+    assert.doesNotMatch(response.body.paths["/api/fonts"].get.responses["304"].description, /[\u00c2\u00e2][\u0080-\u00bf]/);
 });
 
 test("PWA manifest icon sizes match the actual PNG dimensions", async () => {
@@ -389,6 +393,56 @@ test("privacy, terms, cookie, security, and disclosure files are present", async
     assert.match(security, /Policy: https:\/\/typace\.ace-base\.cc\/security/);
 });
 
+
+test("server and client font slugs stay in sync for canonical URL fixtures", () => {
+    const fixtures = ["Café Font!", "Avenir Next", "École Display", "Bodoni--Moda", "東京 Gothic"];
+    for (const name of fixtures) assert.equal(fontSlug(name), slugFor({ name }));
+});
+
+test("formats landing page contains valid Unicode punctuation", async () => {
+    const response = mockResponse();
+    await formatsHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.212" } }, response);
+    assert.equal(response.statusCode, 200);
+    assert.match(response.body, /Font Formats — WOFF2/);
+    assert.match(response.body, /<\/a> · <a href=/);
+    assert.doesNotMatch(response.body, /\u00e2\u0080\u0094|\u00c2\u00b7/);
+});
+
+test("legal disclosures accurately distinguish self-hosted fonts from external icons", async () => {
+    const legal = await readFile(new URL("../src/components/LegalPage.jsx", import.meta.url), "utf8");
+    assert.match(legal, /serves the Grandstander typeface from its own domain/);
+    assert.match(legal, /Grandstander is self-hosted by Typace/);
+    assert.doesNotMatch(legal, /Grandstander font from Google Fonts|Grandstander is requested from Google Fonts/);
+});
+
+test("specimen dialog labels its preset and navigation groups", async () => {
+    const dialog = await readFile(new URL("../src/components/PreviewDialog.jsx", import.meta.url), "utf8");
+    assert.match(dialog, /className="preview-presets" role="group" aria-label="Specimen presets"/);
+    assert.match(dialog, /className="preview-nav" role="group" aria-label="Browse typefaces"/);
+});
+
+test("primary orange controls use AA-contrast text in both themes", async () => {
+    const css = await readFile(new URL("../src/styles/components/controls.css", import.meta.url), "utf8");
+    assert.match(css, /\.button-primary \{padding: 13px 18px; background: var\(--accent\); color: var\(--ink\);\}/);
+    assert.match(css, /\.header-cta \{gap: 12px; padding: 14px 18px; border-radius: 4px; background: var\(--accent\); color: var\(--ink\);\}/);
+    assert.match(css, /\.view-switch button\.active \{background: var\(--accent\); color: var\(--ink\);\}/);
+});
+
+test("theme seed is reused on reload instead of being regenerated", () => {
+    const values = new Map([["typace-theme-seed", "stable-seed"]]);
+    const previous = globalThis.localStorage;
+    globalThis.localStorage = {
+        getItem(key) { return values.has(key) ? values.get(key) : null; },
+        setItem(key, value) { values.set(key, String(value)); }
+    };
+    try {
+        assert.equal(pickSeed(), "stable-seed");
+        assert.equal(values.get("typace-theme-seed-history"), undefined);
+    } finally {
+        if (previous === undefined) delete globalThis.localStorage;
+        else globalThis.localStorage = previous;
+    }
+});
 
 test("malformed font deep-link escapes are rejected without throwing", () => {
     assert.equal(safeDecodePathSegment("space-grotesk"), "space-grotesk");
