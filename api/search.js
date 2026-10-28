@@ -1,38 +1,36 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
 import { listFonts, normalize } from "./_lib/fonts.js";
+import { sendJSON } from "./_lib/respond.js";
 
-function sendJSON(res, status, data) {
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-    res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
-    res.setHeader("X-API-Version", "1.1.0");    res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    if (status === 405) res.setHeader("Allow", "GET, HEAD, OPTIONS");
-    res.setHeader("Cache-Control", status === 200
-        ? "public, max-age=30, s-maxage=120, stale-while-revalidate=600"
-        : "no-store");
-    return res.status(status).json(data);
-}
+// Same cache shape as the catalog: search results are derived from it, so they
+// can be revalidated just as cheaply.
+const CACHE = "public, max-age=30, s-maxage=120, stale-while-revalidate=600";
+const CDN = "public, s-maxage=120, stale-while-revalidate=600";
 
 export default async function handler(req, res) {
-    if (req.method === "OPTIONS") return sendJSON(res, 204, null);
-    if (req.method !== "GET" && req.method !== "HEAD") return sendJSON(res, 405, { error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+    if (req.method === "OPTIONS") return sendJSON(req, res, 204, null);
+    if (req.method !== "GET" && req.method !== "HEAD") {
+        return sendJSON(req, res, 405, { error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+    }
     if (!enforceRateLimit(req, res)) return;
+
     try {
         const fonts = await listFonts();
         const query = String(Array.isArray(req.query?.q) ? req.query.q[0] || "" : req.query?.q || "").trim().slice(0, 200);
-        if (!query) return sendJSON(res, 200, fonts);
+        if (!query) return sendJSON(req, res, 200, fonts, { cache: CACHE, cdn: CDN });
+
         const terms = normalize(query).split("-").filter(Boolean);
-        if (!terms.length) return sendJSON(res, 200, []);
-        return sendJSON(res, 200, fonts.filter(font => {
+        if (!terms.length) return sendJSON(req, res, 200, [], { cache: CACHE, cdn: CDN });
+
+        const matches = fonts.filter(font => {
             const tokens = normalize(`${font.name} ${font.file} ${font.type} ${font.format}`)
                 .split("-")
                 .filter(Boolean);
             return terms.every(term => tokens.some(token => token.startsWith(term)));
-        }));
+        });
+        return sendJSON(req, res, 200, matches, { cache: CACHE, cdn: CDN });
     } catch (error) {
         console.error("Typace font search failed:", error);
-        return sendJSON(res, 500, { error: "Unable to search fonts.", code: "FONT_SEARCH_FAILED" });
+        return sendJSON(req, res, 500, { error: "Unable to search fonts.", code: "FONT_SEARCH_FAILED" });
     }
 }

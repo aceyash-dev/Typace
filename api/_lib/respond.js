@@ -46,7 +46,9 @@ export function sendJSON(req, res, status, data, { cache = "", cdn = "" } = {}) 
             res.status(304).end();
             return;
         }
-        res.status(200).send(body);
+        // res.json keeps the same bytes as the string above (plain JSON.stringify)
+        // while letting callers and tests treat the payload as data, not a string.
+        res.status(200).json(data);
         return;
     }
 

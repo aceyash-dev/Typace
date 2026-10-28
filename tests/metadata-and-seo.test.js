@@ -472,6 +472,19 @@ test("malformed font deep-link escapes are rejected without throwing", () => {
     assert.equal(safeDecodePathSegment("%E0%A4%A"), null);
 });
 
+test("search revalidates with an ETag like the catalog does", async () => {
+    const first = mockResponse();
+    await searchHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.220" }, query: { q: "Ace" } }, first);
+    assert.equal(first.statusCode, 200);
+    assert.match(first.headers.ETag, /^W\//);
+    assert.match(first.headers["Cache-Control"], /max-age/);
+    assert.ok(first.headers["X-Request-Id"]);
+
+    const revalidated = mockResponse();
+    await searchHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.221", "if-none-match": first.headers.ETag }, query: { q: "Ace" } }, revalidated);
+    assert.equal(revalidated.statusCode, 304);
+});
+
 test("symbol-only search queries return no matches instead of the whole catalog", async () => {
     const response = mockResponse();
     await searchHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.207" }, query: { q: "!!!" } }, response);
