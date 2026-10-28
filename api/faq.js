@@ -46,14 +46,14 @@ const HOWTO = [
     "Set font-family to the font's name, with a system fallback such as system-ui, sans-serif."
 ];
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
     applyCommonHeaders(res, req);
     if (req.method === "OPTIONS") return res.status(204).end();
     if (req.method !== "GET" && req.method !== "HEAD") {
         res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
-    if (!enforceRateLimit(req, res)) return;
+    if (!(await enforceRateLimit(req, res))) return;
 
     const canonical = `${BASE}/faq`;
     const description = "Answers to common questions about Typace: what it is, how to add a font to your website, supported formats, licensing, and the catalog API.";

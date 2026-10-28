@@ -51,6 +51,8 @@ Stateless Model Context Protocol endpoint speaking JSON-RPC 2.0 — one message 
 - Prompt: `pick-a-font`.
 - Never exposes the commit endpoint or any write operation.
 - Tools resolve in-process, so one MCP call costs one rate-limit unit, not two.
+- Every tool is annotated `readOnlyHint: true`, and data tools return `structuredContent` alongside the text block.
+- `completion/complete` suggests font slugs for `typace://fonts/{slug}`; `logging/setLevel` is accepted and ignored.
 - Only POST is accepted; GET returns 405. Notifications receive 202 with no body.
 
 ### GET /api/openapi.json
@@ -78,7 +80,7 @@ Each /font/{slug} page answers the common questions directly: how to use the fon
 - API version header: X-API-Version.
 - JSON errors include error and code.
 - Conditional requests: catalog responses send a weak ETag and return 304 on a matching If-None-Match.
-- Rate limiting: 60 requests per minute per client IP by default (TYPACE_RATE_LIMIT overrides it), best-effort per serverless runtime.
+- Rate limiting: 60 requests per minute per client IP on the REST API and 120 on the MCP endpoint (TYPACE_RATE_LIMIT and TYPACE_MCP_RATE_LIMIT override them). A shared store makes the quota global across instances; without one it is best-effort per runtime.
 - Rate-limit headers: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After.
 - HTTP 429 indicates the client should wait for Retry-After seconds.
 - Error responses use Cache-Control: no-store.

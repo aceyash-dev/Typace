@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     if (req.method !== "GET" && req.method !== "HEAD") {
         return sendJSON(res, 405, { error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
-    if (!enforceRateLimit(req, res)) return;
+    if (!(await enforceRateLimit(req, res))) return;
 
     try {
         const fonts = await listFonts();

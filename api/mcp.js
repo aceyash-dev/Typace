@@ -1,6 +1,6 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
 import {
-    listFonts, findFont, normalize, fontFaceCss, fontFileUrl, selectFields,
+    listFonts, findFont, normalize, fontSlug, fontFaceCss, fontFileUrl, selectFields,
 } from "./_lib/fonts.js";
 import { API_VERSION } from "./_lib/respond.js";
 
@@ -86,6 +86,64 @@ const TOOLS = [
     },
 ];
 
+const FONT_SUMMARY_SCHEMA = {
+    type: "object",
+    properties: {
+        name: { type: "string" },
+        type: { type: "string", enum: FORMATS },
+        format: { type: "string" },
+        url: { type: "string" },
+        sizeBytes: { type: ["integer", "null"] },
+        isNew: { type: "boolean" },
+    },
+    required: ["name", "url"],
+};
+
+const FONT_RECORD_SCHEMA = {
+    type: "object",
+    properties: {
+        name: { type: "string" },
+        file: { type: "string" },
+        type: { type: "string", enum: FORMATS },
+        format: { type: "string" },
+        url: { type: "string" },
+        sizeBytes: { type: ["integer", "null"] },
+        createdAt: { type: ["string", "null"] },
+        updatedAt: { type: ["string", "null"] },
+        isNew: { type: "boolean" },
+    },
+    required: ["name", "file", "url"],
+};
+
+const PAGE_SCHEMA = {
+    type: "object",
+    properties: { total: { type: "integer" }, fonts: { type: "array", items: FONT_SUMMARY_SCHEMA } },
+    required: ["total", "fonts"],
+};
+
+const OUTPUT_SCHEMAS = {
+    search_fonts: PAGE_SCHEMA,
+    list_fonts: PAGE_SCHEMA,
+    get_font: FONT_RECORD_SCHEMA,
+    list_formats: { type: "object", additionalProperties: { type: "integer" } },
+    catalog_health: {
+        type: "object",
+        properties: {
+            status: { type: "string" },
+            count: { type: "integer" },
+            formats: { type: "object", additionalProperties: { type: "integer" } },
+            apiVersion: { type: "string" },
+        },
+        required: ["status", "count"],
+    },
+};
+
+// Every tool here only reads. Saying so lets a client auto-approve the call.
+for (const tool of TOOLS) {
+    tool.annotations = { readOnlyHint: true, idempotentHint: true, openWorldHint: false };
+    if (OUTPUT_SCHEMAS[tool.name]) tool.outputSchema = OUTPUT_SCHEMAS[tool.name];
+}
+
 const PROMPTS = [
     {
         name: "pick-a-font",
@@ -99,6 +157,12 @@ const PROMPTS = [
 
 const text = (value) => ({
     content: [{ type: "text", text: typeof value === "string" ? value : JSON.stringify(value, null, 2) }],
+});
+// Tools that return data also return structuredContent, so a client can read the
+// result without parsing the text block.
+const json = (value) => ({
+    content: [{ type: "text", text: JSON.stringify(value, null, 2) }],
+    structuredContent: value,
 });
 const failure = (message) => ({ content: [{ type: "text", text: message }], isError: true });
 
@@ -141,14 +205,14 @@ async function callTool(name, args = {}) {
     switch (name) {
         case "search_fonts": {
             const terms = normalize(String(args.query || "")).split("-").filter(Boolean);
-            if (!terms.length) return text({ total: 0, fonts: [] });
+            if (!terms.length) return json({ total: 0, fonts: [] });
             const format = args.format ? String(args.format).toLowerCase() : "";
             if (format && !FORMATS.includes(format)) return failure(`Unknown format '${format}'. Use one of: ${FORMATS.join(", ")}.`);
             const found = (await listFonts())
                 .filter((font) => (!format || font.type === format) && matches(font, terms));
             const limit = clamp(args.limit, DEFAULT_LIMIT, MAX_LIMIT);
             const offset = Math.max(0, Math.trunc(Number(args.offset) || 0));
-            return text({ total: found.length, fonts: found.slice(offset, offset + limit).map(summarise) });
+            return json({ total: found.length, fonts: found.slice(offset, offset + limit).map(summarise) });
         }
 
         case "list_fonts": {
@@ -158,13 +222,13 @@ async function callTool(name, args = {}) {
             const found = format ? all.filter((font) => font.type === format) : all;
             const limit = clamp(args.limit, DEFAULT_LIMIT, MAX_LIMIT);
             const offset = Math.max(0, Math.trunc(Number(args.offset) || 0));
-            return text({ total: found.length, fonts: found.slice(offset, offset + limit).map(summarise) });
+            return json({ total: found.length, fonts: found.slice(offset, offset + limit).map(summarise) });
         }
 
         case "get_font": {
             const font = findFont(await listFonts(), requireSlug(args));
             if (!font) return failure("No font matches that slug. Use search_fonts to find the right one.");
-            return text(absolute(font));
+            return json(absolute(font));
         }
 
         case "get_font_css": {
@@ -174,11 +238,11 @@ async function callTool(name, args = {}) {
         }
 
         case "list_formats":
-            return text(formatCounts(await listFonts()));
+            return json(formatCounts(await listFonts()));
 
         case "catalog_health": {
             const fonts = await listFonts();
-            return text({ status: fonts.length ? "ok" : "degraded", count: fonts.length, formats: formatCounts(fonts), apiVersion: API_VERSION });
+            return json({ status: fonts.length ? "ok" : "degraded", count: fonts.length, formats: formatCounts(fonts), apiVersion: API_VERSION });
         }
 
         default:
@@ -238,6 +302,8 @@ async function dispatch(message) {
                         tools: { listChanged: false },
                         resources: { subscribe: false, listChanged: false },
                         prompts: { listChanged: false },
+                        completions: {},
+                        logging: {},
                     },
                     serverInfo: { name: "typace", title: "Typace", version: API_VERSION },
                     instructions: INSTRUCTIONS,
@@ -266,6 +332,17 @@ async function dispatch(message) {
                 return ok(id, await readResource(String(params?.uri || "")));
             case "prompts/list":
                 return ok(id, { prompts: PROMPTS });
+            case "logging/setLevel":
+                // Accepted for compatibility; the server does not emit log messages.
+                return ok(id, {});
+            case "completion/complete": {
+                const argument = params?.argument || {};
+                if (argument.name !== "slug") return ok(id, { completion: { values: [], total: 0, hasMore: false } });
+                const prefix = String(argument.value || "").toLowerCase();
+                const slugs = [...new Set((await listFonts()).map((font) => fontSlug(font.name)))].sort();
+                const values = slugs.filter((slug) => slug.startsWith(prefix)).slice(0, 100);
+                return ok(id, { completion: { values, total: values.length, hasMore: values.length === 100 } });
+            }
             case "prompts/get": {
                 if (params?.name !== "pick-a-font") return err(id, -32602, `Unknown prompt: ${params?.name}`);
                 const brief = String(params?.arguments?.brief || "").trim();
@@ -312,7 +389,7 @@ export default async function handler(req, res) {
         res.setHeader("Content-Type", "application/json; charset=utf-8");
         return res.status(405).json({ error: "Method not allowed. MCP uses POST.", code: "METHOD_NOT_ALLOWED" });
     }
-    if (!enforceRateLimit(req, res)) return;
+    if (!(await enforceRateLimit(req, res, { scope: "mcp", methods: "POST, OPTIONS" }))) return;
     // RPC responses are never cacheable; the payload changes per call.
     res.setHeader("Cache-Control", "no-store");
 
@@ -322,6 +399,12 @@ export default async function handler(req, res) {
         catch { return respond(res, err(null, -32700, "Parse error")); }
     }
     if (payload === undefined || payload === null) return respond(res, err(null, -32600, "Invalid Request"));
+
+    const declared = String(req.headers?.["mcp-protocol-version"] || "").trim();
+    if (declared && !SUPPORTED_PROTOCOLS.has(declared)) {
+        return respond(res, err(null, -32600,
+            `Unsupported MCP protocol version: ${declared}. Supported: ${[...SUPPORTED_PROTOCOLS].join(", ")}.`));
+    }
 
     // Notifications carry no id and must not receive a JSON-RPC response.
     if (!Array.isArray(payload) && payload.id === undefined) {

@@ -126,7 +126,7 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "GET, HEAD, OPTIONS");
     return sendJSON(req, res, 405, { error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
   }
-  if (!enforceRateLimit(req, res)) return;
+  if (!(await enforceRateLimit(req, res))) return;
 
   const seed = cleanSeed(req.query?.seed);
   const candidates = baseProviders();

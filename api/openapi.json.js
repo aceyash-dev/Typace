@@ -1,6 +1,6 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
 import { KEYLESS_PROVIDER_IDS } from "./image.js";
-export default function handler(req, res) {
+export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
     res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
@@ -15,7 +15,7 @@ export default function handler(req, res) {
         res.setHeader("Cache-Control", "no-store");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
-    if (!enforceRateLimit(req, res)) return;
+    if (!(await enforceRateLimit(req, res))) return;
 
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -33,7 +33,7 @@ export default function handler(req, res) {
         info: {
             title: "Typace API",
             version: "1.1.0",
-            description: "Public font discovery, search, metadata, and CSS delivery API. Unknown classifications and unavailable source dates are not guessed. API requests are limited to 60 per minute per IP by default (configurable via TYPACE_RATE_LIMIT); excess requests return HTTP 429 with Retry-After."
+            description: "Public font discovery, search, metadata, and CSS delivery API. Unknown classifications and unavailable source dates are not guessed. API requests are limited to 60 per minute per IP by default and MCP requests to 120 (TYPACE_RATE_LIMIT and TYPACE_MCP_RATE_LIMIT); excess requests return HTTP 429 with Retry-After. A shared KV store makes the quota global across instances, otherwise it is per-instance."
         },
         servers: [{ url: "https://typace.ace-base.cc", description: "Production API" }],
         externalDocs: { description: "AI and machine-client guide", url: "https://typace.ace-base.cc/llms-full.txt" },

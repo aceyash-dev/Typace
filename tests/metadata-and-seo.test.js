@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { normalize, findFont, listFonts, fontSlug } from "../api/_lib/fonts.js";
-import { checkRateLimit } from "../api/_lib/rate-limit.js";
+import { checkRateLimit, enforceRateLimit, limitForScope } from "../api/_lib/rate-limit.js";
 import openapiHandler from "../api/openapi.json.js";
 import sitemapHandler from "../api/sitemap.js";
 import commitHandler, { normalizeCommit } from "../api/commit.js";
@@ -76,9 +76,9 @@ test("live catalog is sorted and never invents source dates", async () => {
     assert.deepEqual(fonts.map(font => font.name), [...fonts.map(font => font.name)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })));
 });
 
-test("OpenAPI documents current API paths, schema values, and machine-client health", () => {
+test("OpenAPI documents current API paths, schema values, and machine-client health", async () => {
     const response = mockResponse();
-    openapiHandler({ method: "GET" }, response);
+    await openapiHandler({ method: "GET" }, response);
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.openapi, "3.0.3");
     assert.equal("category" in response.body.components.schemas.Font.properties, false);
@@ -194,9 +194,9 @@ test("font metadata and CSS endpoints reject unsupported methods consistently", 
     }
 });
 
-test("OpenAPI endpoint supports CORS preflight", () => {
+test("OpenAPI endpoint supports CORS preflight", async () => {
     const response = mockResponse();
-    openapiHandler({ method: "OPTIONS" }, response);
+    await openapiHandler({ method: "OPTIONS" }, response);
     assert.equal(response.statusCode, 204);
     assert.equal(response.headers["Access-Control-Allow-Methods"], "GET, HEAD, OPTIONS");
     assert.equal(response.headers["Cache-Control"], "no-store");
@@ -448,9 +448,9 @@ test("theme seed is reused on reload instead of being regenerated", () => {
     }
 });
 
-async function callMcp(message, ip) {
+async function callMcp(message, ip, extraHeaders = {}) {
     const response = mockResponse();
-    await mcpHandler({ method: "POST", headers: { "x-real-ip": ip }, body: message }, response);
+    await mcpHandler({ method: "POST", headers: { "x-real-ip": ip, ...extraHeaders }, body: message }, response);
     return response;
 }
 
@@ -496,6 +496,73 @@ test("MCP accepts notifications without a body and refuses GET", async () => {
     assert.equal(response.headers.Allow, "POST, OPTIONS");
 });
 
+test("MCP advertises read-only tools, structured output, and slug completion", async () => {
+    const list = await callMcp({ jsonrpc: "2.0", id: 10, method: "tools/list" }, "198.51.100.250");
+    for (const tool of list.body.result.tools) {
+        assert.equal(tool.annotations.readOnlyHint, true, tool.name + " must be read-only");
+        assert.equal(tool.annotations.openWorldHint, false, tool.name);
+    }
+    const searchTool = list.body.result.tools.find(tool => tool.name === "search_fonts");
+    assert.ok(searchTool.outputSchema, "data tools must publish an outputSchema");
+
+    const call = await callMcp({ jsonrpc: "2.0", id: 11, method: "tools/call", params: { name: "get_font", arguments: { slug: "space-grotesk" } } }, "198.51.100.251");
+    assert.ok(call.body.result.structuredContent, "data tools must return structuredContent");
+    assert.match(call.body.result.structuredContent.url, /^https:\/\//, "agents need absolute URLs");
+
+    const completion = await callMcp({ jsonrpc: "2.0", id: 12, method: "completion/complete", params: { ref: { type: "ref/resource", uri: "typace://fonts/{slug}" }, argument: { name: "slug", value: "space" } } }, "198.51.100.252");
+    assert.ok(completion.body.result.completion.values.includes("space-grotesk"));
+
+    const wrongVersion = await callMcp({ jsonrpc: "2.0", id: 13, method: "ping" }, "198.51.100.253", { "mcp-protocol-version": "1999-01-01" });
+    assert.match(wrongVersion.body.error.message, /Unsupported MCP protocol version/);
+});
+
+test("rate limiting uses a shared store when configured and degrades when it fails", async () => {
+    const originalFetch = globalThis.fetch;
+    const originalUrl = process.env.TYPACE_KV_REST_URL;
+    const originalToken = process.env.TYPACE_KV_REST_TOKEN;
+    const requests = [];
+    process.env.TYPACE_KV_REST_URL = "https://kv.example.com/";
+    process.env.TYPACE_KV_REST_TOKEN = "secret";
+
+    try {
+        globalThis.fetch = async (url, options) => {
+            requests.push({ url, body: options.body, headers: options.headers });
+            return { ok: true, json: async () => [{ result: 3 }, { result: 1 }] };
+        };
+        const allowedResponse = mockResponse();
+        const allowed = await enforceRateLimit({ headers: { "x-real-ip": "198.51.100.254" } }, allowedResponse, { scope: "api" });
+        assert.equal(allowed, true);
+        assert.equal(allowedResponse.headers["RateLimit-Remaining"], "57");
+        assert.match(requests[0].url, /^https:\/\/kv\.example\.com\/pipeline$/, "trailing slash must not double up");
+        assert.match(String(requests[0].body), /INCR/);
+        assert.equal(requests[0].headers.Authorization, "Bearer secret");
+
+        globalThis.fetch = async () => ({ ok: true, json: async () => [{ result: 61 }, { result: 1 }] });
+        const blockedResponse = mockResponse();
+        const blocked = await enforceRateLimit({ headers: { "x-real-ip": "198.51.100.255" } }, blockedResponse, { scope: "api" });
+        assert.equal(blocked, false);
+        assert.equal(blockedResponse.statusCode, 429);
+        assert.ok(Number(blockedResponse.headers["Retry-After"]) >= 1);
+
+        globalThis.fetch = async () => { throw new Error("store down"); };
+        const fallbackResponse = mockResponse();
+        const fallback = await enforceRateLimit({ headers: { "x-real-ip": "198.51.100.256" } }, fallbackResponse, { scope: "api" });
+        assert.equal(fallback, true, "a store outage must not block traffic");
+        assert.equal(fallbackResponse.headers["RateLimit-Limit"], "60");
+    } finally {
+        globalThis.fetch = originalFetch;
+        if (originalUrl === undefined) delete process.env.TYPACE_KV_REST_URL; else process.env.TYPACE_KV_REST_URL = originalUrl;
+        if (originalToken === undefined) delete process.env.TYPACE_KV_REST_TOKEN; else process.env.TYPACE_KV_REST_TOKEN = originalToken;
+    }
+});
+
+test("MCP gets its own rate-limit budget", async () => {
+    assert.equal(limitForScope("api"), 60);
+    assert.equal(limitForScope("mcp"), 120);
+    const response = await callMcp({ jsonrpc: "2.0", id: 14, method: "ping" }, "198.51.100.257");
+    assert.equal(response.headers["RateLimit-Limit"], "120");
+});
+
 test("catalog supports batch slug lookup and sparse fields", async () => {
     const batch = mockResponse();
     await fontsHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.239" }, query: { slugs: "space-grotesk,not-a-font" } }, batch);
@@ -515,7 +582,7 @@ test("catalog supports batch slug lookup and sparse fields", async () => {
     assert.equal(invalid.body.code, "INVALID_FIELDS");
 });
 
-test("image providers are keyless and stay in sync across client, proxy, and OpenAPI", () => {
+test("image providers are keyless and stay in sync across client, proxy, and OpenAPI", async () => {
     // The palette extractor and the proxy must agree on the provider set, and no
     // provider may need a credential the proxy does not hold.
     const direct = PROVIDERS.filter(provider => !provider.sameOrigin).map(provider => provider.id);
@@ -524,7 +591,7 @@ test("image providers are keyless and stay in sync across client, proxy, and Ope
     for (const id of direct) assert.ok(KEYLESS_PROVIDER_IDS.includes(id));
 
     const response = mockResponse();
-    openapiHandler({ method: "GET" }, response);
+    await openapiHandler({ method: "GET" }, response);
     const parameter = response.body.paths["/api/image"].get.parameters.find(entry => entry.name === "provider");
     assert.deepEqual(parameter.schema.enum, KEYLESS_PROVIDER_IDS);
 

@@ -35,7 +35,7 @@ export default async function handler(req, res) {
         res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return res.status(405).send("Method not allowed.");
     }
-    if (!enforceRateLimit(req, res)) return;
+    if (!(await enforceRateLimit(req, res))) return;
 
     let fontPages = [];
     try {
