@@ -3,7 +3,12 @@ import { sendJSON } from "./_lib/respond.js";
 
 // Same-origin image proxy. Re-serving provider images from this origin keeps
 // canvas pixel reads available to the client-side palette extractor.
-const PROVIDER_TIMEOUT_MS = 6000;
+//
+// Per-attempt cap, plus an overall budget for the whole rotation. The budget is
+// what makes a long provider list safe: a dead source costs its slice, not the
+// full request.
+const PROVIDER_TIMEOUT_MS = 2500;
+const TOTAL_BUDGET_MS = 6000;
 const MAX_BYTES = 3 * 1024 * 1024;
 const IMAGE_CACHE = "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000, stale-if-error=2592000";
 
@@ -26,27 +31,42 @@ function cleanSeed(value) {
 }
 
 /**
- * Keyless providers, in rotation order. None of these require an API key, an
- * account, or any credential: the proxy holds no image-service secrets, so a
- * provider that needed one could not be served here anyway.
+ * Providers the browser can read pixels from directly. Each one must send
+ * `access-control-allow-origin`, otherwise the canvas is tainted and the
+ * palette extractor cannot sample it.
  */
-export const KEYLESS_PROVIDER_IDS = ["picsum", "loremflickr", "dicebear", "robohash"];
+export const DIRECT_PROVIDER_IDS = ["picsum", "loremflickr", "dicebear", "robohash"];
 
-/** Keep URL construction valid and seed-stable. */
+/**
+ * Every keyless provider the proxy will try, in rotation order. None of these
+ * require an API key, an account, or any credential: the proxy holds no
+ * image-service secrets, so a provider that needed one could not be served here
+ * anyway. The extra entries beyond DIRECT_PROVIDER_IDS are reached through the
+ * proxy only, which is same-origin and so needs no CORS grant.
+ */
+export const KEYLESS_PROVIDER_IDS = [...DIRECT_PROVIDER_IDS, "cataas", "placekeanu"];
+
+/**
+ * Keep URL construction valid and seed-stable. cataas and placekeanu have no
+ * seed parameter of their own; variety comes from the rotation, not the seed.
+ */
+const PICKERS = {
+  picsum: (seed) => "https://picsum.photos/seed/" + encodeURIComponent(seed) + "/240/240",
+  loremflickr: (seed) => "https://loremflickr.com/240/240/abstract?lock=" + (hashSeed(seed) % 9999),
+  dicebear: (seed) => "https://api.dicebear.com/9.x/shapes/png?seed=" + encodeURIComponent(seed) + "&size=240",
+  robohash: (seed) => "https://robohash.org/" + encodeURIComponent(seed) + ".png?size=240x240",
+  cataas: () => "https://cataas.com/cat?width=240&height=240",
+  placekeanu: () => "https://placekeanu.com/240/240",
+};
+
 function baseProviders() {
-  const pickers = {
-    picsum: (seed) => "https://picsum.photos/seed/" + encodeURIComponent(seed) + "/240/240",
-    loremflickr: (seed) => "https://loremflickr.com/240/240/abstract?lock=" + (hashSeed(seed) % 9999),
-    dicebear: (seed) => "https://api.dicebear.com/9.x/shapes/png?seed=" + encodeURIComponent(seed) + "&size=240",
-    robohash: (seed) => "https://robohash.org/" + encodeURIComponent(seed) + ".png?size=240x240",
-  };
-  return KEYLESS_PROVIDER_IDS.map((id) => ({ id, pick: pickers[id] }));
+  return KEYLESS_PROVIDER_IDS.map((id) => ({ id, pick: PICKERS[id] }));
 }
 
-async function fetchImage(url) {
+async function fetchImage(url, timeoutMs = PROVIDER_TIMEOUT_MS) {
   const response = await fetch(url, {
     redirect: "follow",
-    signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+    signal: AbortSignal.timeout(Math.max(250, timeoutMs)),
     headers: { Accept: "image/*" },
   });
   if (!response.ok) {
@@ -118,13 +138,16 @@ export default async function handler(req, res) {
   const start = requestedIndex >= 0 ? requestedIndex : hashSeed(seed) % candidates.length;
   const order = candidates.map((_, offset) => candidates[(start + offset) % candidates.length]);
 
+  const deadline = Date.now() + TOTAL_BUDGET_MS;
   for (const provider of order) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) break;
     try {
       const picked = await provider.pick(seed);
       if (!picked) continue;
       const { url, attribution } = typeof picked === "string" ? { url: picked, attribution: null } : picked;
       if (!url) continue;
-      const image = await fetchImage(url);
+      const image = await fetchImage(url, Math.min(PROVIDER_TIMEOUT_MS, remaining));
       if (!image) continue;
 
       res.setHeader("Content-Type", image.type);

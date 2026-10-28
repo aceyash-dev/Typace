@@ -16,7 +16,7 @@ import { escapeCSSString } from "../api/font-page.js";
 import { safeDecodePathSegment } from "../src/lib/routes.js";
 import { downloadNameFor, fontSizeLabel, fontTypeLabel, slugFor } from "../src/lib/fonts.js";
 import { pickSeed, PROVIDERS } from "../src/lib/palette.js";
-import { KEYLESS_PROVIDER_IDS } from "../api/image.js";
+import { KEYLESS_PROVIDER_IDS, DIRECT_PROVIDER_IDS } from "../api/image.js";
 import formatsHandler from "../api/formats.js";
 
 function mockResponse() {
@@ -451,7 +451,9 @@ test("image providers are keyless and stay in sync across client, proxy, and Ope
     // The palette extractor and the proxy must agree on the provider set, and no
     // provider may need a credential the proxy does not hold.
     const direct = PROVIDERS.filter(provider => !provider.sameOrigin).map(provider => provider.id);
-    assert.deepEqual(direct, KEYLESS_PROVIDER_IDS);
+    assert.deepEqual(direct, DIRECT_PROVIDER_IDS);
+    assert.deepEqual(KEYLESS_PROVIDER_IDS.slice(0, DIRECT_PROVIDER_IDS.length), DIRECT_PROVIDER_IDS);
+    for (const id of direct) assert.ok(KEYLESS_PROVIDER_IDS.includes(id));
 
     const response = mockResponse();
     openapiHandler({ method: "GET" }, response);

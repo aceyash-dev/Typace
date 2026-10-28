@@ -1,4 +1,5 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
+import { KEYLESS_PROVIDER_IDS } from "./image.js";
 export default function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
@@ -128,7 +129,7 @@ export default function handler(req, res) {
                     description: "Fetches a random image from one of several free, keyless providers server-side and returns it same-origin. This exists because a browser can only read pixels from a CORS-enabled image. The response reports the winning source in X-Image-Provider, and returns 502 IMAGE_UNAVAILABLE when no provider is reachable.",
                     parameters: [
                         { name: "seed", in: "query", description: "Stable seed selecting the image.", schema: { type: "string" } },
-                        { name: "provider", in: "query", description: "Optional first-choice provider; failures still fall back to the others.", schema: { type: "string", enum: ["picsum", "loremflickr", "dicebear", "robohash"] } }
+                        { name: "provider", in: "query", description: "Optional first-choice provider; failures still fall back to the others.", schema: { type: "string", enum: [...KEYLESS_PROVIDER_IDS] } }
                     ],
                     responses: {
                         "200": { description: "Image bytes, with an image/* content type." },
