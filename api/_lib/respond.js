@@ -28,8 +28,9 @@ export function weakETag(payload) {
  * Send a JSON response. When `cache` is provided for a 200, an ETag is emitted
  * and a matching If-None-Match returns 304 with no body.
  */
-export function sendJSON(req, res, status, data, { cache = "", cdn = "" } = {}) {
+export function sendJSON(req, res, status, data, { cache = "", cdn = "", headers = null } = {}) {
     applyCommonHeaders(res, req);
+    if (headers) for (const [name, value] of Object.entries(headers)) res.setHeader(name, value);
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     if (status === 405) res.setHeader("Allow", "GET, HEAD, OPTIONS");
     // Tell well-behaved clients how long to back off on a server-side failure.

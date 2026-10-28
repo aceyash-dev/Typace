@@ -1,5 +1,5 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
-import { listFonts } from "./_lib/fonts.js";
+import { listFonts, findFont, parseFields, parseSlugs, selectFields } from "./_lib/fonts.js";
 import { sendJSON } from "./_lib/respond.js";
 
 const CACHE = "public, max-age=60, s-maxage=300, stale-while-revalidate=3600, stale-if-error=86400";
@@ -16,6 +16,29 @@ export default async function handler(req, res) {
 
     try {
         let fonts = await listFonts();
+        let fields;
+        try {
+            fields = parseFields(req.query?.fields);
+        } catch (error) {
+            return sendJSON(req, res, 400, { error: error.message, code: error.code, allowed: error.allowed });
+        }
+
+        // Batch lookup: resolves each slug in request order and returns null for
+        // misses, so one bad slug cannot fail a whole comparison. Takes
+        // precedence over format/limit/offset.
+        let slugs;
+        try {
+            slugs = parseSlugs(req.query?.slugs);
+        } catch (error) {
+            return sendJSON(req, res, 400, { error: error.message, code: error.code, limit: error.limit });
+        }
+        if (slugs) {
+            const matches = slugs.map((slug) => findFont(fonts, slug) || null);
+            const found = matches.filter(Boolean).length;
+            return sendJSON(req, res, 200, selectFields(matches, fields), {
+                cache: CACHE, cdn: CDN, headers: { "X-Total-Count": String(found) },
+            });
+        }
 
         const format = String(req.query?.format || "").toLowerCase();
         if (format && !FORMATS.has(format)) {
@@ -42,8 +65,9 @@ export default async function handler(req, res) {
         const offset = Math.max(0, Number.parseInt(req.query?.offset, 10) || 0);
         const page = offset === 0 && limit >= total ? fonts : fonts.slice(offset, offset + limit);
 
-        res.setHeader("X-Total-Count", String(total));
-        return sendJSON(req, res, 200, page, { cache: CACHE, cdn: CDN });
+        return sendJSON(req, res, 200, selectFields(page, fields), {
+            cache: CACHE, cdn: CDN, headers: { "X-Total-Count": String(total) },
+        });
     } catch (error) {
         console.error("Typace font discovery failed:", error);
         return sendJSON(req, res, 500, { error: "Unable to scan the fonts directory.", code: "FONT_SCAN_FAILED" });

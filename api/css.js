@@ -1,5 +1,5 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
-import { listFonts, findFont } from "./_lib/fonts.js";
+import { listFonts, findFont, fontFaceCss, fontFileUrl } from "./_lib/fonts.js";
 import { applyCommonHeaders, weakETag, sendJSON } from "./_lib/respond.js";
 
 const CACHE = "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=86400";
@@ -16,14 +16,9 @@ export default async function handler(req, res) {
         const font = findFont(await listFonts(), req.query?.slug);
         if (!font) return sendJSON(req, res, 404, { error: "Font not found.", code: "FONT_NOT_FOUND" });
 
-        const family = JSON.stringify(font.name).slice(1, -1);
-        // Use the canonical origin; Host and forwarded headers are request-controlled.
-        const fileUrl = new URL(font.url, "https://typace.ace-base.cc").href;
-        const css = `@font-face {
-  font-family: "${family}";
-  src: url("${fileUrl}") format("${font.format}");
-  font-display: swap;
-}`;
+        // Canonical origin; Host and forwarded headers are request-controlled.
+        const fileUrl = fontFileUrl(font);
+        const css = fontFaceCss(font);
 
         applyCommonHeaders(res, req);
         res.setHeader("Content-Type", "text/css; charset=utf-8");

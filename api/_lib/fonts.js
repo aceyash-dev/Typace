@@ -44,6 +44,73 @@ function withTimeout(promise, ms, label) {
 }
 
 /** Canonical URL slug shared by font pages, format listings, and the sitemap. */
+/** Canonical origin for absolute asset URLs in generated CSS. */
+export const CANONICAL_ORIGIN = "https://typace.ace-base.cc";
+
+/** Absolute URL for a font file, resolved against the canonical origin. */
+export function fontFileUrl(font) {
+    return new URL(font.url, CANONICAL_ORIGIN).href;
+}
+
+/** The ready-to-paste @font-face rule for a font. */
+export function fontFaceCss(font) {
+    const family = JSON.stringify(font.name).slice(1, -1);
+    return `@font-face {
+  font-family: "${family}";
+  src: url("${fontFileUrl(font)}") format("${font.format}");
+  font-display: swap;
+}`;
+}
+
+/** Fields a client may request through ?fields=. */
+export const FONT_FIELDS = ["name", "file", "type", "format", "url", "sizeBytes", "createdAt", "updatedAt", "isNew"];
+
+/**
+ * Parse ?fields= into a validated list. Returns null when the parameter is
+ * absent. Unknown names are rejected rather than ignored, so a typo surfaces
+ * instead of silently returning full records.
+ */
+export function parseFields(value) {
+    const raw = Array.isArray(value) ? value[0] : value;
+    if (raw === undefined || raw === null || String(raw).trim() === "") return null;
+    const requested = String(raw).split(",").map((name) => name.trim()).filter(Boolean);
+    if (!requested.length) return null;
+    const unknown = requested.filter((name) => !FONT_FIELDS.includes(name));
+    if (unknown.length) {
+        const error = new Error("Unknown field(s): " + unknown.join(", "));
+        error.code = "INVALID_FIELDS";
+        error.allowed = FONT_FIELDS;
+        throw error;
+    }
+    return [...new Set(requested)];
+}
+
+/** Apply a ?fields= selection, preserving the requested order. */
+export function selectFields(records, fields) {
+    if (!fields) return records;
+    return records.map((record) => {
+        if (record === null) return null;
+        const out = {};
+        for (const name of fields) out[name] = record[name];
+        return out;
+    });
+}
+
+/** Parse ?slugs= into a bounded, de-duplicated list. */
+export function parseSlugs(value, max = 25) {
+    const raw = Array.isArray(value) ? value[0] : value;
+    if (raw === undefined || raw === null || String(raw).trim() === "") return null;
+    const slugs = [...new Set(String(raw).split(",").map((slug) => slug.trim()).filter(Boolean))];
+    if (!slugs.length) return null;
+    if (slugs.length > max) {
+        const error = new Error(`Too many slugs; the limit is ${max}.`);
+        error.code = "TOO_MANY_SLUGS";
+        error.limit = max;
+        throw error;
+    }
+    return slugs;
+}
+
 export function fontSlug(value = "") {
     return String(value || "")
         .normalize("NFKD")
