@@ -57,18 +57,19 @@ test("font lookup matches display names and safely rejects malformed slugs", () 
     assert.equal(findFont(fonts, ""), null);
 });
 
-test("live catalog is sorted and never invents classifications or source dates", async () => {
+test("live catalog is sorted and never invents source dates", async () => {
     const fonts = await listFonts();
     assert.ok(fonts.length > 0);
     assert.equal(fonts.some(font => /misans\.ttf$/i.test(font.file)), false);
     for (const font of fonts) {
-        assert.ok(["serif", "sans-serif", "unknown"].includes(font.category));
+        assert.equal("category" in font, false, "font records must not carry a category");
         assert.equal(font.createdAt, null);
         assert.equal(font.updatedAt, null);
         assert.equal(typeof font.isNew, "boolean");
     }
     // The curated latest-import set remains stable until a newer batch replaces it.
-    assert.equal(fonts.find(font => font.file === "Akrobat.ttf")?.isNew, true);
+    assert.equal(fonts.find(font => font.file === "Pagio.otf")?.isNew, true);
+    assert.equal(fonts.find(font => font.file === "Akrobat.ttf")?.isNew, false);
     assert.equal(fonts.find(font => font.file === "Aboreto.ttf")?.isNew, false);
     assert.deepEqual(fonts.map(font => font.name), [...fonts.map(font => font.name)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })));
 });
@@ -78,7 +79,8 @@ test("OpenAPI documents current API paths, schema values, and machine-client hea
     openapiHandler({ method: "GET" }, response);
     assert.equal(response.statusCode, 200);
     assert.equal(response.body.openapi, "3.0.3");
-    assert.deepEqual(response.body.components.schemas.Font.properties.category.enum, ["serif", "sans-serif", "unknown"]);
+    assert.equal("category" in response.body.components.schemas.Font.properties, false);
+    assert.equal(response.body.paths["/api/fonts"].get.parameters.some(parameter => parameter.name === "category"), false);
     assert.equal(response.body.components.schemas.Font.properties.sizeBytes.type, "integer");
     assert.equal(response.body.components.schemas.Health.properties.catalog.properties.ageSeconds.type, "integer");
     assert.equal(response.body.components.schemas.Health.properties.catalog.properties.stale.type, "boolean");

@@ -22,12 +22,12 @@
 
 The live GET /api/fonts response is the authoritative list of published font assets. Do not hardcode font names or assume every format exists for every family.
 
-Each record includes name, file, type, format, category, url, sizeBytes, createdAt, updatedAt, and isNew. Dates and sizeBytes may be null. isNew marks assets added in a recent catalog batch; do not treat it as a general popularity or quality signal. Categories may be unknown. Do not infer designers, foundries, licenses, glyph coverage, variable axes, weight, style, or OpenType features without a reliable published source.
+Each record includes name, file, type, format, url, sizeBytes, createdAt, updatedAt, and isNew. Dates and sizeBytes may be null. isNew marks assets added in a recent catalog batch; do not treat it as a general popularity or quality signal. Do not infer designers, foundries, licenses, glyph coverage, variable axes, weight, style, or OpenType features without a reliable published source.
 
 ## API usage
 
 - GET /api/health checks service and catalog availability and returns the catalog record count.
-- GET /api/fonts lists the current catalog as a JSON array. Supports ?format=, ?category=, ?limit=, and ?offset=, returns an X-Total-Count header, and carries a weak ETag (send If-None-Match for 304).
+- GET /api/fonts lists the current catalog as a JSON array. Supports ?format=, ?limit=, and ?offset=, returns an X-Total-Count header, and carries a weak ETag (send If-None-Match for 304).
 - GET /api/search?q=QUERY searches name, file, type, and format. Omit q to retrieve the catalog.
 - GET /api/fonts/SLUG returns one metadata record.
 - GET /api/css/SLUG returns a text/css @font-face declaration with an absolute asset URL, plus a Link preload hint for the font asset.

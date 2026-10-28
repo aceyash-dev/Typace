@@ -23,9 +23,6 @@ export default async function handler(req, res) {
         }
         if (format) fonts = fonts.filter((font) => font.type === format);
 
-        const category = String(req.query?.category || "").toLowerCase();
-        if (category) fonts = fonts.filter((font) => String(font.category || "").toLowerCase() === category);
-
         const total = fonts.length;
         const rawLimit = req.query?.limit;
         if (rawLimit !== undefined && rawLimit !== null && rawLimit !== "") {

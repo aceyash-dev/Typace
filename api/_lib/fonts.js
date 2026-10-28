@@ -8,48 +8,18 @@ export const FONT_TYPES = {
     ".woff2": { type: "woff2", format: "woff2" }
 };
 
-const categoryCache = new Map();
 const CATALOG_CACHE_TTL_MS = 30_000;
 
 // Curated list for the latest known catalog import. Replace this set when a newer batch is added.
 // Membership, not elapsed wall-clock time, keeps the Newest filter useful between imports.
 const RECENT_FONT_FILES = new Set([
-    "Akrobat.ttf",
-    "BEDANE.otf",
-    "Bionix.otf",
-    "Blocksmith.otf",
-    "Braga.ttf",
-    "Brunson.ttf",
-    "Camden.ttf",
-    "Canosa Light.otf",
-    "Cocogoose.ttf",
-    "Coolvetica.otf",
-    "Curetro.ttf",
-    "Didot.otf",
-    "Divergentes.ttf",
-    "Fritz.ttf",
-    "Geograph.ttf",
-    "Glitchcraft.otf",
-    "HEINAN-Outline.otf",
-    "Hesthiya.otf",
-    "Hexaplex.otf",
-    "Highrise.otf",
-    "Ksana.otf",
-    "LJDS Sans.ttf",
-    "LT Superior.otf",
-    "Midland Luxury.otf",
-    "Neugrooms.ttf",
-    "Popten.otf",
-    "QUICK ZIP.otf",
-    "Rokey.otf",
-    "Sampoty.ttf",
-    "Shillia.ttf",
-    "Sierra Danielle.otf",
-    "Skrine.otf",
-    "Stretch.otf",
-    "Surgena.ttf",
-    "Tropical Avenue.otf",
-    "Urbanist.ttf"
+    "Alcazar Bastion.ttf",
+    "Clarendon.otf",
+    "Hut Sut Ralston.ttf",
+    "Indus.ttf",
+    "LOKICOLA.ttf",
+    "Pagio.otf",
+    "Puma.ttf"
 ]);
 
 let cachedCatalog = null;
@@ -71,61 +41,6 @@ function withTimeout(promise, ms, label) {
             timer = setTimeout(() => reject(new Error(label + " timed out after " + ms + "ms")), ms);
         })
     ]).finally(() => clearTimeout(timer));
-}
-
-async function readPanose(filePath) {
-    if (categoryCache.has(filePath)) return categoryCache.get(filePath);
-
-    const promise = (async () => {
-        let handle;
-        try {
-            handle = await fs.open(filePath, "r");
-            const header = Buffer.alloc(12);
-            const firstRead = await handle.read(header, 0, header.length, 0);
-            if (firstRead.bytesRead !== header.length) return null;
-
-            const signature = header.toString("hex", 0, 4);
-            if (!["00010000", "4f54544f", "74727565", "74797031"].includes(signature)) return null;
-
-            const tableCount = header.readUInt16BE(4);
-            if (tableCount < 1 || tableCount > 4096) return null;
-
-            const directory = Buffer.alloc(tableCount * 16);
-            const directoryRead = await handle.read(directory, 0, directory.length, 12);
-            if (directoryRead.bytesRead !== directory.length) return null;
-
-            for (let index = 0; index < tableCount; index++) {
-                const offset = index * 16;
-                if (directory.toString("ascii", offset, offset + 4) !== "OS/2") continue;
-
-                const tableOffset = directory.readUInt32BE(offset + 8);
-                const tableLength = directory.readUInt32BE(offset + 12);
-                if (tableLength < 42 || tableOffset + 42 > 0xffffffff) return null;
-
-                const os2 = Buffer.alloc(42);
-                const tableRead = await handle.read(os2, 0, os2.length, tableOffset);
-                if (tableRead.bytesRead !== os2.length) return null;
-
-                if (os2[32] !== 2) return null;
-                const serifStyle = os2[33];
-                if ([11, 12, 13].includes(serifStyle)) return "sans-serif";
-                if ([2, 3, 4, 5, 6, 7, 8, 9, 10].includes(serifStyle)) return "serif";
-                return null;
-            }
-        } catch {
-            return null;
-        } finally {
-            if (handle) await handle.close().catch(() => {});
-        }
-        return null;
-    })();
-
-    categoryCache.set(filePath, promise);
-    return promise;
-}
-
-async function getFontCategory(filePath) {
-    return (await readPanose(filePath)) || "unknown";
 }
 
 /** Canonical URL slug shared by font pages, format listings, and the sitemap. */
@@ -194,7 +109,6 @@ async function getFontMetadata(entry) {
         type: metadata.type,
         format: metadata.format,
         sizeBytes,
-        category: await getFontCategory(absolutePath),
         url: `/fonts/${relativePath
             .split(path.sep)
             .map(encodeURIComponent)

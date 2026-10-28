@@ -47,13 +47,12 @@ export default function handler(req, res) {
             schemas: {
                 Font: {
                     type: "object",
-                    required: ["name", "file", "type", "format", "category", "url", "createdAt", "updatedAt"],
+                    required: ["name", "file", "type", "format", "url", "createdAt", "updatedAt"],
                     properties: {
                         name: { type: "string" },
                         file: { type: "string" },
                         type: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] },
                         format: { type: "string", enum: ["truetype", "opentype", "woff", "woff2"] },
-                        category: { type: "string", enum: ["serif", "sans-serif", "unknown"] },
                         sizeBytes: { type: "integer", minimum: 0, nullable: true, description: "Font file size in bytes when the filesystem stat succeeds." },
                         url: { type: "string", format: "uri-reference" },
                         createdAt: { type: "string", format: "date-time", nullable: true },
@@ -191,7 +190,6 @@ export default function handler(req, res) {
                     description: "Returns the current authoritative catalog as a JSON array. Supports optional filtering and pagination. Responses carry a weak ETag — send it back as If-None-Match to receive 304. The X-Total-Count header reports how many fonts match the filters.",
                     parameters: [
                         { name: "format", in: "query", description: "Filter by file format.", schema: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] } },
-                        { name: "category", in: "query", description: "Filter by font category.", schema: { type: "string", enum: ["serif", "sans-serif", "unknown"] } },
                         { name: "limit", in: "query", description: "Maximum records to return (1-500).", schema: { type: "integer", minimum: 1, maximum: 500 } },
                         { name: "offset", in: "query", description: "Number of records to skip.", schema: { type: "integer", minimum: 0 } }
                     ],

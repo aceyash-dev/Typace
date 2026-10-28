@@ -78,7 +78,7 @@ export default async function handler(req, res) {
              `Typace delivers the file but does not change its license. Check the license attached to this typeface before embedding, modifying, redistributing, or bundling it.`]
         ];
 
-        const facts = [["Format", type], ["CSS format", font.format], ["Category", font.category || "unknown"]];
+        const facts = [["Format", type], ["CSS format", font.format]];
         if (size) facts.push(["File size", size]);
 
         const graph = [
