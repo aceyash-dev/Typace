@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { normalize, findFont, listFonts, fontSlug, isRecentlyAdded } from "../api/_lib/fonts.js";
-import { checkRateLimit, enforceRateLimit, limitForScope } from "../api/_lib/rate-limit.js";
+import { checkRateLimit, enforceRateLimit, limitForScope, sharedLimiterConfigured } from "../api/_lib/rate-limit.js";
 import openapiHandler from "../api/openapi.json.js";
 import sitemapHandler from "../api/sitemap.js";
 import commitHandler, { normalizeCommit } from "../api/commit.js";
@@ -569,6 +569,28 @@ test("rate limiting uses a shared store when configured and degrades when it fai
         globalThis.fetch = originalFetch;
         if (originalUrl === undefined) delete process.env.TYPACE_KV_REST_URL; else process.env.TYPACE_KV_REST_URL = originalUrl;
         if (originalToken === undefined) delete process.env.TYPACE_KV_REST_TOKEN; else process.env.TYPACE_KV_REST_TOKEN = originalToken;
+    }
+});
+
+test("shared limiter accepts the Upstash and Marketplace variable names", () => {
+    const KEYS = ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN", "KV_REST_API_URL", "KV_REST_API_TOKEN", "TYPACE_KV_REST_URL", "TYPACE_KV_REST_TOKEN"];
+    const saved = Object.fromEntries(KEYS.map(key => [key, process.env[key]]));
+    const clear = () => { for (const key of KEYS) delete process.env[key]; };
+    try {
+        clear();
+        assert.equal(sharedLimiterConfigured(), false, "no credentials means per-instance limiting");
+
+        process.env.UPSTASH_REDIS_REST_URL = "https://upstash.example.com";
+        process.env.UPSTASH_REDIS_REST_TOKEN = "token";
+        assert.equal(sharedLimiterConfigured(), true, "Upstash-direct variable names must work");
+
+        clear();
+        process.env.KV_REST_API_URL = "https://kv.example.com";
+        process.env.KV_REST_API_TOKEN = "token";
+        assert.equal(sharedLimiterConfigured(), true, "Vercel Marketplace variable names must work");
+    } finally {
+        clear();
+        for (const key of KEYS) if (saved[key] !== undefined) process.env[key] = saved[key];
     }
 });
 

@@ -79,12 +79,24 @@ export function checkRateLimit(req, now = Date.now(), scope = "api") {
 }
 
 /**
- * Upstash-compatible Redis REST credentials, if the deployment has them. Works
- * with Vercel KV (`KV_REST_API_*`) and plain Upstash (`TYPACE_KV_REST_*`).
+ * Upstash-compatible Redis REST credentials, if the deployment has them.
+ *
+ * Vercel KV was retired and migrated to Upstash in December 2024, so which names
+ * appear depends on how the database was provisioned:
+ *   - Vercel Marketplace Upstash integration -> KV_REST_API_URL / KV_REST_API_TOKEN
+ *   - Upstash directly (Console or CLI)       -> UPSTASH_REDIS_REST_URL / _TOKEN
+ *   - anything else                           -> TYPACE_KV_REST_URL / _TOKEN
+ * All three are accepted so the integration works without renaming variables.
  */
 function sharedConfig() {
-    const url = process.env.TYPACE_KV_REST_URL || process.env.KV_REST_API_URL || "";
-    const token = process.env.TYPACE_KV_REST_TOKEN || process.env.KV_REST_API_TOKEN || "";
+    const url = process.env.TYPACE_KV_REST_URL
+        || process.env.KV_REST_API_URL
+        || process.env.UPSTASH_REDIS_REST_URL
+        || "";
+    const token = process.env.TYPACE_KV_REST_TOKEN
+        || process.env.KV_REST_API_TOKEN
+        || process.env.UPSTASH_REDIS_REST_TOKEN
+        || "";
     return url && token ? { url: String(url).replace(/\/+$/, ""), token: String(token) } : null;
 }
 
