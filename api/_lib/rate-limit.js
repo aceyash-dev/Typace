@@ -104,10 +104,15 @@ export function sharedLimiterConfigured() {
     return Boolean(sharedConfig());
 }
 
+// One atomic command instead of two: increment, and set the TTL only on the
+// first hit of the window. Halves the command cost against a metered store and
+// removes the window where a key could exist without a TTL.
+const INCR_WITH_TTL = "local c = redis.call('INCR', KEYS[1]) if c == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]) end return c";
+
 /**
- * Fixed-window counter in Redis: INCR the window key and set its TTL in one
- * pipeline. Fixed windows allow a burst at a boundary, which is fine here —
- * the alternative (a sorted set per client) costs far more per request.
+ * Fixed-window counter in Redis. Fixed windows allow a burst at a boundary,
+ * which is acceptable here — the alternative (a sorted set per client) costs far
+ * more per request, and this is a rate limit, not a quota.
  */
 async function checkShared(req, { scope, now }) {
     const config = sharedConfig();
@@ -117,16 +122,16 @@ async function checkShared(req, { scope, now }) {
     const windowStart = Math.floor(now / WINDOW_MS) * WINDOW_MS;
     const key = `typace:ratelimit:${scope}:${getClientKey(req)}:${windowStart}`;
 
-    const response = await fetch(`${config.url}/pipeline`, {
+    const response = await fetch(config.url, {
         method: "POST",
         headers: { Authorization: `Bearer ${config.token}`, "Content-Type": "application/json" },
-        body: JSON.stringify([["INCR", key], ["EXPIRE", key, Math.ceil(WINDOW_MS / 1000), "NX"]]),
+        body: JSON.stringify(["EVAL", INCR_WITH_TTL, "1", key, String(Math.ceil(WINDOW_MS / 1000))]),
         signal: AbortSignal.timeout(1500),
     });
     if (!response.ok) throw new Error(`rate limit store responded ${response.status}`);
 
     const payload = await response.json();
-    const count = Number(Array.isArray(payload) ? payload[0]?.result : NaN);
+    const count = Number(payload?.result ?? NaN);
     if (!Number.isFinite(count)) throw new Error("rate limit store returned no count");
     return outcome(count, limit, windowStart, now);
 }

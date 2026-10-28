@@ -543,17 +543,22 @@ test("rate limiting uses a shared store when configured and degrades when it fai
     try {
         globalThis.fetch = async (url, options) => {
             requests.push({ url, body: options.body, headers: options.headers });
-            return { ok: true, json: async () => [{ result: 3 }, { result: 1 }] };
+            return { ok: true, json: async () => ({ result: 3 }) };
         };
         const allowedResponse = mockResponse();
         const allowed = await enforceRateLimit({ headers: { "x-real-ip": "198.51.100.254" } }, allowedResponse, { scope: "api" });
         assert.equal(allowed, true);
         assert.equal(allowedResponse.headers["RateLimit-Remaining"], "57");
-        assert.match(requests[0].url, /^https:\/\/kv\.example\.com\/pipeline$/, "trailing slash must not double up");
-        assert.match(String(requests[0].body), /INCR/);
+        assert.equal(requests[0].url, "https://kv.example.com", "trailing slash must not double up");
+        // One atomic EVAL, not an INCR + EXPIRE pipeline: half the metered commands.
+        const command = JSON.parse(String(requests[0].body));
+        assert.equal(command[0], "EVAL");
+        assert.match(command[1], /INCR/);
+        assert.match(command[1], /EXPIRE/);
+        assert.equal(command[3].startsWith("typace:ratelimit:api:"), true);
         assert.equal(requests[0].headers.Authorization, "Bearer secret");
 
-        globalThis.fetch = async () => ({ ok: true, json: async () => [{ result: 61 }, { result: 1 }] });
+        globalThis.fetch = async () => ({ ok: true, json: async () => ({ result: 61 }) });
         const blockedResponse = mockResponse();
         const blocked = await enforceRateLimit({ headers: { "x-real-ip": "198.51.100.255" } }, blockedResponse, { scope: "api" });
         assert.equal(blocked, false);
