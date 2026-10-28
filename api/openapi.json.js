@@ -192,11 +192,13 @@ export default function handler(req, res) {
                     parameters: [
                         { name: "format", in: "query", description: "Filter by file format.", schema: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] } },
                         { name: "limit", in: "query", description: "Maximum records to return (1-500).", schema: { type: "integer", minimum: 1, maximum: 500 } },
-                        { name: "offset", in: "query", description: "Number of records to skip.", schema: { type: "integer", minimum: 0 } }
+                        { name: "offset", in: "query", description: "Number of records to skip.", schema: { type: "integer", minimum: 0 } },
+                        { name: "fields", in: "query", description: "Comma-separated subset of record fields to return. Unknown names are rejected with INVALID_FIELDS.", schema: { type: "string" } },
+                        { name: "slugs", in: "query", description: "Comma-separated batch lookup (max 25), resolved in request order with null for misses. Takes precedence over format, limit, and offset.", schema: { type: "string" } }
                     ],
                     responses: {
-                        "200": ok("Current catalog", { type: "array", items: fontRef }),
-                        "400": ok("Invalid font format", errorRef),
+                        "200": ok("Current catalog", { type: "array", items: { ...fontRef, nullable: true } }),
+                        "400": ok("Invalid format, field, or slug list", errorRef),
                         "304": { description: "Not modified — the client's cached copy is still valid." },
                         "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Catalog could not be read", errorRef)
@@ -223,7 +225,10 @@ export default function handler(req, res) {
                     operationId: "searchFonts",
                     summary: "Search the font catalog",
                     description: "Returns a JSON array; q is capped at 200 characters and matching uses token prefixes. Omit q to return the catalog.",
-                    parameters: [{ name: "q", in: "query", description: "Search terms matched against name, path, type, and format. Omit to return the full catalog.", schema: { type: "string" } }],
+                    parameters: [
+                        { name: "q", in: "query", description: "Search terms matched against name, path, type, and format. Omit to return the full catalog.", schema: { type: "string" } },
+                        { name: "fields", in: "query", description: "Comma-separated subset of record fields to return.", schema: { type: "string" } }
+                    ],
                     responses: {
                         "200": ok("Matching font records", { type: "array", items: fontRef }),
                         "429": ok("Rate limit exceeded", errorRef),
@@ -259,6 +264,24 @@ export default function handler(req, res) {
                         "405": { description: "Method not allowed" },
                         "429": ok("Rate limit exceeded", errorRef),
                         "502": { description: "Commit metadata could not be resolved", content: { "application/json": { schema: { "$ref": "#/components/schemas/Error" } } } }
+                    }
+                }
+            },
+            "/api/mcp": {
+                post: {
+                    tags: ["MCP"],
+                    operationId: "mcp",
+                    summary: "Model Context Protocol endpoint",
+                    description: "Stateless Streamable HTTP MCP server speaking JSON-RPC 2.0. One message per POST, JSON response, no session id. Exposes read-only tools (search_fonts, list_fonts, get_font, get_font_css, list_formats, catalog_health), resources (typace://catalog, typace://fonts/{slug}, typace://font/{slug}.css), and a pick-a-font prompt. Never exposes the commit endpoint or any write operation.",
+                    requestBody: {
+                        required: true,
+                        content: { "application/json": { schema: { type: "object", description: "A JSON-RPC 2.0 request or notification." } } }
+                    },
+                    responses: {
+                        "200": { description: "JSON-RPC response. Notifications receive 202 with no body." },
+                        "202": { description: "Notification accepted; no response body." },
+                        "405": ok("Only POST is supported", errorRef),
+                        "429": ok("Rate limit exceeded", errorRef)
                     }
                 }
             },

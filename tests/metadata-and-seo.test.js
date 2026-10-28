@@ -12,6 +12,7 @@ import searchHandler from "../api/search.js";
 import fontHandler from "../api/font.js";
 import cssHandler from "../api/css.js";
 import healthHandler from "../api/health.js";
+import mcpHandler from "../api/mcp.js";
 import { escapeCSSString } from "../api/font-page.js";
 import { safeDecodePathSegment } from "../src/lib/routes.js";
 import { downloadNameFor, fontSizeLabel, fontTypeLabel, slugFor } from "../src/lib/fonts.js";
@@ -447,6 +448,73 @@ test("theme seed is reused on reload instead of being regenerated", () => {
     }
 });
 
+async function callMcp(message, ip) {
+    const response = mockResponse();
+    await mcpHandler({ method: "POST", headers: { "x-real-ip": ip }, body: message }, response);
+    return response;
+}
+
+test("MCP endpoint initialises, lists its tools, and calls them", async () => {
+    const init = await callMcp({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18" } }, "198.51.100.230");
+    assert.equal(init.statusCode, 200);
+    assert.equal(init.body.result.protocolVersion, "2025-06-18");
+    assert.ok(init.body.result.capabilities.tools);
+    assert.ok(init.body.result.serverInfo.name);
+
+    const list = await callMcp({ jsonrpc: "2.0", id: 2, method: "tools/list" }, "198.51.100.231");
+    assert.deepEqual(list.body.result.tools.map(tool => tool.name),
+        ["search_fonts", "list_fonts", "get_font", "get_font_css", "list_formats", "catalog_health"]);
+    for (const tool of list.body.result.tools) assert.equal(tool.inputSchema.type, "object");
+
+    const search = await callMcp({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "search_fonts", arguments: { query: "grotesk" } } }, "198.51.100.232");
+    const payload = JSON.parse(search.body.result.content[0].text);
+    assert.ok(payload.total >= 1);
+    assert.ok(payload.fonts.every(font => "url" in font && "name" in font));
+
+    const css = await callMcp({ jsonrpc: "2.0", id: 4, method: "tools/call", params: { name: "get_font_css", arguments: { slug: "space-grotesk" } } }, "198.51.100.233");
+    assert.match(css.body.result.content[0].text, /^@font-face \{/);
+});
+
+test("MCP separates tool failures from protocol errors", async () => {
+    const missing = await callMcp({ jsonrpc: "2.0", id: 5, method: "tools/call", params: { name: "get_font", arguments: { slug: "not-a-font" } } }, "198.51.100.234");
+    assert.equal(missing.body.result.isError, true);
+
+    const unknownTool = await callMcp({ jsonrpc: "2.0", id: 6, method: "tools/call", params: { name: "nope", arguments: {} } }, "198.51.100.235");
+    assert.equal(unknownTool.body.error.code, -32602);
+
+    const unknownMethod = await callMcp({ jsonrpc: "2.0", id: 7, method: "nope" }, "198.51.100.236");
+    assert.equal(unknownMethod.body.error.code, -32601);
+});
+
+test("MCP accepts notifications without a body and refuses GET", async () => {
+    const notification = await callMcp({ jsonrpc: "2.0", method: "notifications/initialized" }, "198.51.100.237");
+    assert.equal(notification.statusCode, 202);
+
+    const response = mockResponse();
+    await mcpHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.238" } }, response);
+    assert.equal(response.statusCode, 405);
+    assert.equal(response.headers.Allow, "POST, OPTIONS");
+});
+
+test("catalog supports batch slug lookup and sparse fields", async () => {
+    const batch = mockResponse();
+    await fontsHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.239" }, query: { slugs: "space-grotesk,not-a-font" } }, batch);
+    assert.equal(batch.statusCode, 200);
+    assert.equal(batch.body.length, 2);
+    assert.equal(batch.body[0].name, "Space Grotesk");
+    assert.equal(batch.body[1], null, "a miss must not fail the batch");
+    assert.equal(batch.headers["X-Total-Count"], "1");
+
+    const sparse = mockResponse();
+    await fontsHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.240" }, query: { limit: "1", fields: "name,url" } }, sparse);
+    assert.deepEqual(Object.keys(sparse.body[0]), ["name", "url"]);
+
+    const invalid = mockResponse();
+    await fontsHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.241" }, query: { fields: "name,bogus" } }, invalid);
+    assert.equal(invalid.statusCode, 400);
+    assert.equal(invalid.body.code, "INVALID_FIELDS");
+});
+
 test("image providers are keyless and stay in sync across client, proxy, and OpenAPI", () => {
     // The palette extractor and the proxy must agree on the provider set, and no
     // provider may need a credential the proxy does not hold.
@@ -478,6 +546,7 @@ test("search revalidates with an ETag like the catalog does", async () => {
     assert.equal(first.statusCode, 200);
     assert.match(first.headers.ETag, /^W\//);
     assert.match(first.headers["Cache-Control"], /max-age/);
+    assert.equal(first.headers["X-Total-Count"], "1");
     assert.ok(first.headers["X-Request-Id"]);
 
     const revalidated = mockResponse();

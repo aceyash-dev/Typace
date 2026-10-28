@@ -42,6 +42,17 @@ Returns text/css containing an @font-face declaration for the requested publishe
 
 Returns sha, shortSha, message, date, and source. Private repository URLs are intentionally omitted.
 
+### POST /api/mcp
+
+Stateless Model Context Protocol endpoint speaking JSON-RPC 2.0 — one message per POST, JSON response, no session id.
+
+- Read-only tools: `search_fonts`, `list_fonts`, `get_font`, `get_font_css`, `list_formats`, `catalog_health`.
+- Resources: `typace://catalog`, `typace://fonts/{slug}`, `typace://font/{slug}.css`.
+- Prompt: `pick-a-font`.
+- Never exposes the commit endpoint or any write operation.
+- Tools resolve in-process, so one MCP call costs one rate-limit unit, not two.
+- Only POST is accepted; GET returns 405. Notifications receive 202 with no body.
+
 ### GET /api/openapi.json
 
 Returns the OpenAPI 3.0.3 specification. Public API access does not require an API key.

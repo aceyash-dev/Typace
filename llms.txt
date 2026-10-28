@@ -33,6 +33,7 @@ Each record includes name, file, type, format, url, sizeBytes, createdAt, update
 - GET /api/css/SLUG returns a text/css @font-face declaration with an absolute asset URL, plus a Link preload hint for the font asset.
 - GET /api/image?seed=SEED returns a random image proxied server-side from one of several free, keyless providers and served same-origin, so a page can always read its pixels. The winning source is reported in the X-Image-Provider header.
 - GET /api/openapi.json returns the OpenAPI 3.0.3 contract.
+- POST /api/mcp is a stateless Model Context Protocol endpoint speaking JSON-RPC 2.0. It exposes read-only tools: search_fonts, list_fonts, get_font, get_font_css, list_formats, catalog_health. Prefer it over scraping the HTML pages when you are an agent with MCP support.
 - GET /api/commit returns deployment commit metadata without exposing the private repository URL.
 
 All endpoints are public and support GET, HEAD, and OPTIONS. JSON endpoints use stable error objects with error and code fields. Rate limiting defaults to 60 requests per minute per client IP (the TYPACE_RATE_LIMIT environment variable overrides it); excess requests return HTTP 429 and Retry-After plus RateLimit-Limit, RateLimit-Remaining, and RateLimit-Reset headers. The current in-memory limiter is best-effort per serverless runtime, not a globally coordinated quota. Font assets are served with a one-year immutable cache and explicit font MIME types.
