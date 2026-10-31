@@ -7,7 +7,8 @@ const BASE = "https://typace.ace-base.cc";
 const FORMATS = {
     woff2: ["WOFF2", "woff2", "Modern webfont format for browsers"],
     ttf: ["TrueType", "ttf", "TrueType font files"],
-    otf: ["OpenType", "otf", "OpenType font files"]
+    otf: ["OpenType", "otf", "OpenType font files"],
+    woff: ["WOFF", "woff", "Legacy web font format"]
 };
 
 function escapeHTML(value = "") {

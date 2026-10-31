@@ -8,7 +8,8 @@ const BASE = "https://typace.ace-base.cc";
 const FORMATS = [
     ["woff2", "WOFF2", "Modern webfont format for browsers"],
     ["ttf", "TrueType", "TrueType font files"],
-    ["otf", "OpenType", "OpenType font files"]
+    ["otf", "OpenType", "OpenType font files"],
+    ["woff", "WOFF", "Legacy web font format"]
 ];
 
 function escapeHTML(value = "") {
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
     try {
         const fonts = await listFonts();
         const canonical = `${BASE}/formats`;
-        const description = "Browse the Typace font library by file format — WOFF2, TrueType (TTF), and OpenType (OTF) — with per-font CSS and downloads.";
+        const description = "Browse the Typace font library by file format — WOFF2, TrueType (TTF), OpenType (OTF), and WOFF — with per-font CSS and downloads.";
 
         const items = FORMATS.map(([slug, label, copy]) => {
             const count = fonts.filter(font => font.type === slug).length;
@@ -40,7 +41,7 @@ export default async function handler(req, res) {
 
         const faqs = [
             ["What font formats does Typace offer?",
-             "Typace publishes WOFF2 webfonts, TrueType (TTF), and OpenType (OTF) files. Every catalog record reports its exact format, so you never have to guess."],
+             "Typace publishes WOFF2 webfonts, TrueType (TTF), OpenType (OTF), and WOFF files. Every catalog record reports its exact format, so you never have to guess."],
             ["Which format should I use on the web?",
              "Prefer WOFF2 for browsers — it is the smallest and is supported everywhere modern. Use TTF or OTF when you need the original desktop file."],
             ["How do I load a Typace font?",
@@ -62,7 +63,7 @@ export default async function handler(req, res) {
         const html = `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Font Formats — WOFF2, TTF &amp; OTF | Typace</title>
+<title>Font Formats — WOFF2, TTF, OTF &amp; WOFF | Typace</title>
 <meta name="description" content="${escapeHTML(description)}">
 <link rel="canonical" href="${canonical}">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
@@ -85,7 +86,7 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid #eadfd0;font-size:1
 <header><a href="/">Typace</a> · <a href="/browse">Browse</a> · <a href="/formats">Formats</a> · <a href="/developers">Developers</a></header>
 <main>
 <h1>Fonts by format</h1>
-<p class="answer">Typace publishes fonts as WOFF2 webfonts, TrueType (TTF), and OpenType (OTF). Pick a format to browse every published file, or open a font page for ready-to-use CSS.</p>
+<p class="answer">Typace publishes fonts as WOFF2 webfonts, TrueType (TTF), OpenType (OTF), and WOFF. Pick a format to browse every published file, or open a font page for ready-to-use CSS.</p>
 <ul>${items}</ul>
 <h2>Frequently asked questions</h2>
 ${faqs.map(([q, a]) => `<h3>${escapeHTML(q)}</h3><p>${escapeHTML(a)}</p>`).join("")}

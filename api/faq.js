@@ -20,13 +20,13 @@ function serializeJSONForHTML(value) {
 // an answer engine, without needing the surrounding page for context.
 const QA = [
     ["What is Typace?",
-     "Typace is a free font library and font delivery service by The Ace Base. It publishes typefaces as WOFF2, TrueType (TTF), and OpenType (OTF) files, with a live catalog API, so you can preview a font, copy its ready-to-use CSS, and download the original file."],
+     "Typace is a free font library and font delivery service by The Ace Base. It publishes typefaces as WOFF2, TrueType (TTF), OpenType (OTF), and WOFF files, with a live catalog API, so you can preview a font, copy its ready-to-use CSS, and download the original file."],
     ["How do I add a Typace font to my website?",
      "Fetch the catalog at https://typace.ace-base.cc/api/fonts, pick a font, then add its @font-face rule to your stylesheet and set font-family on the elements that should use it. You can copy the rule from any font page, or load it with @import or a <link> tag."],
     ["Are Typace fonts free to use?",
      "Typace delivers the files but does not change their licenses. Each typeface keeps its own license, so check the license attached to the font before embedding, modifying, redistributing, or bundling it."],
     ["What font formats does Typace support?",
-     "Typace publishes WOFF2 (recommended for the web), TrueType (TTF), and OpenType (OTF). Every catalog record reports its exact format and asset URL, so you never have to guess the file type."],
+     "Typace publishes WOFF2 (recommended for the web), TrueType (TTF), OpenType (OTF), and WOFF. Every catalog record reports its exact format and asset URL, so you never have to guess the file type."],
     ["How do I get the CSS for a font?",
      "Open the font's page and copy the @font-face rule, or request it from the API at https://typace.ace-base.cc/api/css/{slug}. The API returns an absolute asset URL, so the generated rule works when pasted into any stylesheet."],
     ["Can I use Typace without JavaScript?",

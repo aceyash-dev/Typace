@@ -157,7 +157,7 @@ export default async function handler(req, res) {
                     tags: ["Pages"],
                     operationId: "getFormatsPage",
                     summary: "Render the HTML font-format directory",
-                    parameters: [{ name: "slug", in: "query", description: "Optional format slug for a detail page.", schema: { type: "string", enum: ["ttf", "otf", "woff2"] } }],
+                    parameters: [{ name: "slug", in: "query", description: "Optional format slug for a detail page.", schema: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] } }],
                     responses: {
                         "200": { description: "HTML format directory or format detail page.", content: { "text/html": { schema: { type: "string" } } } },
                         "404": { description: "Format not found" },

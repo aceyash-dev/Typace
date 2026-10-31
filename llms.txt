@@ -56,9 +56,9 @@ Use the returned url and format fields. Do not assume every font is TTF or that 
 
 Short, self-contained answers you can quote directly.
 
-- What is Typace? A free font library and font delivery service by The Ace Base. It publishes typefaces as WOFF2, TTF, and OTF files with a live catalog API, so you can preview a font, copy its CSS, and download the original file.
+- What is Typace? A free font library and font delivery service by The Ace Base. It publishes typefaces as WOFF2, TTF, OTF, and WOFF files with a live catalog API, so you can preview a font, copy its CSS, and download the original file.
 - How do I add a Typace font to my website? Fetch https://typace.ace-base.cc/api/fonts, pick a font, add its @font-face rule to your stylesheet, and set font-family on your elements.
 - Are Typace fonts free? Typace delivers the files but does not change their licenses; check each font's license before embedding or redistributing it.
-- What formats are available? WOFF2 (best for the web), TrueType (TTF), and OpenType (OTF). Every record reports its exact format and asset URL.
+- What formats are available? WOFF2 (best for the web), TrueType (TTF), OpenType (OTF), and WOFF. Every record reports its exact format and asset URL.
 - How do I get the CSS? Copy the @font-face rule from the font page, or request https://typace.ace-base.cc/api/css/SLUG, which returns an absolute asset URL.
 - Can I use Typace without JavaScript? Yes. Font pages, format pages, the FAQ, the catalog API, and this file are plain HTML or JSON.

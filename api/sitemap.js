@@ -11,6 +11,7 @@ const pages = [
     { path: "/formats/woff2", changefreq: "weekly", priority: "0.8" },
     { path: "/formats/ttf", changefreq: "weekly", priority: "0.8" },
     { path: "/formats/otf", changefreq: "weekly", priority: "0.8" },
+    { path: "/formats/woff", changefreq: "weekly", priority: "0.8" },
     { path: "/faq", changefreq: "monthly", priority: "0.6" },
     { path: "/developers", changefreq: "monthly", priority: "0.8" },
     { path: "/privacy", changefreq: "yearly", priority: "0.3" },
