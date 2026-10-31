@@ -553,6 +553,25 @@ test("MCP sends no body for notifications, including a batch of them", async () 
     assert.equal(mixed.body[0].id, 9);
 });
 
+test("every catalogued format has a directory entry and a detail page", async () => {
+    const supported = [...new Set(Object.values(FONT_TYPES).map(entry => entry.type))].sort();
+    assert.deepEqual(supported, ["otf", "ttf", "woff", "woff2"]);
+
+    const index = mockResponse();
+    await formatsHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.263" }, query: {} }, index);
+    assert.equal(index.statusCode, 200);
+    for (const type of supported) {
+        assert.match(index.body, new RegExp(`href="/formats/${type}"`), `${type} is missing from /formats`);
+    }
+
+    // The detail page must resolve for every format, not 404 on the odd one out.
+    for (const type of supported) {
+        const detail = mockResponse();
+        await formatsPageHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.264" }, query: { slug: type } }, detail);
+        assert.equal(detail.statusCode, 200, `/formats/${type} should render`);
+    }
+});
+
 test("MCP advertises read-only tools, structured output, and slug completion", async () => {
     const list = await callMcp({ jsonrpc: "2.0", id: 10, method: "tools/list" }, "198.51.100.250");
     for (const tool of list.body.result.tools) {
