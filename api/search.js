@@ -1,5 +1,5 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
-import { listFonts, normalize, parseFields, selectFields } from "./_lib/fonts.js";
+import { listFonts, normalize, matchesTerms, parseFields, selectFields } from "./_lib/fonts.js";
 import { sendJSON } from "./_lib/respond.js";
 
 // Same cache shape as the catalog: search results are derived from it, so they
@@ -32,12 +32,7 @@ export default async function handler(req, res) {
             cache: CACHE, cdn: CDN, headers: { "X-Total-Count": "0" },
         });
 
-        const matches = fonts.filter(font => {
-            const tokens = normalize(`${font.name} ${font.file} ${font.type} ${font.format}`)
-                .split("-")
-                .filter(Boolean);
-            return terms.every(term => tokens.some(token => token.startsWith(term)));
-        });
+        const matches = fonts.filter((font) => matchesTerms(font, terms));
         return sendJSON(req, res, 200, selectFields(matches, fields), {
             cache: CACHE, cdn: CDN, headers: { "X-Total-Count": String(matches.length) },
         });

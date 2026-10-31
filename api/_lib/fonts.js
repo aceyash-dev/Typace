@@ -89,6 +89,15 @@ export function fontFaceCss(font) {
 }`;
 }
 
+/**
+ * Token-prefix match used by both /api/search and the MCP search tool, so the
+ * two cannot drift apart.
+ */
+export function matchesTerms(font, terms) {
+    const tokens = normalize(`${font.name} ${font.file} ${font.type} ${font.format}`).split("-").filter(Boolean);
+    return terms.every((term) => tokens.some((token) => token.startsWith(term)));
+}
+
 /** Fields a client may request through ?fields=. */
 export const FONT_FIELDS = ["name", "file", "type", "format", "url", "sizeBytes", "createdAt", "updatedAt", "isNew"];
 

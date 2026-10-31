@@ -2,7 +2,7 @@ import test from "node:test";
 import { existsSync } from "node:fs";
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
-import { normalize, findFont, listFonts, fontSlug, isRecentlyAdded } from "../api/_lib/fonts.js";
+import { normalize, findFont, listFonts, fontSlug, isRecentlyAdded, FONT_TYPES } from "../api/_lib/fonts.js";
 import { checkRateLimit, enforceRateLimit, limitForScope, sharedLimiterConfigured } from "../api/_lib/rate-limit.js";
 import openapiHandler from "../api/openapi.json.js";
 import sitemapHandler from "../api/sitemap.js";
@@ -19,6 +19,7 @@ import { downloadNameFor, fontSizeLabel, fontTypeLabel, slugFor } from "../src/l
 import { pickSeed, PROVIDERS } from "../src/lib/palette.js";
 import { KEYLESS_PROVIDER_IDS, DIRECT_PROVIDER_IDS } from "../api/image.js";
 import formatsHandler from "../api/formats.js";
+import formatsPageHandler from "../api/_lib/formats-page.js";
 
 function mockResponse() {
     return {
@@ -525,6 +526,31 @@ test("MCP accepts notifications without a body and refuses GET", async () => {
     await mcpHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.238" } }, response);
     assert.equal(response.statusCode, 405);
     assert.equal(response.headers.Allow, "POST, OPTIONS");
+});
+
+test("MCP sends no body for notifications, including a batch of them", async () => {
+    // JSON-RPC 2.0: a notification must not receive a response.
+    const single = await callMcp({ jsonrpc: "2.0", method: "notifications/initialized" }, "198.51.100.260");
+    assert.equal(single.statusCode, 202);
+    assert.equal(single.body, null);
+
+    // A batch of nothing but notifications must produce no body at all.
+    const allNotifications = await callMcp([
+        { jsonrpc: "2.0", method: "notifications/initialized" },
+        { jsonrpc: "2.0", method: "notifications/cancelled", params: { requestId: 1 } },
+    ], "198.51.100.261");
+    assert.equal(allNotifications.statusCode, 202, "an all-notification batch must not return 200 with a body");
+    assert.equal(allNotifications.body, null);
+
+    // A mixed batch answers only the request.
+    const mixed = await callMcp([
+        { jsonrpc: "2.0", method: "notifications/initialized" },
+        { jsonrpc: "2.0", id: 9, method: "ping" },
+    ], "198.51.100.262");
+    assert.equal(mixed.statusCode, 200);
+    assert.equal(Array.isArray(mixed.body), true);
+    assert.equal(mixed.body.length, 1, "notifications must not appear in the batch response");
+    assert.equal(mixed.body[0].id, 9);
 });
 
 test("MCP advertises read-only tools, structured output, and slug completion", async () => {

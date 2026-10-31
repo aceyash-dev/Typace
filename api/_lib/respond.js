@@ -5,11 +5,11 @@ export const API_VERSION = "1.1.0";
 // Shared response helpers so every endpoint sends identical CORS, versioning,
 // caching and conditional-request headers.
 
-export function applyCommonHeaders(res, req) {
+export function applyCommonHeaders(res, req, { methods = "GET, HEAD, OPTIONS", allowHeaders = "Accept, Content-Type" } = {}) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Timing-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
+    res.setHeader("Access-Control-Allow-Methods", methods);
+    res.setHeader("Access-Control-Allow-Headers", allowHeaders);
     res.setHeader("Access-Control-Max-Age", "86400");
     res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version, ETag, X-Total-Count, X-Request-Id");
     res.setHeader("X-API-Version", API_VERSION);
