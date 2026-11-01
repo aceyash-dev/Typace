@@ -54,6 +54,22 @@ export default async function handler(req, res) {
                         file: { type: "string" },
                         type: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] },
                         format: { type: "string", enum: ["truetype", "opentype", "woff", "woff2"] },
+                        style: {
+                            type: "object",
+                            nullable: true,
+                            description: "Measurable attributes read from the font binary. Null when the container could not be parsed (WOFF2).",
+                            properties: {
+                                weight: { type: "integer" },
+                                weightClass: { type: "string", enum: ["light", "regular", "medium", "bold", "black"] },
+                                width: { type: "integer" },
+                                widthClass: { type: "string", enum: ["condensed", "normal", "expanded"] },
+                                italic: { type: "boolean" },
+                                bold: { type: "boolean" },
+                                monospace: { type: "boolean" },
+                                allCaps: { type: "boolean" },
+                                glyphs: { type: "integer" }
+                            }
+                        },
                         sizeBytes: { type: "integer", minimum: 0, nullable: true, description: "Font file size in bytes when the filesystem stat succeeds." },
                         url: { type: "string", format: "uri-reference" },
                         createdAt: { type: "string", format: "date-time", nullable: true },
@@ -194,6 +210,11 @@ export default async function handler(req, res) {
                         { name: "limit", in: "query", description: "Maximum records to return (1-500).", schema: { type: "integer", minimum: 1, maximum: 500 } },
                         { name: "offset", in: "query", description: "Number of records to skip.", schema: { type: "integer", minimum: 0 } },
                         { name: "fields", in: "query", description: "Comma-separated subset of record fields to return. Unknown names are rejected with INVALID_FIELDS.", schema: { type: "string" } },
+                        { name: "weight", in: "query", description: "Filter by declared weight class, read from the font's OS/2 table.", schema: { type: "string", enum: ["light", "regular", "medium", "bold", "black"] } },
+                        { name: "width", in: "query", description: "Filter by declared width class.", schema: { type: "string", enum: ["condensed", "normal", "expanded"] } },
+                        { name: "italic", in: "query", description: "Filter by italic flag.", schema: { type: "string", enum: ["true", "false"] } },
+                        { name: "monospace", in: "query", description: "Filter by fixed-pitch flag.", schema: { type: "string", enum: ["true", "false"] } },
+                        { name: "caps", in: "query", description: "Uppercase-only fonts (no lowercase glyphs).", schema: { type: "string", enum: ["true", "false"] } },
                         { name: "slugs", in: "query", description: "Comma-separated batch lookup (max 25), resolved in request order with null for misses. Takes precedence over format, limit, and offset.", schema: { type: "string" } }
                     ],
                     responses: {
@@ -227,7 +248,9 @@ export default async function handler(req, res) {
                     description: "Returns a JSON array; q is capped at 200 characters and matching uses token prefixes. Omit q to return the catalog.",
                     parameters: [
                         { name: "q", in: "query", description: "Search terms matched against name, path, type, and format. Omit to return the full catalog.", schema: { type: "string" } },
-                        { name: "fields", in: "query", description: "Comma-separated subset of record fields to return.", schema: { type: "string" } }
+                        { name: "fields", in: "query", description: "Comma-separated subset of record fields to return.", schema: { type: "string" } },
+                        { name: "weight", in: "query", description: "Filter by declared weight class.", schema: { type: "string", enum: ["light", "regular", "medium", "bold", "black"] } },
+                        { name: "italic", in: "query", description: "Filter by italic flag.", schema: { type: "string", enum: ["true", "false"] } }
                     ],
                     responses: {
                         "200": ok("Matching font records", { type: "array", items: fontRef }),

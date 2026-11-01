@@ -1,5 +1,5 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
-import { listFonts, normalize, matchesTerms, parseFields, selectFields } from "./_lib/fonts.js";
+import { listFonts, normalize, matchesTerms, parseFields, selectFields, parseStyleFilters, matchesStyle } from "./_lib/fonts.js";
 import { sendJSON } from "./_lib/respond.js";
 
 // Same cache shape as the catalog: search results are derived from it, so they
@@ -22,6 +22,10 @@ export default async function handler(req, res) {
         } catch (error) {
             return sendJSON(req, res, 400, { error: error.message, code: error.code, allowed: error.allowed });
         }
+        const { filters: styleFilters, error: styleError } = parseStyleFilters(req.query);
+        if (styleError) {
+            return sendJSON(req, res, 400, { error: styleError, code: "INVALID_STYLE_FILTER" });
+        }
         const query = String(Array.isArray(req.query?.q) ? req.query.q[0] || "" : req.query?.q || "").trim().slice(0, 200);
         if (!query) return sendJSON(req, res, 200, selectFields(fonts, fields), {
             cache: CACHE, cdn: CDN, headers: { "X-Total-Count": String(fonts.length) },
@@ -32,7 +36,7 @@ export default async function handler(req, res) {
             cache: CACHE, cdn: CDN, headers: { "X-Total-Count": "0" },
         });
 
-        const matches = fonts.filter((font) => matchesTerms(font, terms));
+        const matches = fonts.filter((font) => matchesTerms(font, terms) && matchesStyle(font, styleFilters));
         return sendJSON(req, res, 200, selectFields(matches, fields), {
             cache: CACHE, cdn: CDN, headers: { "X-Total-Count": String(matches.length) },
         });

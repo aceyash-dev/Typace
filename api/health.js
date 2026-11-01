@@ -1,4 +1,5 @@
-import { enforceRateLimit } from "./_lib/rate-limit.js";
+import { enforceRateLimit, sharedLimiterConfigured } from "./_lib/rate-limit.js";
+import { KEYLESS_PROVIDER_IDS } from "./image.js";
 import { listFonts, getCatalogStatus } from "./_lib/fonts.js";
 
 function setHeaders(res, status = 200) {
@@ -41,11 +42,21 @@ export default async function handler(req, res) {
                 stale: catalog.stale,
                 issue: catalog.issue
             },
+            // P3 readiness: this reports whether the shared limiter is actually
+            // wired, which the rate-limit headers alone cannot tell you.
+            rateLimit: {
+                mode: sharedLimiterConfigured() ? "shared" : "per-instance",
+                note: sharedLimiterConfigured()
+                    ? "One global quota across instances."
+                    : "Best-effort per instance. Set Upstash REST credentials for a global quota."
+            },
+            image: { providers: KEYLESS_PROVIDER_IDS },
             links: {
                 catalog: "/api/fonts",
                 search: "/api/search",
                 openapi: "/api/openapi.json",
-                llms: "/llms.txt"
+                llms: "/llms.txt",
+                mcp: "/mcp"
             }
         });
     } catch (error) {

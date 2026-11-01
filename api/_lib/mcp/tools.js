@@ -1,7 +1,7 @@
 // Tool registry and implementations. Every tool is read-only and resolves
 // in-process through _lib/fonts.js — never over HTTP — so one MCP call costs one
 // rate-limit unit rather than two.
-import { listFonts, findFont, normalize, matchesTerms, fontFaceCss, fontFileUrl } from "../fonts.js";
+import { listFonts, findFont, normalize, matchesTerms, fontFaceCss, fontFileUrl, parseStyleFilters, matchesStyle } from "../fonts.js";
 import { API_VERSION } from "../respond.js";
 import { FORMATS, DEFAULT_LIMIT, MAX_LIMIT, LICENCE } from "./constants.js";
 import { OUTPUT_SCHEMAS } from "./schemas.js";
@@ -35,7 +35,7 @@ export const TOOLS = [
     {
         name: "search_fonts",
         title: "Search fonts",
-        description: "Find typefaces by name, file, or format. Prefix matching, so 'grot' finds 'Space Grotesk'.",
+        description: "Find typefaces by name, or filter by measurable style: weight, width, italic, monospace, and uppercase-only. Prefix matching, so 'grot' finds 'Space Grotesk'.",
         inputSchema: {
             type: "object",
             properties: {
@@ -43,6 +43,11 @@ export const TOOLS = [
                 format: { type: "string", enum: FORMATS, description: "Restrict to one file format." },
                 limit: { type: "integer", minimum: 1, maximum: MAX_LIMIT },
                 offset: { type: "integer", minimum: 0 },
+                weight: { type: "string", enum: ["light", "regular", "medium", "bold", "black"], description: "Declared weight class." },
+                width: { type: "string", enum: ["condensed", "normal", "expanded"], description: "Declared width class." },
+                italic: { type: "string", enum: ["true", "false"] },
+                monospace: { type: "string", enum: ["true", "false"] },
+                caps: { type: "string", enum: ["true", "false"], description: "Uppercase only, no lowercase glyphs." },
             },
             required: ["query"],
         },
@@ -50,13 +55,18 @@ export const TOOLS = [
     {
         name: "list_fonts",
         title: "List fonts",
-        description: "Page through the whole catalogue, optionally filtered by file format.",
+        description: "Page through the whole catalogue, optionally filtered by file format or measurable style.",
         inputSchema: {
             type: "object",
             properties: {
                 format: { type: "string", enum: FORMATS },
                 limit: { type: "integer", minimum: 1, maximum: MAX_LIMIT },
                 offset: { type: "integer", minimum: 0 },
+                weight: { type: "string", enum: ["light", "regular", "medium", "bold", "black"], description: "Declared weight class." },
+                width: { type: "string", enum: ["condensed", "normal", "expanded"], description: "Declared width class." },
+                italic: { type: "string", enum: ["true", "false"] },
+                monospace: { type: "string", enum: ["true", "false"] },
+                caps: { type: "string", enum: ["true", "false"], description: "Uppercase only, no lowercase glyphs." },
             },
         },
     },
@@ -108,8 +118,10 @@ export async function callTool(name, args = {}) {
             if (!terms.length) return json({ total: 0, fonts: [] });
             const { format, error } = normaliseFormat(args.format);
             if (error) return failure(error);
+            const { filters, error: styleError } = parseStyleFilters(args);
+            if (styleError) return failure(styleError);
             const found = (await listFonts())
-                .filter((font) => (!format || font.type === format) && matchesTerms(font, terms));
+                .filter((font) => (!format || font.type === format) && matchesTerms(font, terms) && matchesStyle(font, filters));
             const limit = clamp(args.limit, DEFAULT_LIMIT, MAX_LIMIT);
             const offset = Math.max(0, Math.trunc(Number(args.offset) || 0));
             return json({ total: found.length, fonts: found.slice(offset, offset + limit).map(summarise) });
@@ -118,8 +130,10 @@ export async function callTool(name, args = {}) {
         case "list_fonts": {
             const { format, error } = normaliseFormat(args.format);
             if (error) return failure(error);
+            const { filters, error: styleError } = parseStyleFilters(args);
+            if (styleError) return failure(styleError);
             const all = await listFonts();
-            const found = format ? all.filter((font) => font.type === format) : all;
+            const found = all.filter((font) => (!format || font.type === format) && matchesStyle(font, filters));
             const limit = clamp(args.limit, DEFAULT_LIMIT, MAX_LIMIT);
             const offset = Math.max(0, Math.trunc(Number(args.offset) || 0));
             return json({ total: found.length, fonts: found.slice(offset, offset + limit).map(summarise) });

@@ -35,17 +35,19 @@ jobs:
         with:
           node-version: 24
 
-      - name: Rebuild the manifest from git history
-        run: node scripts/font-manifest.mjs
+      - name: Rebuild the indexes
+        run: |
+          node scripts/font-manifest.mjs
+          node scripts/font-style-index.mjs
 
       - name: Commit if it changed
         run: |
-          if git diff --quiet -- fonts/manifest.json; then
-            echo "manifest already current"
+          if git diff --quiet -- fonts/manifest.json fonts/style-index.json; then
+            echo "indexes already current"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add fonts/manifest.json
-          git commit -m "chore(fonts): refresh manifest [skip ci]"
+          git add fonts/manifest.json fonts/style-index.json
+          git commit -m "chore(fonts): refresh manifest and style index [skip ci]"
           git push

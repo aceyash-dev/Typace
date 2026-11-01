@@ -24,7 +24,7 @@ Returns status, service, API version, check timestamp, catalog status/count, and
 
 ### GET /api/fonts
 
-Returns a JSON array of current font records. Records contain name, file, type, format, url, sizeBytes, createdAt, updatedAt, and isNew. createdAt and updatedAt come from git history via fonts/manifest.json; sizeBytes may be null. isNew is true while a font is within 14 days of its add date. isNew flags assets from a recent catalog batch. Supports ?format= (ttf, otf, woff, woff2), ?limit= (1-500), and ?offset=. The X-Total-Count response header reports the number of matching records. Responses carry a weak ETag; send it as If-None-Match to receive 304 Not Modified with no body.
+Returns a JSON array of current font records. Records contain name, file, type, format, url, sizeBytes, createdAt, updatedAt, and isNew. createdAt and updatedAt come from git history via fonts/manifest.json; sizeBytes may be null. isNew is true while a font is within 14 days of its add date. isNew flags assets from a recent catalog batch. Supports ?format= (ttf, otf, woff, woff2), ?weight= (light, regular, medium, bold, black), ?width= (condensed, normal, expanded), ?italic=, ?monospace=, ?caps=, ?limit= (1-500), and ?offset=. The X-Total-Count response header reports the number of matching records. Responses carry a weak ETag; send it as If-None-Match to receive 304 Not Modified with no body.
 
 ### GET /api/search?q=QUERY
 
@@ -50,8 +50,8 @@ Tools, all read-only (`readOnlyHint: true`):
 
 | Tool | Arguments | Returns |
 | --- | --- | --- |
-| `search_fonts` | `query` (required), `format`, `limit` (max 50), `offset` | `{ total, fonts[] }` |
-| `list_fonts` | `format`, `limit`, `offset` | `{ total, fonts[] }` |
+| `search_fonts` | `query` (required), `format`, `weight`, `width`, `italic`, `monospace`, `caps`, `limit` (max 50), `offset` | `{ total, fonts[] }` |
+| `list_fonts` | `format`, `weight`, `width`, `italic`, `monospace`, `caps`, `limit`, `offset` | `{ total, fonts[] }` |
 | `get_font` | `slug` | one font record |
 | `get_font_css` | `slug` | `@font-face` rule plus absolute file URL |
 | `list_formats` | none | counts per format |

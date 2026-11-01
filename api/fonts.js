@@ -1,5 +1,5 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
-import { listFonts, findFont, parseFields, parseSlugs, selectFields } from "./_lib/fonts.js";
+import { listFonts, findFont, parseFields, parseSlugs, selectFields, parseStyleFilters, matchesStyle } from "./_lib/fonts.js";
 import { sendJSON } from "./_lib/respond.js";
 
 const CACHE = "public, max-age=60, s-maxage=300, stale-while-revalidate=3600, stale-if-error=86400";
@@ -45,6 +45,14 @@ export default async function handler(req, res) {
             return sendJSON(req, res, 400, { error: "Unsupported font format.", code: "INVALID_FORMAT", allowed: [...FORMATS] });
         }
         if (format) fonts = fonts.filter((font) => font.type === format);
+
+        // Measurable style filters, read from the font binaries — weight, width,
+        // italic, monospace, case coverage.
+        const { filters: styleFilters, error: styleError } = parseStyleFilters(req.query);
+        if (styleError) {
+            return sendJSON(req, res, 400, { error: styleError, code: "INVALID_STYLE_FILTER" });
+        }
+        if (Object.keys(styleFilters).length) fonts = fonts.filter((font) => matchesStyle(font, styleFilters));
 
         const total = fonts.length;
         const rawLimit = req.query?.limit;

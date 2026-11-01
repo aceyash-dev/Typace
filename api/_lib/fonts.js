@@ -41,6 +41,70 @@ async function readManifest() {
     return manifestCache;
 }
 
+let styleCache = null;
+let styleCachedAt = 0;
+
+/**
+ * fonts/style-index.json, generated from sfnt tables by
+ * scripts/font-style-index.mjs. Missing entry means "not known", never a guess.
+ */
+async function readStyleIndex() {
+    const now = Date.now();
+    if (styleCache && now - styleCachedAt < MANIFEST_TTL_MS) return styleCache;
+    try {
+        const raw = await fs.readFile(path.join(process.cwd(), "fonts", "style-index.json"), "utf8");
+        const parsed = JSON.parse(raw);
+        styleCache = parsed && typeof parsed === "object" && parsed.fonts && typeof parsed.fonts === "object"
+            ? parsed.fonts
+            : {};
+    } catch {
+        styleCache = {};
+    }
+    styleCachedAt = now;
+    return styleCache;
+}
+
+/** Measurable attributes a client may filter on. */
+export const STYLE_FILTERS = {
+    weight: ["light", "regular", "medium", "bold", "black"],
+    width: ["condensed", "normal", "expanded"],
+    italic: ["true", "false"],
+    monospace: ["true", "false"],
+    caps: ["true", "false"],
+};
+
+/**
+ * Parse the style filters from a query object or tool arguments. Returns
+ * `{ filters }` or `{ error }` — an unknown value is a 400, not a silent no-op.
+ */
+export function parseStyleFilters(source = {}) {
+    const filters = {};
+    for (const [name, allowed] of Object.entries(STYLE_FILTERS)) {
+        const raw = Array.isArray(source[name]) ? source[name][0] : source[name];
+        if (raw === undefined || raw === null || String(raw).trim() === "") continue;
+        const value = String(raw).trim().toLowerCase();
+        if (!allowed.includes(value)) {
+            return { error: `Unsupported ${name} filter. Allowed: ${allowed.join(", ")}.` };
+        }
+        filters[name] = value;
+    }
+    return { filters };
+}
+
+/** True when a record satisfies every requested style filter. */
+export function matchesStyle(font, filters = {}) {
+    const style = font.style;
+    if (!Object.keys(filters).length) return true;
+    // A font with no readable style data cannot be claimed to match anything.
+    if (!style) return false;
+    if (filters.weight && style.weightClass !== filters.weight) return false;
+    if (filters.width && style.widthClass !== filters.width) return false;
+    if (filters.italic && String(Boolean(style.italic)) !== filters.italic) return false;
+    if (filters.monospace && String(Boolean(style.monospace)) !== filters.monospace) return false;
+    if (filters.caps && String(Boolean(style.allCaps)) !== filters.caps) return false;
+    return true;
+}
+
 export function isRecentlyAdded(addedAt, now = Date.now()) {
     const timestamp = Date.parse(String(addedAt || ""));
     if (!Number.isFinite(timestamp)) return false;
@@ -199,7 +263,7 @@ async function readFontFiles(directory, relativeDirectory = "") {
     return files;
 }
 
-async function getFontMetadata(entry, manifest = {}) {
+async function getFontMetadata(entry, manifest = {}, styles = {}) {
     const { name: fileName, relativePath, absolutePath } = entry;
     const extension = path.extname(fileName).toLowerCase();
     const metadata = FONT_TYPES[extension];
@@ -218,7 +282,8 @@ async function getFontMetadata(entry, manifest = {}) {
             .join("/")}`,
         createdAt: manifest[fileName]?.addedAt || null,
         updatedAt: manifest[fileName]?.updatedAt || null,
-        isNew: isRecentlyAdded(manifest[fileName]?.addedAt)
+        isNew: isRecentlyAdded(manifest[fileName]?.addedAt),
+        style: styles[fileName] || null
     };
 }
 
@@ -238,12 +303,13 @@ async function buildCatalog() {
     }
     catalogIssue = null;
     const manifest = await readManifest();
+    const styles = await readStyleIndex();
     const fonts = [];
     const batchSize = 16;
 
     for (let index = 0; index < entries.length; index += batchSize) {
         const batch = entries.slice(index, index + batchSize);
-        fonts.push(...await Promise.all(batch.map((entry) => getFontMetadata(entry, manifest))));
+        fonts.push(...await Promise.all(batch.map((entry) => getFontMetadata(entry, manifest, styles))));
     }
 
     return fonts.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));

@@ -579,6 +579,84 @@ test("MCP sends no body for notifications, including a batch of them", async () 
     assert.equal(mixed.body[0].id, 9);
 });
 
+test("style index covers every readable font and drives the style filters", async () => {
+    const index = JSON.parse(await readFile(new URL("../fonts/style-index.json", import.meta.url), "utf8"));
+    const fonts = await listFonts();
+    const unsupported = new Set(index.unsupported);
+
+    for (const font of fonts) {
+        if (unsupported.has(font.file)) {
+            assert.equal(font.style, null, `${font.file} must not claim style data it does not have`);
+            continue;
+        }
+        assert.ok(font.style, `${font.file} is missing style data`);
+        assert.ok(["light", "regular", "medium", "bold", "black"].includes(font.style.weightClass), font.file);
+        assert.ok(["condensed", "normal", "expanded"].includes(font.style.widthClass), font.file);
+        assert.equal(typeof font.style.glyphs, "number");
+    }
+
+    const bold = mockResponse();
+    await fontsHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.270" }, query: { weight: "bold", limit: "500" } }, bold);
+    assert.equal(bold.statusCode, 200);
+    assert.ok(bold.body.length > 0, "the bold filter should match something");
+    assert.ok(bold.body.every(font => font.style.weightClass === "bold"));
+
+    const invalid = mockResponse();
+    await fontsHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.271" }, query: { weight: "chunky" } }, invalid);
+    assert.equal(invalid.statusCode, 400);
+    assert.equal(invalid.body.code, "INVALID_STYLE_FILTER");
+});
+
+test("MCP search and list accept the same style filters", async () => {
+    const mono = await callMcp({
+        jsonrpc: "2.0", id: 30, method: "tools/call",
+        params: { name: "list_fonts", arguments: { monospace: "true" } },
+    }, "198.51.100.272");
+    const payload = JSON.parse(mono.body.result.content[0].text);
+    assert.ok(payload.fonts.length > 0, "expected at least one monospace match");
+    assert.ok(payload.fonts.every(font => font.style?.monospace === true));
+
+    // Style filters compose with the text query, not replace it.
+    const combined = await callMcp({
+        jsonrpc: "2.0", id: 33, method: "tools/call",
+        params: { name: "search_fonts", arguments: { query: "mono", monospace: "true" } },
+    }, "198.51.100.276");
+    const filtered = JSON.parse(combined.body.result.content[0].text);
+    assert.ok(filtered.fonts.length > 0 && filtered.fonts.every(font => font.style?.monospace === true));
+
+    const listed = await callMcp({
+        jsonrpc: "2.0", id: 31, method: "tools/call",
+        params: { name: "list_fonts", arguments: { weight: "light" } },
+    }, "198.51.100.273");
+    const page = JSON.parse(listed.body.result.content[0].text);
+    assert.ok(page.fonts.every(font => font.style?.weightClass === "light"));
+
+    const bad = await callMcp({
+        jsonrpc: "2.0", id: 32, method: "tools/call",
+        params: { name: "search_fonts", arguments: { query: "mono", weight: "chunky" } },
+    }, "198.51.100.274");
+    assert.equal(bad.body.result.isError, true, "an unknown style value must not silently match everything");
+});
+
+test("health reports the limiter mode and the image providers", async () => {
+    const response = mockResponse();
+    await healthHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.275" } }, response);
+    assert.equal(response.statusCode, 200);
+    assert.ok(["shared", "per-instance"].includes(response.body.rateLimit.mode));
+    assert.ok(response.body.rateLimit.note.length > 0);
+    assert.ok(Array.isArray(response.body.image.providers) && response.body.image.providers.length > 0);
+    assert.equal(response.body.links.mcp, "/mcp");
+});
+
+test("MCP registry manifest points at the live endpoint", async () => {
+    const manifest = JSON.parse(await readFile(new URL("../server.json", import.meta.url), "utf8"));
+    assert.match(manifest.$schema, /server\.schema\.json$/);
+    assert.equal(manifest.name, "io.github.aceyash-dev/typace");
+    assert.ok(manifest.description.length <= 100, "the registry rejects descriptions longer than 100 characters");
+    assert.equal(manifest.remotes[0].type, "streamable-http");
+    assert.match(manifest.remotes[0].url, /\/mcp$/);
+});
+
 test("every catalogued format has a directory entry and a detail page", async () => {
     const supported = [...new Set(Object.values(FONT_TYPES).map(entry => entry.type))].sort();
     assert.deepEqual(supported, ["otf", "ttf", "woff", "woff2"]);

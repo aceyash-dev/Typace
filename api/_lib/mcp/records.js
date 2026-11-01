@@ -8,7 +8,7 @@ export function absolute(font) {
 }
 
 export function summarise(font) {
-    return selectFields([absolute(font)], ["name", "type", "format", "url", "sizeBytes", "isNew"])[0];
+    return selectFields([absolute(font)], ["name", "type", "format", "url", "sizeBytes", "isNew", "style"])[0];
 }
 
 export function formatCounts(fonts) {
