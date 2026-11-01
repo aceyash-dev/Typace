@@ -27,9 +27,12 @@ export default async function handler(req, res) {
             return sendJSON(req, res, 400, { error: styleError, code: "INVALID_STYLE_FILTER" });
         }
         const query = String(Array.isArray(req.query?.q) ? req.query.q[0] || "" : req.query?.q || "").trim().slice(0, 200);
-        if (!query) return sendJSON(req, res, 200, selectFields(fonts, fields), {
-            cache: CACHE, cdn: CDN, headers: { "X-Total-Count": String(fonts.length) },
-        });
+        if (!query) {
+            const matches = fonts.filter((font) => matchesStyle(font, styleFilters));
+            return sendJSON(req, res, 200, selectFields(matches, fields), {
+                cache: CACHE, cdn: CDN, headers: { "X-Total-Count": String(matches.length) },
+            });
+        }
 
         const terms = normalize(query).split("-").filter(Boolean);
         if (!terms.length) return sendJSON(req, res, 200, [], {
