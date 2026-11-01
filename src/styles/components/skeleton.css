@@ -6,6 +6,7 @@
   from { background-position: -160% 0; }
   to { background-position: 260% 0; }
 }
+.font-skeleton-grid, .load-sentinel-grid { pointer-events: none; }
 .skeleton-card {
   display: flex;
   min-height: 0;
@@ -57,6 +58,7 @@
 @media (max-width: 760px) {
   .skeleton-bottom { padding: 13px 14px 14px; }
   .browse-page .skeleton-card .skeleton-specimen { min-height: 150px; }
+  .browse-page .skeleton-card .skeleton-actions .skeleton-chip { width: 32px; height: 32px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .skeleton-line, .skeleton-specimen, .skeleton-chip { animation: none; }
