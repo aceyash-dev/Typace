@@ -166,12 +166,16 @@ export async function enforceRateLimit(req, res, { scope = "api", now = Date.now
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("X-Content-Type-Options", "nosniff");
-    res.status(429).json({
-        error: `Too many requests. Limit is ${result.limit} requests per minute per IP.`,
-        code: "RATE_LIMIT_EXCEEDED",
-        limit: result.limit,
-        windowSeconds: 60,
-        retryAfter: result.retryAfter
-    });
+    if (req.method === "HEAD") {
+        res.status(429).end();
+    } else {
+        res.status(429).json({
+            error: `Too many requests. Limit is ${result.limit} requests per minute per IP.`,
+            code: "RATE_LIMIT_EXCEEDED",
+            limit: result.limit,
+            windowSeconds: 60,
+            retryAfter: result.retryAfter
+        });
+    }
     return false;
 }

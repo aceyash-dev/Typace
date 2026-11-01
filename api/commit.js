@@ -4,7 +4,7 @@ const CACHE_TTL_MS = 60_000;
 let cachedCommit = null;
 let cachedAt = 0;
 
-function sendJSON(res, status, data) {
+function sendJSON(res, status, data, method = "GET") {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
@@ -17,6 +17,7 @@ function sendJSON(res, status, data) {
             ? "public, max-age=30, s-maxage=120, stale-while-revalidate=300"
             : "no-store"
     );
+    if (status === 204 || method === "HEAD") return res.status(status).end();
     return res.status(status).json(data);
 }
 
@@ -121,12 +122,12 @@ export default async function handler(req, res) {
         return sendJSON(res, 405, {
             error: "Method not allowed.",
             code: "METHOD_NOT_ALLOWED"
-        });
+        }, req.method);
     }
     if (!(await enforceRateLimit(req, res))) return;
 
     if (cachedCommit && Date.now() - cachedAt < CACHE_TTL_MS) {
-        return sendJSON(res, 200, cachedCommit);
+        return sendJSON(res, 200, cachedCommit, req.method);
     }
 
     try {
@@ -135,17 +136,17 @@ export default async function handler(req, res) {
             return sendJSON(res, 502, {
                 error: "Commit metadata is unavailable.",
                 code: "COMMIT_METADATA_UNAVAILABLE"
-            });
+            }, req.method);
         }
 
         cachedCommit = commit;
         cachedAt = Date.now();
-        return sendJSON(res, 200, commit);
+        return sendJSON(res, 200, commit, req.method);
     } catch (error) {
         console.error("Typace commit metadata lookup failed:", error);
         return sendJSON(res, 502, {
             error: "Unable to resolve the current Typace commit.",
             code: "COMMIT_LOOKUP_FAILED"
-        });
+        }, req.method);
     }
 }

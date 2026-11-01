@@ -20,6 +20,7 @@ export default async function handler(req, res) {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Cache-Control", "public, max-age=300, s-maxage=1800, stale-while-revalidate=86400");
+    if (req.method === "HEAD") return res.status(200).end();
 
     const fontRef = { "$ref": "#/components/schemas/Font" };
     const errorRef = { "$ref": "#/components/schemas/Error" };
@@ -250,7 +251,10 @@ export default async function handler(req, res) {
                         { name: "q", in: "query", description: "Search terms matched against name, path, type, and format. Omit to return the full catalog.", schema: { type: "string" } },
                         { name: "fields", in: "query", description: "Comma-separated subset of record fields to return.", schema: { type: "string" } },
                         { name: "weight", in: "query", description: "Filter by declared weight class.", schema: { type: "string", enum: ["light", "regular", "medium", "bold", "black"] } },
-                        { name: "italic", in: "query", description: "Filter by italic flag.", schema: { type: "string", enum: ["true", "false"] } }
+                        { name: "italic", in: "query", description: "Filter by italic flag.", schema: { type: "string", enum: ["true", "false"] } },
+                        { name: "width", in: "query", description: "Filter by declared width class.", schema: { type: "string", enum: ["condensed", "normal", "expanded"] } },
+                        { name: "monospace", in: "query", description: "Filter by fixed-pitch flag.", schema: { type: "string", enum: ["true", "false"] } },
+                        { name: "caps", in: "query", description: "Filter by uppercase-only glyph coverage.", schema: { type: "string", enum: ["true", "false"] } }
                     ],
                     responses: {
                         "200": ok("Matching font records", { type: "array", items: fontRef }),
