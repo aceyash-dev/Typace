@@ -1,7 +1,9 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "regions": ["bom1"],
+  "regions": [
+    "bom1"
+  ],
   "rewrites": [
     {
       "source": "/sitemap.xml",
@@ -36,8 +38,56 @@
       "destination": "/api/mcp"
     },
     {
-      "source": "/(.*)",
+      "source": "/browse",
       "destination": "/index.html"
+    },
+    {
+      "source": "/browse/ttf",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/browse/otf",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/browse/woff2",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/browse/font/:slug",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/account",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/developers",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/cookies",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/security",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/not-found-json"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/not-found"
     }
   ],
   "headers": [
