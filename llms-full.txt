@@ -44,16 +44,35 @@ Returns sha, shortSha, message, date, and source. Private repository URLs are in
 
 ### POST /api/mcp
 
-Stateless Model Context Protocol endpoint speaking JSON-RPC 2.0 — one message per POST, JSON response, no session id.
+Stateless Model Context Protocol endpoint speaking JSON-RPC 2.0 — one message per POST, JSON response, no session id. Also reachable at `/mcp`.
 
-- Read-only tools: `search_fonts`, `list_fonts`, `get_font`, `get_font_css`, `list_formats`, `catalog_health`.
-- Resources: `typace://catalog`, `typace://fonts/{slug}`, `typace://font/{slug}.css`.
+Tools, all read-only (`readOnlyHint: true`):
+
+| Tool | Arguments | Returns |
+| --- | --- | --- |
+| `search_fonts` | `query` (required), `format`, `limit` (max 50), `offset` | `{ total, fonts[] }` |
+| `list_fonts` | `format`, `limit`, `offset` | `{ total, fonts[] }` |
+| `get_font` | `slug` | one font record |
+| `get_font_css` | `slug` | `@font-face` rule plus absolute file URL |
+| `list_formats` | none | counts per format |
+| `catalog_health` | none | status, count, formats, apiVersion |
+
+Example call:
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"tools/call",
+ "params":{"name":"search_fonts","arguments":{"query":"grotesk","limit":2}}}
+```
+
+Every tool result carries a text block and, for data tools, a matching `structuredContent` object.
+
+Resources: `typace://catalog`, `typace://formats`, `typace://fonts/{slug}`, `typace://font/{slug}.css`.
 - Prompt: `pick-a-font`.
 - Never exposes the commit endpoint or any write operation.
 - Tools resolve in-process, so one MCP call costs one rate-limit unit, not two.
 - Every tool is annotated `readOnlyHint: true`, and data tools return `structuredContent` alongside the text block.
 - `completion/complete` suggests font slugs for `typace://fonts/{slug}`; `logging/setLevel` is accepted and ignored.
-- Only POST is accepted; GET returns 405. Notifications receive 202 with no body.
+- Only POST is accepted; a GET returns 405 describing the endpoint. Notifications receive 202 with no body, including a batch made only of notifications.
 
 ### GET /api/openapi.json
 

@@ -2,6 +2,7 @@ import { enforceRateLimit } from "./_lib/rate-limit.js";
 import { applyCommonHeaders, sendJSON } from "./_lib/respond.js";
 import { dispatch, err } from "./_lib/mcp/dispatch.js";
 import { SUPPORTED_PROTOCOLS } from "./_lib/mcp/constants.js";
+import { TOOLS } from "./_lib/mcp/tools.js";
 
 // Stateless Streamable HTTP MCP adapter. One JSON-RPC message per POST and a
 // JSON response — no session, no server-initiated SSE. Vercel may serve each
@@ -26,7 +27,16 @@ export default async function handler(req, res) {
         res.setHeader("Allow", "POST, OPTIONS");
         res.setHeader("Cache-Control", "no-store");
         res.setHeader("Content-Type", "application/json; charset=utf-8");
-        return res.status(405).json({ error: "Method not allowed. MCP uses POST.", code: "METHOD_NOT_ALLOWED" });
+        // A human opening this in a browser gets a description rather than a bare
+        // 405. The transport is POST-only; SSE streams are not offered.
+        return res.status(405).json({
+            error: "Method not allowed. MCP uses POST.",
+            code: "METHOD_NOT_ALLOWED",
+            protocol: "Model Context Protocol — stateless Streamable HTTP, JSON-RPC 2.0, no session id",
+            endpoint: "https://typace.ace-base.cc/api/mcp",
+            documentation: "https://typace.ace-base.cc/llms-full.txt",
+            tools: TOOLS.map((tool) => tool.name),
+        });
     }
     if (!(await enforceRateLimit(req, res, { scope: "mcp", methods: "POST, OPTIONS" }))) return;
     // RPC responses are never cacheable; the payload changes per call.

@@ -32,6 +32,10 @@
       "destination": "/api/css?slug=:slug"
     },
     {
+      "source": "/mcp",
+      "destination": "/api/mcp"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

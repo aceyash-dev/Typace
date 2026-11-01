@@ -27,6 +27,8 @@ const QA = [
      "Typace delivers the files but does not change their licenses. Each typeface keeps its own license, so check the license attached to the font before embedding, modifying, redistributing, or bundling it."],
     ["What font formats does Typace support?",
      "Typace publishes WOFF2 (recommended for the web), TrueType (TTF), OpenType (OTF), and WOFF. Every catalog record reports its exact format and asset URL, so you never have to guess the file type."],
+    ["Can an AI agent or MCP client use Typace?",
+     "Yes. https://typace.ace-base.cc/api/mcp is a stateless Model Context Protocol endpoint (JSON-RPC 2.0) exposing search_fonts, list_fonts, get_font, get_font_css, list_formats and catalog_health as read-only tools, plus catalogue resources and a pick-a-font prompt. It needs no key; the same per-IP rate limit applies."],
     ["How do I get the CSS for a font?",
      "Open the font's page and copy the @font-face rule, or request it from the API at https://typace.ace-base.cc/api/css/{slug}. The API returns an absolute asset URL, so the generated rule works when pasted into any stylesheet."],
     ["Can I use Typace without JavaScript?",

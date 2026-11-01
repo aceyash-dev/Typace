@@ -13,6 +13,8 @@ import fontHandler from "../api/font.js";
 import cssHandler from "../api/css.js";
 import healthHandler from "../api/health.js";
 import mcpHandler from "../api/mcp.js";
+import { TOOLS } from "../api/_lib/mcp/tools.js";
+import { RESOURCES } from "../api/_lib/mcp/resources.js";
 import { escapeCSSString } from "../api/font-page.js";
 import { safeDecodePathSegment } from "../src/lib/routes.js";
 import { downloadNameFor, fontSizeLabel, fontTypeLabel, slugFor } from "../src/lib/fonts.js";
@@ -526,6 +528,30 @@ test("MCP accepts notifications without a body and refuses GET", async () => {
     await mcpHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.238" } }, response);
     assert.equal(response.statusCode, 405);
     assert.equal(response.headers.Allow, "POST, OPTIONS");
+});
+
+test("MCP is documented and routed: every tool, resource, and the /mcp alias", async () => {
+    const docs = {
+        README: await readFile(new URL("../README.md", import.meta.url), "utf8"),
+        "llms.txt": await readFile(new URL("../llms.txt", import.meta.url), "utf8"),
+        "llms-full.txt": await readFile(new URL("../llms-full.txt", import.meta.url), "utf8"),
+    };
+    // Adding a tool without documenting it is the drift this catches.
+    for (const tool of TOOLS) {
+        for (const [name, body] of Object.entries(docs)) {
+            assert.ok(body.includes(tool.name), `${name} does not document the ${tool.name} tool`);
+        }
+    }
+    for (const resource of RESOURCES) {
+        assert.ok(docs["llms-full.txt"].includes(resource.uri), `llms-full.txt does not document ${resource.uri}`);
+    }
+
+    const config = JSON.parse(await readFile(new URL("../vercel.json", import.meta.url), "utf8"));
+    const rewriteIndex = config.rewrites.findIndex(rule => rule.source === "/mcp");
+    assert.ok(rewriteIndex >= 0, "/mcp must route to the MCP endpoint");
+    assert.equal(config.rewrites[rewriteIndex].destination, "/api/mcp");
+    const catchAll = config.rewrites.findIndex(rule => rule.source === "/(.*)");
+    assert.ok(rewriteIndex < catchAll, "/mcp must be rewritten before the SPA catch-all");
 });
 
 test("MCP sends no body for notifications, including a batch of them", async () => {
