@@ -68,3 +68,25 @@
   --bg-warm: #fff7e9;
   --surface-warm: #ffead6;
 }
+
+:root {
+  /* Browse page component tokens: one source for repeated shape, depth and sticky offsets. */
+  --radius-browse-toolbar: 8px;
+  --radius-browse-toolbar-mobile: 14px;
+  --radius-browse-control: 10px;
+  --radius-browse-filter: 9px;
+  --radius-browse-card: 16px;
+  --radius-browse-specimen: 0px;
+  --radius-browse-action: 10px;
+  --radius-browse-empty-state: 6px;
+  --radius-browse-preview: 20px;
+  --shadow-browse-toolbar: 0 8px 22px color-mix(in srgb, var(--text) 6%, transparent);
+  --shadow-browse-toolbar-mobile: 0 8px 24px color-mix(in srgb, var(--text) 9%, transparent);
+  --shadow-browse-card: 0 5px 18px color-mix(in srgb, var(--text) 5.5%, transparent);
+  --shadow-browse-card-hover: 0 8px 24px color-mix(in srgb, var(--text) 9%, transparent);
+  --browse-toolbar-sticky-top: 91px;
+  --browse-toolbar-sticky-top-mobile: 68px;
+  --frosted-page-surface: color-mix(in srgb, var(--bg) 94%, transparent);
+  --frosted-toolbar-surface: color-mix(in srgb, var(--surface) 96%, transparent);
+  --frosted-blur: 18px;
+}
