@@ -102,9 +102,19 @@
 }
 @media (max-width: 760px) {
   .browse-page .font-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .browse-page .font-card .specimen-button { min-height: 150px; padding: 20px 15px; }
+  /* Even padding: the specimen breathes at the top and bottom, not just the sides. */
+  .browse-page .font-card .specimen-button { min-height: 150px; padding: 22px 16px; }
   .browse-page .font-card .specimen { font-size: clamp(42px, 13vw, 56px); }
-  .browse-page .font-card .font-card-bottom { padding: 13px 14px 14px; }
+  /* Two columns leave roughly 150px inside a card, and the three action buttons
+     need all of it. Side by side, the name column collapsed to a few pixels and
+     the name wrapped one letter per line, so stack them instead. */
+  .browse-page .font-card .font-card-bottom {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px 14px;
+  }
+  .browse-page .font-card .font-card-actions { justify-content: flex-start; gap: 4px; }
   .browse-page .font-card .font-card-actions .icon-button { width: 36px; height: 36px; }
 }
 @media (prefers-reduced-motion: reduce) {

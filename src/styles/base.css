@@ -31,39 +31,44 @@ body {background-color: var(--bg); background-image: linear-gradient(to right, c
 body {background-image:
     radial-gradient(ellipse at 8% 4%, color-mix(in srgb, var(--accent) 5%, transparent), transparent 28rem),
     linear-gradient(to right, color-mix(in srgb, var(--line) 18%, transparent) 1px, transparent 1px); background-size: auto, 48px 100%;}
-@media (max-width: 760px) {
-  main {padding-bottom: calc(94px + env(safe-area-inset-bottom));}
-}
-@media (max-width:760px) {
-  main {padding-bottom:calc(100px + env(safe-area-inset-bottom));}
-}
 body {background-image: radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--accent-soft) 44%, transparent), transparent 34rem);}
 @media (prefers-reduced-motion: reduce) {
   * {scroll-behavior:auto; animation-duration:.01ms; animation-iteration-count:1; transition-duration:.01ms !important;}
   *::before {scroll-behavior:auto; animation-duration:.01ms; animation-iteration-count:1; transition-duration:.01ms !important;}
   *::after {scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
 }
-@media (min-width: 761px) and (max-width: 1024px) {
-  main {padding-bottom: calc(92px + env(safe-area-inset-bottom));}
-}
 html {-webkit-text-size-adjust: 100%; text-size-adjust: 100%;}
 html {overflow-x: clip;}
 body {overflow-x: clip;}
 body {min-height: 100dvh;}
-@media (max-width: 760px) {
-  html {scroll-padding-top: 84px; scroll-padding-bottom: 108px;}
-  main {padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important;}
-}
 h1 {text-wrap: balance;}
 h2 {text-wrap: balance;}
 :target {scroll-margin-top: 90px;}
-@media (max-width: 1024px) {
-  main {padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;}
+
+/* Space for the floating nav, which is bottom-anchored on phones only.
+   One definition, so the safe-area inset cannot be dropped by a later rule. */
+:root {--nav-clearance: 92px;}
+main {padding-bottom: calc(var(--nav-clearance) + env(safe-area-inset-bottom, 0px));}
+@media (min-width: 761px) {
+  /* Above this width the nav is a pill at the top, so nothing needs clearing. */
+  main {padding-bottom: 0;}
 }
-@media (max-width: 1024px) {
-  main {padding-bottom: 108px !important;}
+@media (max-width: 760px) {
+  html {scroll-padding-top: 84px; scroll-padding-bottom: calc(var(--nav-clearance) + env(safe-area-inset-bottom, 0px));}
 }
-@media (min-width: 1025px) {
-  main {padding-bottom: 0 !important;}
+
+/* Native-app behaviour -------------------------------------------------- */
+/* Kill the rubber-band and pull-to-refresh so a swipe cannot reload the app. */
+html {overscroll-behavior-y: none;}
+body {overscroll-behavior-y: none;}
+/* No grey flash on tap, and no 300ms double-tap-zoom delay on controls. */
+* {-webkit-tap-highlight-color: transparent;}
+button, a, select, [role="button"] {touch-action: manipulation;}
+/* Chrome does not want to be selected; text content still does. */
+.main-nav, .site-header, .font-card-actions, .font-card-bottom {-webkit-user-select: none; user-select: none;}
+input, textarea, .specimen, .preview-sample {-webkit-user-select: text; user-select: text;}
+/* Installed on a phone the viewport runs under the status bar, so the sticky
+   header has to clear it or the logo sits beneath the clock. */
+@media (display-mode: standalone) {
+  .site-header {padding-top: env(safe-area-inset-top, 0px);}
 }
-main {padding-bottom: 108px !important;}
