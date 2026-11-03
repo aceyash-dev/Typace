@@ -1,0 +1,16 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { codePointTester, describeFont, readTableDirectory, weightLabel, widthLabel } from "../scripts/lib/sfnt.mjs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { buildStyleIndex } from "../scripts/font-style-index.mjs";
+function cmap4() { const b=Buffer.alloc(64); b.writeUInt16BE(0,0); b.writeUInt16BE(1,2); b.writeUInt16BE(3,4); b.writeUInt16BE(1,6); b.writeUInt32BE(12,8); const x=12; b.writeUInt16BE(4,x); b.writeUInt16BE(32,x+2); b.writeUInt16BE(4,x+6); b.writeUInt16BE(0x41,x+14); b.writeUInt16BE(0xffff,x+16); b.writeUInt16BE(0,x+18); b.writeUInt16BE(0x41,x+20); b.writeUInt16BE(0xffff,x+22); b.writeInt16BE(0,x+24); b.writeInt16BE(1,x+26); b.writeUInt16BE(0,x+28); b.writeUInt16BE(0,x+30); return b; }
+function cmap12() { const b=Buffer.alloc(40); b.writeUInt16BE(0,0); b.writeUInt16BE(1,2); b.writeUInt16BE(3,4); b.writeUInt16BE(10,6); b.writeUInt32BE(12,8); const x=12; b.writeUInt16BE(12,x); b.writeUInt32BE(28,x+4); b.writeUInt32BE(1,x+12); b.writeUInt32BE(0x1f600,x+16); b.writeUInt32BE(0x1f64f,x+20); b.writeUInt32BE(0x1f600,x+24); return b; }
+test("format 4 cmap detects BMP codepoints",()=>{const has=codePointTester(cmap4(),{offset:0});assert.equal(has(0x41),true);assert.equal(has(0x61),false);});
+test("format 12 cmap detects supplementary codepoints",()=>{const has=codePointTester(cmap12(),{offset:0});assert.equal(has(0x1f600),true);assert.equal(has(0x1f680),false);});
+test("sfnt readers reject truncated directories and ignore compressed containers",()=>{const truncated=Buffer.alloc(12); truncated.writeUInt16BE(1,4); assert.throws(()=>readTableDirectory(truncated),/Truncated sfnt table directory/);assert.equal(describeFont(Buffer.from("wOF2")),null);});
+test("font labels preserve classification thresholds",()=>{assert.deepEqual([300,400,550,700,800].map(weightLabel),["light","regular","medium","bold","black"]);assert.deepEqual([3,5,7].map(widthLabel),["condensed","normal","expanded"]);});
+function sfntWithTable(tag, table) { const header=Buffer.alloc(28); header.writeUInt32BE(0x00010000,0); header.writeUInt16BE(1,4); header.write(tag,12,"ascii"); header.writeUInt32BE(28,20); header.writeUInt32BE(table.length,24); return Buffer.concat([header,table]); }
+test("describeFont derives allCaps from cmap coverage",()=>{assert.equal(describeFont(sfntWithTable("cmap",cmap4())).allCaps,true); const mixed=cmap4(); mixed.writeUInt16BE(0x61,12+14); assert.equal(describeFont(sfntWithTable("cmap",mixed)).allCaps,false);});
+test("buildStyleIndex does not overwrite the previous artifact when no font parses",()=>{const directory=mkdtempSync(path.join(os.tmpdir(),"sfnt-index-")); const fontsDir=path.join(directory,"fonts"); const outputPath=path.join(directory,"style-index.json"); try {mkdirSync(fontsDir); writeFileSync(path.join(fontsDir,"broken.ttf"),Buffer.from("not-an-sfnt")); writeFileSync(outputPath,"preserve-this-artifact\\n"); assert.throws(()=>buildStyleIndex({fontsDir,outputPath}),/refusing to publish an empty style index/); assert.equal(readFileSync(outputPath,"utf8"),"preserve-this-artifact\\n");} finally {rmSync(directory,{recursive:true,force:true});}});
