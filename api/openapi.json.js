@@ -43,7 +43,8 @@ export default async function handler(req, res) {
             { name: "Search", description: "Search the current font catalog." },
             { name: "CSS", description: "Generate web font CSS for a published font." },
             { name: "Assets", description: "Proxy supported image assets." },
-            { name: "Pages", description: "HTML discovery and documentation pages." }
+            { name: "Pages", description: "HTML discovery and documentation pages." },
+            { name: "MCP", description: "Model Context Protocol endpoint for agents." }
         ],
         components: {
             schemas: {
@@ -169,27 +170,23 @@ export default async function handler(req, res) {
                     }
                 }
             },
-            "/api/formats": {
+            "/api/pages": {
                 get: {
                     tags: ["Pages"],
-                    operationId: "getFormatsPage",
-                    summary: "Render the HTML font-format directory",
-                    parameters: [{ name: "slug", in: "query", description: "Optional format slug for a detail page.", schema: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] } }],
+                    operationId: "getPage",
+                    summary: "Render a server-rendered page",
+                    description: "One function serves every HTML page. /faq, /formats, /formats/{slug} and /font/{slug} are rewritten here by vercel.json; an unknown page renders the 404 page.",
+                    parameters: [
+                        { name: "page", in: "query", required: true, description: "Which page to render.", schema: { type: "string", enum: ["faq", "formats", "font"] } },
+                        { name: "slug", in: "query", description: "Format slug when page=formats, font slug when page=font.", schema: { type: "string" } }
+                    ],
                     responses: {
-                        "200": { description: "HTML format directory or format detail page.", content: { "text/html": { schema: { type: "string" } } } },
-                        "404": { description: "Format not found" },
+                        "200": { description: "HTML page.", content: { "text/html": { schema: { type: "string" } } } },
+                        "404": { description: "Format or font not found" },
                         "405": ok("Method not allowed", errorRef),
                         "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Catalog unavailable", errorRef)
                     }
-                }
-            },
-            "/api/faq": {
-                get: {
-                    tags: ["Pages"],
-                    operationId: "getFaqPage",
-                    summary: "Render the HTML FAQ and structured data",
-                    responses: { "200": { description: "HTML FAQ page.", content: { "text/html": { schema: { type: "string" } } } } }
                 }
             },
             "/api/sitemap": {

@@ -82,7 +82,11 @@ export async function dispatch(message) {
                 return err(id, -32601, `Method not found: ${method}`);
         }
     } catch (error) {
+        // A client mistake is reported as invalid params with its own message.
+        // Anything else is a server fault: log it, and tell the client nothing
+        // about internals.
+        if (error?.code === -32602) return err(id, -32602, error.message);
         console.error("Typace MCP dispatch failed:", error);
-        return err(id, -32603, error?.message || "Internal error");
+        return err(id, -32603, "Internal error");
     }
 }

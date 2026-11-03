@@ -6,6 +6,7 @@ import { API_VERSION } from "../respond.js";
 import { FORMATS, DEFAULT_LIMIT, MAX_LIMIT, LICENCE } from "./constants.js";
 import { OUTPUT_SCHEMAS } from "./schemas.js";
 import { absolute, summarise, formatCounts, clamp } from "./records.js";
+import { InvalidParamsError } from "./errors.js";
 
 const text = (value) => ({
     content: [{ type: "text", text: typeof value === "string" ? value : JSON.stringify(value, null, 2) }],
@@ -22,7 +23,7 @@ const failure = (message) => ({ content: [{ type: "text", text: message }], isEr
 
 function requireSlug(args) {
     const slug = String(args?.slug || "").trim();
-    if (!slug) throw new Error("A 'slug' argument is required.");
+    if (!slug) throw new InvalidParamsError("A 'slug' argument is required.");
     return slug;
 }
 

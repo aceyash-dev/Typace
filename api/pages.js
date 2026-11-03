@@ -21,6 +21,9 @@ const ROUTES = {
 
 export default async function handler(req, res) {
     const page = String(req.query?.page || "").toLowerCase();
-    const route = ROUTES[page] || notFoundHandler;
+    // Own-property check: a plain object inherits from Object.prototype, so
+    // ?page=__proto__ would resolve to a non-function and ?page=constructor to
+    // Object — one 500 and one empty 200, both instead of a 404.
+    const route = Object.hasOwn(ROUTES, page) ? ROUTES[page] : notFoundHandler;
     return route(req, res);
 }

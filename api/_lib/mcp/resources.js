@@ -1,6 +1,7 @@
 // Resources: the catalogue itself and per-font records/CSS, addressed by URI.
 import { listFonts, findFont, fontFaceCss } from "../fonts.js";
 import { absolute, formatCounts } from "./records.js";
+import { InvalidParamsError } from "./errors.js";
 
 export const RESOURCES = [
     { uri: "typace://catalog", name: "Typace catalog", description: "Every published font record.", mimeType: "application/json" },
@@ -26,16 +27,16 @@ export async function readResource(uri) {
     const fontMatch = /^typace:\/\/fonts\/(.+)$/.exec(uri);
     if (fontMatch) {
         const font = findFont(fonts, decodeURIComponent(fontMatch[1]));
-        if (!font) throw new Error("No font matches that URI.");
+        if (!font) throw new InvalidParamsError("No font matches that URI.");
         return { contents: [{ uri, mimeType: "application/json", text: JSON.stringify(absolute(font)) }] };
     }
 
     const cssMatch = /^typace:\/\/font\/(.+)\.css$/.exec(uri);
     if (cssMatch) {
         const font = findFont(fonts, decodeURIComponent(cssMatch[1]));
-        if (!font) throw new Error("No font matches that URI.");
+        if (!font) throw new InvalidParamsError("No font matches that URI.");
         return { contents: [{ uri, mimeType: "text/css", text: fontFaceCss(font) }] };
     }
 
-    throw new Error(`Unknown resource: ${uri}`);
+    throw new InvalidParamsError(`Unknown resource: ${uri}`);
 }

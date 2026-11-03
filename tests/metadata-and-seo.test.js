@@ -21,6 +21,7 @@ import { downloadNameFor, fontSizeLabel, fontTypeLabel, slugFor } from "../src/l
 import { pickSeed, PROVIDERS } from "../src/lib/palette.js";
 import { KEYLESS_PROVIDER_IDS, DIRECT_PROVIDER_IDS } from "../api/image.js";
 import formatsHandler from "../api/_lib/pages/formats.js";
+import pagesHandler from "../api/pages.js";
 import formatsPageHandler from "../api/_lib/formats-page.js";
 
 function mockResponse() {
@@ -113,8 +114,9 @@ test("OpenAPI documents current API paths, schema values, and machine-client hea
     assert.ok(response.body.paths["/api/health"]);
     assert.ok(response.body.paths["/api/fonts"]);
     assert.ok(response.body.paths["/api/font"]);
-    assert.ok(response.body.paths["/api/formats"]);
-    assert.ok(response.body.paths["/api/faq"]);
+    // /api/formats and /api/faq folded into /api/pages when api/ had to fit
+    // Vercel's 12-function limit; the public URLs are unchanged.
+    assert.ok(response.body.paths["/api/pages"]);
     assert.ok(response.body.paths["/api/sitemap"]);
     assert.ok(response.body.paths["/api/search"]);
     assert.ok(response.body.tags.some(tag => tag.name === "Assets"));
@@ -664,6 +666,50 @@ test("MCP registry manifest points at the live endpoint", async () => {
     assert.ok(manifest.description.length <= 100, "the registry rejects descriptions longer than 100 characters");
     assert.equal(manifest.remotes[0].type, "streamable-http");
     assert.match(manifest.remotes[0].url, /\/mcp$/);
+});
+
+test("page routing survives prototype keys and renders a real 404", async () => {
+    for (const page of ["__proto__", "constructor", "toString", "hasOwnProperty", "nope"]) {
+        const response = mockResponse();
+        await pagesHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.280" }, query: { page } }, response);
+        assert.equal(response.statusCode, 404, `?page=${page} must 404, not throw or return 200`);
+        assert.match(String(response.body), /not in the collection|NOT_FOUND|Not found/i);
+    }
+    // The known pages still route.
+    const faq = mockResponse();
+    await pagesHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.281" }, query: { page: "faq" } }, faq);
+    assert.equal(faq.statusCode, 200);
+});
+
+test("MCP reports a bad argument as invalid params, not a server fault", async () => {
+    const missing = await callMcp({ jsonrpc: "2.0", id: 40, method: "tools/call", params: { name: "get_font", arguments: {} } }, "198.51.100.282");
+    assert.equal(missing.body.error.code, -32602, "a missing slug is the client's mistake, not ours");
+
+    const badUri = await callMcp({ jsonrpc: "2.0", id: 41, method: "resources/read", params: { uri: "typace://nope" } }, "198.51.100.283");
+    assert.equal(badUri.body.error.code, -32602);
+
+    // A genuine server fault must not leak internals.
+    const unknownMethod = await callMcp({ jsonrpc: "2.0", id: 42, method: "nope/nope" }, "198.51.100.284");
+    assert.equal(unknownMethod.body.error.code, -32601);
+    assert.equal(unknownMethod.body.error.message.includes("at "), false);
+});
+
+test("OpenAPI declares every tag and documents the consolidated page function", async () => {
+    const response = mockResponse();
+    await openapiHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.285" } }, response);
+    const spec = response.body;
+    const declared = new Set((spec.tags || []).map(tag => tag.name));
+    for (const [path, operation] of Object.entries(spec.paths)) {
+        for (const op of Object.values(operation)) {
+            for (const tag of op.tags || []) {
+                assert.ok(declared.has(tag), `${path} uses undeclared tag ${tag}`);
+            }
+        }
+    }
+    assert.ok(spec.paths["/api/pages"], "the consolidated page function must be documented");
+    // These were separate functions before the 12-function consolidation.
+    assert.equal(spec.paths["/api/formats"], undefined, "/api/formats no longer exists");
+    assert.equal(spec.paths["/api/faq"], undefined, "/api/faq no longer exists");
 });
 
 test("every catalogued format has a directory entry and a detail page", async () => {
