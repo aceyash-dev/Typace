@@ -107,10 +107,14 @@
     box-shadow: 0 12px 38px rgba(48,37,29,.18);
     transition: opacity .24s ease, transform .28s ease, visibility 0s;
   }
+  /* Explicit heights: with only min-heights, the active pill grew taller than
+     the bar and hung out of the bottom of it. */
+  .main-nav.floating-nav {height: 60px; align-items: center;}
   .main-nav.floating-nav a {
     flex: 1 1 0;
     min-width: 0;
-    min-height: 46px;
+    height: 48px;
+    min-height: 0;
     padding: 0 10px;
     font-size: 12px;
     border-radius: 16px;
@@ -125,7 +129,7 @@
 /* Narrow phones: icons only, so three targets still fit. */
 @media (max-width: 380px) {
   .main-nav.floating-nav {width: calc(100vw - 20px);}
-  .main-nav.floating-nav a {flex-direction: column; gap: 3px; min-height: 48px; padding: 5px 7px; font-size: 9px;}
+  .main-nav.floating-nav a {flex-direction: column; gap: 2px; height: 48px; min-height: 0; padding: 4px 7px; font-size: 9px;}
   .main-nav.floating-nav a > .hgi {font-size: 19px;}
   .main-nav.floating-nav a > span {display: none;}
   .main-nav.floating-nav a.nav-active > span {display: inline;}

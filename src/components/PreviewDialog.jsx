@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "./Icon.jsx";
 import { applyTheme, loadImageTheme, reshuffleSeed } from "../lib/palette.js";
-import { fontUrl, familyFor, loadFontFace, fontCssSnippet, formatBytes } from "../lib/fonts.js";
+import { fontUrl, familyFor, loadFontFace, fontCssSnippet, formatBytes, slugFor, copyText } from "../lib/fonts.js";
 import { track } from "../lib/analytics.js";
 
 const SWIPE_CLOSE = 120;
@@ -55,6 +55,7 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
   const [imageLoading, setImageLoading] = useState(false);
   const imageShuffleRef = useRef(0);
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
+  const [shared, setShared] = useState(false);
   const family = font ? familyFor(font) : "";
 
   useEffect(() => { writeStored("typace-sample", sample); }, [sample]);
@@ -126,6 +127,23 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
   const snippet = fontCssSnippet(font, language);
   const activeLanguage = LANGUAGES.find((item) => item.id === language) || LANGUAGES[0];
   const sizeLabel = formatBytes(font.sizeBytes ?? font.size ?? font.bytes);
+  // The shareable artefact is the server-rendered page: it carries the specimen,
+  // the licence note and the CSS without needing JavaScript.
+  const pageUrl = typeof window === "undefined" ? "" : `${window.location.origin}/font/${slugFor(font)}`;
+
+  async function shareFont() {
+    const payload = { title: `${font.name} · Typace`, text: `Preview ${font.name}, copy its CSS, or download the file.`, url: pageUrl };
+    track("share_font", { font: font.name });
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try { await navigator.share(payload); return; }
+      catch { /* the user dismissed the sheet; fall through to copying */ }
+    }
+    try {
+      await copyText(pageUrl);
+      setShared(true);
+      window.setTimeout(() => setShared(false), 2000);
+    } catch { /* clipboard unavailable */ }
+  }
 
   function shufflePreviewPhoto() {
     const requestId = ++imageShuffleRef.current;
@@ -280,6 +298,12 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
             </button>
             <a className="button button-secondary" href={fontUrl(font)} download={String(font.file).split("/").pop()} onClick={() => track("download_font", { font: font.name, variant: "sheet" })}>
               <Icon name="download-01" /> Download{sizeLabel ? " · " + sizeLabel : ""}
+            </a>
+            <button className="button button-secondary" type="button" onClick={shareFont}>
+              <Icon name={shared ? "checkmark-circle-02" : "share-01"} /> {shared ? "Link copied" : "Share"}
+            </button>
+            <a className="button button-secondary" href={`/font/${slugFor(font)}`} onClick={() => track("open_font_page", { font: font.name })}>
+              <Icon name="arrow-up-right-01" /> Page
             </a>
           </div>
           {(onPrev || onNext) && (

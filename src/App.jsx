@@ -199,9 +199,12 @@ export default function App() {
   }
   function closeFont() {
     setSelectedFont(null);
-    if (isBrowse && window.location.pathname.startsWith("/browse/font/")) {
-      window.history.pushState({}, "", "/browse");
-    }
+    if (!isBrowse || !window.location.pathname.startsWith("/browse/font/")) return;
+    // Opening pushed an entry, so closing steps back to it. Pushing another
+    // entry left /browse/font/<slug> in the history and made Back reopen the
+    // sheet the user had just dismissed.
+    if (window.history.state && window.history.state.typaceFont) window.history.back();
+    else window.history.replaceState({}, "", "/browse");
   }
 
   // Open the specimen named in a /browse/font/<slug> deep link.

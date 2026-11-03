@@ -8,6 +8,13 @@ html {min-width: 320px; scroll-behavior: smooth; scroll-padding-top: 24px;}
 body {margin: 0; min-width: 320px; background: var(--bg); color: var(--text); transition: background .2s ease, color .2s ease;}
 body {font-family: inherit;}
 button {font-family: inherit;}
+
+/* Android Chrome draws its own clear button inside type="search", which landed
+   next to the app's own clear control as two ✕ icons. Hide the native one. */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {-webkit-appearance: none; appearance: none; display: none;}
 input {font-family: inherit;}
 select {font-family: inherit;}
 button {font-size: inherit;}
