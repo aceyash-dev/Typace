@@ -21,6 +21,6 @@ const ROUTES = {
 
 export default async function handler(req, res) {
     const page = String(req.query?.page || "").toLowerCase();
-    const route = ROUTES[page] || notFoundHandler;
+    const route = Object.hasOwn(ROUTES, page) ? ROUTES[page] : notFoundHandler;
     return route(req, res);
 }
