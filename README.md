@@ -52,6 +52,12 @@ Every font record carries a `style` object, or `null` when the container could n
 
 `GET /api/health` reports `rateLimit.mode` (`shared` or `per-instance`) and the active image providers, so the deployment's real configuration can be checked without guessing from headers.
 
+## Deployment constraint: 12 API functions
+
+Vercel's Hobby plan allows **12 Serverless Functions per deployment**. The 13th builds cleanly and then fails at the deploy step, which has no build log — every status just reads "Deployment has failed", and production silently stays on the previous build.
+
+`api/` currently holds 11. Before adding a file to `api/`, fold the logic into an existing function (as `api/pages.js` does for the server-rendered pages) or put it under `api/_lib/`, which the function builder ignores.
+
 ## MCP server
 
 The catalogue is exposed as a Model Context Protocol server, so an agent can go from a brief to a working `@font-face` rule without scraping HTML.
