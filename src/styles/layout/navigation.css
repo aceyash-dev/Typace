@@ -109,7 +109,7 @@
   }
   /* Explicit heights: with only min-heights, the active pill grew taller than
      the bar and hung out of the bottom of it. */
-  .main-nav.floating-nav {height: 60px; align-items: center;}
+  .main-nav.floating-nav {height: 60px; align-items: center; overflow: hidden;}
   .main-nav.floating-nav a {
     flex: 1 1 0;
     min-width: 0;
@@ -133,6 +133,8 @@
   .main-nav.floating-nav a > .hgi {font-size: 19px;}
   .main-nav.floating-nav a > span {display: none;}
   .main-nav.floating-nav a.nav-active > span {display: inline;}
+  /* Explore is the primary action; it keeps its label at every width. */
+  .main-nav.floating-nav a.nav-explore > span {display: inline;}
   .main-nav.floating-nav a.nav-explore > .hgi:nth-of-type(2) {display: none;}
 }
 

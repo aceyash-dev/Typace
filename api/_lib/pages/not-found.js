@@ -8,6 +8,9 @@ export default function handler(_req, res) {
 <meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f5f2ec">
 <title>Page not found | Typace</title>
 <style>
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;overscroll-behavior-y:none;-webkit-text-size-adjust:100%}
 :root{color-scheme:light;--ink:#27231f;--muted:#746c63;--paper:#f5f2ec;--accent:#9b593c}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:28px;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 main{width:min(100%,640px);padding:clamp(28px,7vw,64px);border:1px solid #ddd5ca;border-radius:24px;background:#fffdf9;box-shadow:0 18px 60px #27231f0d}

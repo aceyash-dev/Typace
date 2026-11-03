@@ -302,9 +302,6 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
             <button className="button button-secondary" type="button" onClick={shareFont}>
               <Icon name={shared ? "checkmark-circle-02" : "share-01"} /> {shared ? "Link copied" : "Share"}
             </button>
-            <a className="button button-secondary" href={`/font/${slugFor(font)}`} onClick={() => track("open_font_page", { font: font.name })}>
-              <Icon name="arrow-up-right-01" /> Page
-            </a>
           </div>
           {(onPrev || onNext) && (
             <div className="preview-nav" role="group" aria-label="Browse typefaces">

@@ -83,6 +83,9 @@ export default async function handler(req, res) {
 <meta property="og:title" content="Typace FAQ"><meta property="og:description" content="${escapeHTML(description)}"><meta property="og:url" content="${canonical}">
 <script type="application/ld+json">${serializeJSONForHTML({ "@context": "https://schema.org", "@graph": graph })}</script>
 <style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;overscroll-behavior-y:none;-webkit-text-size-adjust:100%}
+
 body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:800px;margin:0 auto;padding:28px 22px 64px;line-height:1.68;color:#2c2621;background:#fffdf8}
 a{color:inherit}
 header{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:22px;font-size:13px}

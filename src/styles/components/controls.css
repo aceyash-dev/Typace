@@ -141,6 +141,10 @@
   .search-box kbd {display: none;}
   .mobile-filter-toggle {display: inline-flex; height: 46px; position: relative; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; font-size: 12px; font-weight: 800;}
   .mobile-filter-toggle .hgi {font-size: 17px;}
+  /* The toggle already carried an .is-open class but nothing styled it, so
+     tapping it changed nothing on screen and read as a dead button. */
+  .mobile-filter-toggle.is-open {background: var(--accent); border-color: var(--accent); color: var(--paper-soft);}
+  .mobile-filter-toggle.is-open i {background: var(--paper-soft);}
   .mobile-filter-toggle i {position: absolute; top: 7px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent);}
   .catalog-filters {display: none; grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; padding-top: 2px;}
   .catalog-filters.filters-open {display: grid;}

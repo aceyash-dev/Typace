@@ -71,6 +71,9 @@ export default async function handler(req, res) {
 <meta property="og:title" content="Font Formats | Typace"><meta property="og:description" content="${escapeHTML(description)}"><meta property="og:url" content="${canonical}">
 <script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@graph": graph })}</script>
 <style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;overscroll-behavior-y:none;-webkit-text-size-adjust:100%}
+
 body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:860px;margin:0 auto;padding:28px 22px 64px;line-height:1.65;color:#2c2621;background:#fffdf8}
 a{color:inherit}header{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px;font-size:13px}
 h1{font-size:clamp(2.1rem,7vw,3.6rem);line-height:1.03;letter-spacing:-.02em;margin:.1em 0 .3em}
