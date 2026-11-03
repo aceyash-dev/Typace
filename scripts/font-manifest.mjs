@@ -16,8 +16,6 @@ import { pathToFileURL } from "node:url";
 import { FONTS_DIR, FONT_EXTENSIONS, FONT_MANIFEST_PATH, REPOSITORY_ROOT, FONT_MANIFEST_NOTE } from "./lib/config.mjs";
 import { writeIfChanged } from "./lib/artifact.mjs";
 
-
-
 function git(args) {
     try {
         return execFileSync("git", args, { cwd: REPOSITORY_ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
@@ -27,41 +25,39 @@ function git(args) {
 }
 
 export function buildFontManifest({ fontsDir = FONTS_DIR, outputPath = FONT_MANIFEST_PATH } = {}) {
-const files = readdirSync(fontsDir)
-    .filter((name) => FONT_EXTENSIONS.has(path.extname(name).toLowerCase()))
-    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+    fontsDir = path.resolve(REPOSITORY_ROOT, fontsDir);
+    outputPath = path.resolve(REPOSITORY_ROOT, outputPath);
+    const files = readdirSync(fontsDir)
+        .filter((name) => FONT_EXTENSIONS.has(path.extname(name).toLowerCase()))
+        .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 
-if (!files.length) {
-    console.error("No font files found in fonts/.");
-    throw new Error("No font files found in fonts/.");
-}
+    if (!files.length) {
+        throw new Error(`No font files found in ${fontsDir}.`);
+    }
 
-const fonts = {};
-let missing = 0;
+    const fonts = {};
+    let missing = 0;
 
-for (const file of files) {
-    const relative = path.posix.join("fonts", file);
-    // --diff-filter=A --follow walks back through renames, so a renamed file
-    // keeps the date it was first added rather than the date it was moved.
-    const addedLog = git(["log", "--diff-filter=A", "--follow", "--format=%aI", "--", relative])
-        .split("\n").filter(Boolean);
-    const updatedAt = git(["log", "-1", "--format=%aI", "--", relative]) || null;
-    const addedAt = addedLog.length ? addedLog[addedLog.length - 1] : updatedAt;
-    if (!addedAt) missing += 1;
-    fonts[file] = { addedAt, updatedAt };
-}
+    for (const file of files) {
+        const relative = path.relative(REPOSITORY_ROOT, path.join(fontsDir, file)).split(path.sep).join("/");
+        // --diff-filter=A --follow walks back through renames, so a renamed file
+        // keeps the date it was first added rather than the date it was moved.
+        const addedLog = git(["log", "--diff-filter=A", "--follow", "--format=%aI", "--", relative])
+            .split("\n").filter(Boolean);
+        const updatedAt = git(["log", "-1", "--format=%aI", "--", relative]) || null;
+        const addedAt = addedLog.length ? addedLog[addedLog.length - 1] : updatedAt;
+        if (!addedAt) missing += 1;
+        fonts[file] = { addedAt, updatedAt };
+    }
 
-
-
-const result = writeIfChanged({
-    outputPath,
-    payload: {
-        isUnchanged: (previous) => JSON.stringify(previous.fonts) === JSON.stringify(fonts),
-        create: () => ({ note: FONT_MANIFEST_NOTE, fonts }),
-    },
-    summary: `fonts/manifest.json — ${files.length} fonts, ${missing} without a commit date`,
-});
-return result;
+    return writeIfChanged({
+        outputPath,
+        payload: {
+            isUnchanged: (previous) => JSON.stringify(previous.fonts) === JSON.stringify(fonts),
+            create: () => ({ note: FONT_MANIFEST_NOTE, fonts }),
+        },
+        summary: `fonts/manifest.json — ${files.length} fonts, ${missing} without a commit date`,
+    });
 }
 
 export function main() {

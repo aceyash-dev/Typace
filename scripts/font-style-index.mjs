@@ -3,11 +3,13 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { FONTS_DIR, FONT_EXTENSIONS, STYLE_INDEX_PATH, STYLE_INDEX_NOTE } from "./lib/config.mjs";
+import { FONTS_DIR, FONT_EXTENSIONS, STYLE_INDEX_PATH, STYLE_INDEX_NOTE, REPOSITORY_ROOT } from "./lib/config.mjs";
 import { writeIfChanged } from "./lib/artifact.mjs";
 import { describeFont } from "./lib/sfnt.mjs";
 
 export function buildStyleIndex({ fontsDir = FONTS_DIR, outputPath = STYLE_INDEX_PATH } = {}) {
+    fontsDir = path.resolve(REPOSITORY_ROOT, fontsDir);
+    outputPath = path.resolve(REPOSITORY_ROOT, outputPath);
     const files = readdirSync(fontsDir)
         .filter((name) => FONT_EXTENSIONS.has(path.extname(name).toLowerCase()))
         .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
@@ -22,6 +24,9 @@ export function buildStyleIndex({ fontsDir = FONTS_DIR, outputPath = STYLE_INDEX
             failed.push({ file, reason: error.message });
             console.warn(`Unable to parse ${file}: ${error.message}`);
         }
+    }
+    if (Object.keys(fonts).length === 0) {
+        throw new Error("No fonts could be parsed; refusing to publish an empty style index.");
     }
     const result = writeIfChanged({
         outputPath,
@@ -38,12 +43,7 @@ export function buildStyleIndex({ fontsDir = FONTS_DIR, outputPath = STYLE_INDEX
 
 export function main() {
     try {
-        const result = buildStyleIndex();
-        if (result.parsed === 0) {
-            console.error("No fonts could be parsed; refusing to publish an empty style index.");
-            process.exitCode = 1;
-        }
-        return result;
+        return buildStyleIndex();
     } catch (error) {
         console.error(`Font style index failed: ${error.message}`);
         process.exitCode = 1;
