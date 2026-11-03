@@ -26,7 +26,7 @@ export default function App() {
   const isAccount = window.location.pathname === "/account";
   const isDevelopers = window.location.pathname === "/developers" || window.location.pathname.startsWith("/developers/");
   const API_DOCS = "https://docs.ace-base.cc/projects/typace-api";
-  const routeFormat = ({ "/browse/woff2": "woff2", "/browse/ttf": "ttf", "/browse/otf": "otf" })[window.location.pathname] || "all";
+  const routeFormat = ({ "/browse/woff": "woff", "/browse/woff2": "woff2", "/browse/ttf": "ttf", "/browse/otf": "otf" })[window.location.pathname] || "all";
   const legalRoute = { "/privacy": "privacy", "/terms": "terms", "/cookies": "cookies", "/security": "security" }[window.location.pathname];
   const [fonts, setFonts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -200,7 +200,7 @@ export default function App() {
   function closeFont() {
     setSelectedFont(null);
     if (isBrowse && window.location.pathname.startsWith("/browse/font/")) {
-      window.history.pushState({}, "", "/browse");
+      window.history.replaceState({}, "", "/browse");
     }
   }
 
@@ -391,7 +391,7 @@ export default function App() {
             <button className={"mobile-filter-toggle" + (filtersOpen ? " is-open" : "")} type="button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen} aria-controls="catalog-filters" aria-label="Sort and filter fonts"><Icon name="filter" /><span>Filter</span>{(formatFilter !== "all" || sort !== "az") && <i aria-hidden="true" />}</button>
             <div className={"catalog-filters" + (filtersOpen ? " filters-open" : "")} id="catalog-filters">
               <label className="sort-control"><span className="sr-only">Sort fonts</span><Icon name="sorting-05" /><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="new">Date added</option><option value="az">Name A–Z</option><option value="za">Name Z–A</option></select></label>
-              <label className="format-control"><span className="sr-only">Filter file format</span><select value={formatFilter} onChange={(event) => { const value = event.target.value; setFormatFilter(value); if (isBrowse) window.history.replaceState({}, "", value === "all" ? "/browse" : "/browse/" + value); }}><option value="all">All formats</option><option value="woff2">WOFF2</option><option value="ttf">TTF</option><option value="otf">OTF</option></select></label>
+              <label className="format-control"><span className="sr-only">Filter file format</span><select value={formatFilter} onChange={(event) => { const value = event.target.value; setFormatFilter(value); if (isBrowse) window.history.replaceState({}, "", value === "all" ? "/browse" : "/browse/" + value); }}><option value="all">All formats</option><option value="woff">WOFF</option><option value="woff2">WOFF2</option><option value="ttf">TTF</option><option value="otf">OTF</option></select></label>
               <div className="view-switch" role="group" aria-label="Font layout">
                 <button type="button" className={view === "card" ? "active" : ""} onClick={() => setView("card")} aria-pressed={view === "card"} aria-label="Card view"><Icon name="grid-view" /></button>
                 <button type="button" className={view === "peek" ? "active" : ""} onClick={() => setView("peek")} aria-pressed={view === "peek"} aria-label="Peek view"><Icon name="list-view" /></button>
