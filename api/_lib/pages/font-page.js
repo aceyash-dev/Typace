@@ -1,6 +1,6 @@
-import { listFonts, findFont, fontSlug } from "./_lib/fonts.js";
-import { applyCommonHeaders } from "./_lib/respond.js";
-import { enforceRateLimit } from "./_lib/rate-limit.js";
+import { listFonts, findFont, fontSlug } from "../fonts.js";
+import { applyCommonHeaders } from "../respond.js";
+import { enforceRateLimit } from "../rate-limit.js";
 
 const BASE = "https://typace.ace-base.cc";
 

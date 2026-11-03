@@ -15,12 +15,12 @@ import healthHandler from "../api/health.js";
 import mcpHandler from "../api/mcp.js";
 import { TOOLS } from "../api/_lib/mcp/tools.js";
 import { RESOURCES } from "../api/_lib/mcp/resources.js";
-import { escapeCSSString } from "../api/font-page.js";
+import { escapeCSSString } from "../api/_lib/pages/font-page.js";
 import { safeDecodePathSegment } from "../src/lib/routes.js";
 import { downloadNameFor, fontSizeLabel, fontTypeLabel, slugFor } from "../src/lib/fonts.js";
 import { pickSeed, PROVIDERS } from "../src/lib/palette.js";
 import { KEYLESS_PROVIDER_IDS, DIRECT_PROVIDER_IDS } from "../api/image.js";
-import formatsHandler from "../api/formats.js";
+import formatsHandler from "../api/_lib/pages/formats.js";
 import formatsPageHandler from "../api/_lib/formats-page.js";
 
 function mockResponse() {

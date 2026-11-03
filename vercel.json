@@ -11,19 +11,19 @@
     },
     {
       "source": "/formats",
-      "destination": "/api/formats"
+      "destination": "/api/pages?page=formats"
     },
     {
       "source": "/formats/:slug",
-      "destination": "/api/formats?slug=:slug"
+      "destination": "/api/pages?page=formats&slug=:slug"
     },
     {
       "source": "/font/:slug",
-      "destination": "/api/font-page?slug=:slug"
+      "destination": "/api/pages?page=font&slug=:slug"
     },
     {
       "source": "/faq",
-      "destination": "/api/faq"
+      "destination": "/api/pages?page=faq"
     },
     {
       "source": "/api/fonts/:slug",
@@ -82,12 +82,16 @@
       "destination": "/index.html"
     },
     {
+      "source": "/api/pages",
+      "destination": "/api/pages"
+    },
+    {
       "source": "/api/:path*",
-      "destination": "/api/not-found-json"
+      "destination": "/api/pages?page=404-json"
     },
     {
       "source": "/(.*)",
-      "destination": "/api/not-found"
+      "destination": "/api/pages?page=404"
     }
   ],
   "headers": [

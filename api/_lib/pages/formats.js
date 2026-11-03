@@ -1,7 +1,7 @@
-import { listFonts } from "./_lib/fonts.js";
-import formatsPageHandler from "./_lib/formats-page.js";
-import { applyCommonHeaders } from "./_lib/respond.js";
-import { enforceRateLimit } from "./_lib/rate-limit.js";
+import { listFonts } from "../fonts.js";
+import formatsPageHandler from "../formats-page.js";
+import { applyCommonHeaders } from "../respond.js";
+import { enforceRateLimit } from "../rate-limit.js";
 
 const BASE = "https://typace.ace-base.cc";
 

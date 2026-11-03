@@ -1,6 +1,6 @@
-import { applyCommonHeaders } from "./_lib/respond.js";
+import { applyCommonHeaders } from "../respond.js";
 
-import { enforceRateLimit } from "./_lib/rate-limit.js";
+import { enforceRateLimit } from "../rate-limit.js";
 const BASE = "https://typace.ace-base.cc";
 
 function escapeHTML(value = "") {
