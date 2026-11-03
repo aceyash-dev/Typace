@@ -50,6 +50,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/browse/woff",
+      "destination": "/index.html"
+    },
+    {
       "source": "/browse/woff2",
       "destination": "/index.html"
     },
