@@ -54,6 +54,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/browse/woff",
+      "destination": "/index.html"
+    },
+    {
       "source": "/browse/font/:slug",
       "destination": "/index.html"
     },
