@@ -8,163 +8,81 @@
  * weight, width, italic, monospace and case coverage are declared by the file,
  * not inferred from its name.
  *
- * Run from the repository root. No dependencies: reads sfnt tables directly.
+ * The sfnt parsing lives in scripts/lib/sfnt.mjs so it can be tested directly;
+ * this file only walks fonts/, builds the payload and writes it.
+ *
+ * No dependencies. Paths come from scripts/lib/config.mjs, so the script runs
+ * from any working directory (FONTS_DIR / STYLE_INDEX_OUT override them).
  */
-import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
-const FONT_EXTENSIONS = new Set([".ttf", ".otf", ".woff", ".woff2"]);
-const root = process.cwd();
-const fontsDir = path.join(root, "fonts");
-
-function tables(buffer) {
-    const found = new Map();
-    const count = buffer.readUInt16BE(4);
-    for (let index = 0; index < count; index += 1) {
-        const base = 12 + index * 16;
-        const tag = buffer.toString("ascii", base, base + 4);
-        found.set(tag, { offset: buffer.readUInt32BE(base + 8), length: buffer.readUInt32BE(base + 12) });
-    }
-    return found;
-}
-
-function weightLabel(weight) {
-    if (weight < 350) return "light";
-    if (weight < 500) return "regular";
-    if (weight < 600) return "medium";
-    if (weight < 750) return "bold";
-    return "black";
-}
-
-function widthLabel(width) {
-    if (width <= 4) return "condensed";
-    if (width === 5) return "normal";
-    return "expanded";
-}
-
-/** Minimal cmap reader: format 4 and format 12 are enough for a codepoint test. */
-function codePointTester(buffer, table) {
-    if (!table) return () => false;
-    const base = table.offset;
-    const count = buffer.readUInt16BE(base + 2);
-    let best = null;
-    for (let index = 0; index < count; index += 1) {
-        const record = base + 4 + index * 8;
-        const platform = buffer.readUInt16BE(record);
-        const encoding = buffer.readUInt16BE(record + 2);
-        const offset = base + buffer.readUInt32BE(record + 4);
-        const format = buffer.readUInt16BE(offset);
-        // Prefer a full Unicode table, then a BMP Unicode one.
-        const rank = (platform === 3 && encoding === 10) ? 3 : (platform === 3 && encoding === 1) ? 2 : (platform === 0) ? 1 : 0;
-        if (rank && (format === 4 || format === 12) && (!best || rank > best.rank)) {
-            best = { rank, offset, format };
-        }
-    }
-    if (!best) return () => false;
-
-    if (best.format === 12) {
-        const groups = buffer.readUInt32BE(best.offset + 12);
-        return (codePoint) => {
-            for (let index = 0; index < groups; index += 1) {
-                const group = best.offset + 16 + index * 12;
-                const start = buffer.readUInt32BE(group);
-                const end = buffer.readUInt32BE(group + 4);
-                if (codePoint >= start && codePoint <= end) return true;
-            }
-            return false;
-        };
-    }
-
-    const segments = buffer.readUInt16BE(best.offset + 6) / 2;
-    const ends = best.offset + 14;
-    const starts = ends + segments * 2 + 2;
-    return (codePoint) => {
-        for (let index = 0; index < segments; index += 1) {
-            const end = buffer.readUInt16BE(ends + index * 2);
-            if (codePoint > end) continue;
-            const start = buffer.readUInt16BE(starts + index * 2);
-            return codePoint >= start;
-        }
-        return false;
-    };
-}
-
-const SFNT_SIGNATURES = new Set(["00010000", "4f54544f", "74727565", "74797031"]);
+import { writeArtifact } from "./lib/artifact.mjs";
+import { FONTS_DIR, STYLE_INDEX_NOTE, STYLE_INDEX_PATH, listFontFilesSync } from "./lib/config.mjs";
+import { describeFont } from "./lib/sfnt.mjs";
 
 /**
- * Returns null for a container we cannot read (WOFF2 is Brotli-compressed with
- * per-table transforms). Parsing one as if it were sfnt yields plausible-looking
- * nonsense — weight 400, zero glyphs — which is worse than saying "unknown".
+ * @returns {{fonts: Record<string, object>, unsupported: string[], failed: {file: string, error: string}[]}}
  */
-function describe(buffer) {
-    if (buffer.length < 12) return null;
-    if (!SFNT_SIGNATURES.has(buffer.toString("hex", 0, 4))) return null;
+export function buildStyleIndex(directory = FONTS_DIR) {
+    const files = listFontFilesSync(readdirSync, directory);
+    const fonts = {};
+    const unsupported = [];
+    const failed = [];
 
-    const map = tables(buffer);
-    const os2 = map.get("OS/2");
-    const head = map.get("head");
-    const post = map.get("post");
-    const maxp = map.get("maxp");
-
-    const weight = os2 ? buffer.readUInt16BE(os2.offset + 4) : 400;
-    const width = os2 ? buffer.readUInt16BE(os2.offset + 6) : 5;
-    const selection = os2 ? buffer.readUInt16BE(os2.offset + 62) : 0;
-    const macStyle = head ? buffer.readUInt16BE(head.offset + 44) : 0;
-    const italic = Boolean(selection & 0x01) || Boolean(macStyle & 0x02);
-    const bold = Boolean(selection & 0x20) || Boolean(macStyle & 0x01);
-    const fixedPitch = post ? buffer.readUInt32BE(post.offset + 12) !== 0 : false;
-    const glyphs = maxp ? buffer.readUInt16BE(maxp.offset + 4) : 0;
-
-    const has = codePointTester(buffer, map.get("cmap"));
-    const lower = has(0x61);
-    const upper = has(0x41);
-
-    return {
-        weight,
-        weightClass: weightLabel(weight),
-        width,
-        widthClass: widthLabel(width),
-        italic,
-        bold,
-        monospace: fixedPitch,
-        allCaps: upper && !lower,
-        glyphs,
-    };
-}
-
-const files = readdirSync(fontsDir)
-    .filter((name) => FONT_EXTENSIONS.has(path.extname(name).toLowerCase()))
-    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
-
-const fonts = {};
-const unsupported = [];
-for (const file of files) {
-    let described = null;
-    try {
-        described = describe(readFileSync(path.join(fontsDir, file)));
-    } catch {
-        described = null;
+    for (const file of files) {
+        let described = null;
+        try {
+            described = describeFont(readFileSync(path.join(directory, file)));
+        } catch (error) {
+            // A read or parse failure is not the same thing as a container we
+            // cannot decode: say so instead of filing both under "unsupported".
+            failed.push({ file, error: String(error && error.message ? error.message : error) });
+            console.warn(`Could not read ${file}: ${error && error.message ? error.message : error}`);
+            continue;
+        }
+        if (described) fonts[file] = described;
+        else unsupported.push(file);
     }
-    if (described) fonts[file] = described;
-    else unsupported.push(file);
+
+    return { fonts, unsupported, failed };
 }
 
-const manifestPath = path.join(fontsDir, "style-index.json");
-let previous = null;
-try { previous = JSON.parse(readFileSync(manifestPath, "utf8")); } catch { /* first run */ }
-const unchanged = previous && JSON.stringify(previous.fonts) === JSON.stringify(fonts) && JSON.stringify(previous.unsupported) === JSON.stringify(unsupported);
+function main() {
+    let listing;
+    try {
+        listing = buildStyleIndex();
+    } catch (error) {
+        console.error(`Could not scan ${FONTS_DIR}: ${error && error.message ? error.message : error}`);
+        process.exitCode = 1;
+        return;
+    }
 
-const output = {
-    generatedAt: unchanged ? previous.generatedAt : new Date().toISOString(),
-    note: "Generated by scripts/font-style-index.mjs from sfnt tables. Do not edit by hand. Files listed in 'unsupported' are compressed containers whose tables cannot be read without a WOFF2 decoder, so they carry no style data.",
-    fonts,
-    unsupported,
-};
-const serialised = JSON.stringify(output, null, 2) + "\n";
-if (serialised === (previous ? JSON.stringify(previous, null, 2) + "\n" : "")) {
-    console.log(`fonts/style-index.json already current — ${Object.keys(fonts).length} fonts.`);
-} else {
-    writeFileSync(manifestPath, serialised, "utf8");
-    console.log(`Wrote fonts/style-index.json — ${Object.keys(fonts).length} parsed, ${unsupported.length} unsupported.`);
-    if (unsupported.length) console.log("unsupported:", unsupported.join(", "));
+    const { fonts, unsupported, failed } = listing;
+    const parsed = Object.keys(fonts).length;
+
+    writeArtifact({
+        path: STYLE_INDEX_PATH,
+        note: STYLE_INDEX_NOTE,
+        content: { fonts, unsupported },
+        logCurrent: () => console.log(`fonts/style-index.json already current — ${parsed} fonts.`),
+        logWritten: () => {
+            console.log(`Wrote fonts/style-index.json — ${parsed} parsed, ${unsupported.length} unsupported.`);
+            if (unsupported.length) console.log("unsupported:", unsupported.join(", "));
+        }
+    });
+
+    // A parser that suddenly parses nothing would otherwise land an empty index
+    // and still exit 0, because the write is skipped or trivially succeeds.
+    if (parsed === 0) {
+        console.error("No font could be parsed; refusing to treat this as success.");
+        process.exitCode = 1;
+    }
+    if (failed.length) {
+        console.error(`${failed.length} font(s) could not be read.`);
+        process.exitCode = 1;
+    }
 }
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();
