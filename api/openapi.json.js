@@ -120,7 +120,14 @@ export default async function handler(req, res) {
                     properties: {
                         error: { type: "string" },
                         code: { type: "string" },
-                        allowed: { type: "array", items: { type: "string", enum: ["ttf", "otf", "woff", "woff2"] } }
+                        allowed: {
+                    type: "array",
+                    items: { type: "string" },
+                    // The same property carries accepted *format* names from
+                    // /api/fonts and accepted *field* names from parseFields, so
+                    // a fixed enum here described a value space neither path used.
+                    description: "Accepted values for the parameter that was rejected."
+                }
                     }
                 }
             }
@@ -255,6 +262,7 @@ export default async function handler(req, res) {
                     ],
                     responses: {
                         "200": ok("Matching font records", { type: "array", items: fontRef }),
+                        "400": ok("Unknown field in ?fields=, or an invalid style filter", errorRef),
                         "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("Search failed", errorRef)
                     }
@@ -268,7 +276,9 @@ export default async function handler(req, res) {
                     parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }],
                     responses: {
                         "200": ok("Generated CSS", { type: "string" }, "text/css"),
+                        "304": { description: "Not modified; the caller's ETag still matches" },
                         "404": ok("Font not found", errorRef),
+                        "405": ok("Method not allowed", errorRef),
                         "429": ok("Rate limit exceeded", errorRef),
                         "500": ok("CSS generation failed", errorRef)
                     }
