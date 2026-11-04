@@ -1,25 +1,14 @@
 import { enforceRateLimit } from "./_lib/rate-limit.js";
+import { applyCommonHeaders, sendJSON } from "./_lib/respond.js";
 const REPOSITORY = process.env.TYPACE_REPOSITORY || "aceyash-dev/Typace";
 const CACHE_TTL_MS = 60_000;
 let cachedCommit = null;
 let cachedAt = 0;
 
-function sendJSON(res, status, data, method = "GET") {
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-    res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
-    res.setHeader("X-API-Version", "1.1.0");    res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader(
-        "Cache-Control",
-        status === 200
-            ? "public, max-age=30, s-maxage=120, stale-while-revalidate=300"
-            : "no-store"
-    );
-    if (status === 204 || method === "HEAD") return res.status(status).end();
-    return res.status(status).json(data);
-}
+// One response path: _lib/respond.js sets the shared CORS, versioning, ETag and
+// X-Request-Id headers. The local copy here had drifted, so /api/commit
+// responses could not be correlated with the platform logs.
+const CACHE_CONTROL = "public, max-age=30, s-maxage=120, stale-while-revalidate=300";
 
 function validTimestamp(value) {
     if (typeof value !== "string" || !value.trim()) return null;
@@ -86,7 +75,9 @@ async function fetchGitHubCommit(reference) {
 async function resolveCommit() {
     const deploymentSha = process.env.VERCEL_GIT_COMMIT_SHA;
     const deploymentMessage = process.env.VERCEL_GIT_COMMIT_MESSAGE;
-    const deploymentDate = process.env.VERCEL_GIT_COMMIT_AUTHOR_DATE || null;
+    // Vercel exposes the author login and name, but no author date; a project
+    // variable is the only way to supply one without a GitHub round trip.
+    const deploymentDate = process.env.TYPACE_COMMIT_DATE || null;
 
     if (deploymentSha && /^[a-f0-9]{7,40}$/i.test(deploymentSha)) {
         let fromGitHub = null;
@@ -107,11 +98,7 @@ async function resolveCommit() {
 }
 
 export default async function handler(req, res) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-    res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
-    res.setHeader("X-API-Version", "1.1.0");    res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
-    res.setHeader("X-Content-Type-Options", "nosniff");
+    applyCommonHeaders(res, req);
 
     if (req.method === "OPTIONS") {
         res.setHeader("Cache-Control", "no-store");
@@ -119,34 +106,34 @@ export default async function handler(req, res) {
     }
     if (req.method !== "GET" && req.method !== "HEAD") {
         res.setHeader("Allow", "GET, HEAD, OPTIONS");
-        return sendJSON(res, 405, {
+        return sendJSON(req, res, 405, {
             error: "Method not allowed.",
             code: "METHOD_NOT_ALLOWED"
-        }, req.method);
+        });
     }
     if (!(await enforceRateLimit(req, res))) return;
 
     if (cachedCommit && Date.now() - cachedAt < CACHE_TTL_MS) {
-        return sendJSON(res, 200, cachedCommit, req.method);
+        return sendJSON(req, res, 200, cachedCommit, { cache: CACHE_CONTROL });
     }
 
     try {
         const commit = await resolveCommit();
         if (!commit) {
-            return sendJSON(res, 502, {
+            return sendJSON(req, res, 502, {
                 error: "Commit metadata is unavailable.",
                 code: "COMMIT_METADATA_UNAVAILABLE"
-            }, req.method);
+            });
         }
 
         cachedCommit = commit;
         cachedAt = Date.now();
-        return sendJSON(res, 200, commit, req.method);
+        return sendJSON(req, res, 200, commit, { cache: CACHE_CONTROL });
     } catch (error) {
         console.error("Typace commit metadata lookup failed:", error);
-        return sendJSON(res, 502, {
+        return sendJSON(req, res, 502, {
             error: "Unable to resolve the current Typace commit.",
             code: "COMMIT_LOOKUP_FAILED"
-        }, req.method);
+        });
     }
 }
