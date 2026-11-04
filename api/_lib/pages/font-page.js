@@ -42,7 +42,7 @@ export default async function handler(req, res) {
         res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
-    if (!(await enforceRateLimit(req, res))) return;
+    if (!(await enforceRateLimit(req, res, { scope: "pages" }))) return;
 
     try {
         const font = findFont(await listFonts(), req.query?.slug);

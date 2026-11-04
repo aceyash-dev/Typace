@@ -36,14 +36,19 @@ export default async function handler(req, res) {
         res.setHeader("Allow", "GET, HEAD, OPTIONS");
         return res.status(405).send("Method not allowed.");
     }
-    if (!(await enforceRateLimit(req, res))) return;
+    if (!(await enforceRateLimit(req, res, { scope: "pages" }))) return;
 
     let fontPages = [];
     try {
         const fonts = await listFonts();
-        fontPages = fonts
-            .map(font => ({ path: `/font/${fontSlug(font.name)}`, changefreq: "monthly", priority: "0.7" }))
-            .filter(page => page.path !== "/font/");
+        // One <loc> per typeface, not per file: a font shipped as TTF + OTF +
+        // WOFF2 is one page, and duplicate <loc> values are a sitemap error.
+        fontPages = [...new Map(
+            fonts
+                .map(font => ({ path: `/font/${fontSlug(font.name)}`, changefreq: "monthly", priority: "0.7" }))
+                .filter(page => page.path !== "/font/")
+                .map(page => [page.path, page])
+        ).values()];
     } catch {
         // The sitemap still lists the static pages if the catalog is unavailable.
     }

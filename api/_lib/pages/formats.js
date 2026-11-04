@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     }
     // The detail handler applies its own limiter. Only limit the directory here.
     if (req.query?.slug) return formatsPageHandler(req, res);
-    if (!(await enforceRateLimit(req, res))) return;
+    if (!(await enforceRateLimit(req, res, { scope: "pages" }))) return;
 
     try {
         const fonts = await listFonts();

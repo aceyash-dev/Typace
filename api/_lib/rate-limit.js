@@ -17,6 +17,9 @@ const DEFAULT_LIMIT = toLimit(process.env.TYPACE_RATE_LIMIT, 60);
 const SCOPE_LIMITS = {
     api: DEFAULT_LIMIT,
     mcp: toLimit(process.env.TYPACE_MCP_RATE_LIMIT, 120),
+    // Crawlers and shared NATs fetch hundreds of HTML pages and the sitemap in a
+    // minute. That traffic should not compete with the JSON API for one budget.
+    pages: toLimit(process.env.TYPACE_PAGE_RATE_LIMIT, 600),
 };
 
 export function limitForScope(scope = "api") {
