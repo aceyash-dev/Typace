@@ -1,5 +1,6 @@
 import { listFonts, findFont, fontSlug } from "../fonts.js";
 import { applyCommonHeaders } from "../respond.js";
+import notFound from "./not-found.js";
 import { enforceRateLimit } from "../rate-limit.js";
 
 const BASE = "https://typace.ace-base.cc";
@@ -45,10 +46,9 @@ export default async function handler(req, res) {
 
     try {
         const font = findFont(await listFonts(), req.query?.slug);
-        if (!font) {
-            res.setHeader("Content-Type", "text/plain; charset=utf-8");
-            return res.status(404).send("Font not found.");
-        }
+        // One 404 implementation: the shared page sets no-store, noindex and
+        // the site's own styling, which the bare text response did not.
+        if (!font) return notFound(req, res);
 
         const name = escapeHTML(font.name);
         const cssFamily = escapeCSSString(font.name);
