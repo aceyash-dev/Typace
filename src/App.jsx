@@ -8,7 +8,7 @@ import CookieConsent from "./components/CookieConsent.jsx";
 import LegalPage from "./components/LegalPage.jsx";
 import SkeletonGrid from "./components/SkeletonGrid.jsx";
 import SiteFooter from "./components/SiteFooter.jsx";
-import { copyText, fontCssSnippet, formatCount, normalize, slugFor, usableFont, FONT_VIEW } from "./lib/fonts.js";
+import { copyText, fontCssSnippet, formatCount, matchesTerms, normalize, slugFor, usableFont, FONT_VIEW } from "./lib/fonts.js";
 import { track } from "./lib/analytics.js";
 import { safeDecodePathSegment } from "./lib/routes.js";
 import { pickSeed, loadImageTheme, applyTheme } from "./lib/palette.js";
@@ -131,11 +131,13 @@ export default function App() {
   }, []);
 
   const filtered = useMemo(() => {
-    const needle = normalize(query).trim();
+    // Same token-prefix rule as /api/search, so a query the API answers cannot
+    // show the empty state here. normalize() slugs both sides, which is why a
+    // space, hyphen or stray punctuation in the box no longer breaks matching.
+    const terms = normalize(query).split("-").filter(Boolean);
     const results = fonts.filter((font) => {
       const matchesFormat = (routeFormat === "all" || String(font.type).toLowerCase() === routeFormat) && (formatFilter === "all" || String(font.type).toLowerCase() === formatFilter);
-      const haystack = normalize([font.name, font.file, font.type, font.format].join(" "));
-      return matchesFormat && (!needle || haystack.includes(needle));
+      return matchesFormat && matchesTerms(font, terms);
     });
     results.sort((a, b) => {
       // Newest is the real add date from the manifest, not a "new" flag, so a

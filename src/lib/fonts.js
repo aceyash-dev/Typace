@@ -1,10 +1,27 @@
 const fontLoadPromises = new Map();
 
+// Mirrors api/_lib/fonts.js normalize() exactly: strip the font extension,
+// fold accents, lowercase, then collapse every non-alphanumeric run to a single
+// dash. The browse filter and /api/search must agree, or a query the API can
+// answer shows "No fonts found." on the page.
 export function normalize(value) {
   return String(value || "")
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/\.(ttf|otf|woff2?)$/i, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Token-prefix match, the same rule api/_lib/fonts.js matchesTerms() applies,
+ * so a query answered by /api/search also matches in the browser.
+ */
+export function matchesTerms(font, terms) {
+  if (!terms || terms.length === 0) return true;
+  const tokens = normalize([font?.name, font?.file, font?.type, font?.format].join(" ")).split("-").filter(Boolean);
+  return terms.every((term) => tokens.some((token) => token.startsWith(term)));
 }
 
 export function familyFor(font) {
