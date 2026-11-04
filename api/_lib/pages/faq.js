@@ -1,6 +1,7 @@
 import { applyCommonHeaders } from "../respond.js";
 
 import { enforceRateLimit } from "../rate-limit.js";
+import { listFonts } from "../fonts.js";
 const BASE = "https://typace.ace-base.cc";
 
 function escapeHTML(value = "") {
@@ -16,17 +17,51 @@ function serializeJSONForHTML(value) {
         .replace(/&/g, "\\u0026");
 }
 
+// The formats the catalogue actually serves, in the order the copy should name
+// them. The FAQ used to promise WOFF unconditionally while `fonts/` held none,
+// so answer engines quoted a format that could not be downloaded; the sentence
+// is now built from the live catalogue instead of a hardcoded list.
+const FORMAT_LABELS = [
+    ["woff2", "WOFF2"],
+    ["ttf", "TrueType (TTF)"],
+    ["otf", "OpenType (OTF)"],
+    ["woff", "WOFF"]
+];
+
+export function publishedFormatLabels(fonts = []) {
+    const counts = new Map();
+    for (const font of fonts) {
+        const type = String(font?.type || "").toLowerCase();
+        if (type) counts.set(type, (counts.get(type) || 0) + 1);
+    }
+    return FORMAT_LABELS.filter(([type]) => counts.get(type) > 0).map(([, label]) => label);
+}
+
+function joinList(items) {
+    if (items.length === 0) return "";
+    if (items.length === 1) return items[0];
+    return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
+}
+
 // Direct, self-contained answers. Each is written to be quotable on its own by
 // an answer engine, without needing the surrounding page for context.
-const QA = [
+function buildQA(labels = []) {
+    const list = joinList(labels);
+    const formatsSentence = list
+        ? `It publishes typefaces as ${list} files, with a live catalog API,`
+        : "It publishes typefaces with a live catalog API,";
+    const formatsAnswer = list
+        ? `Typace publishes ${list}. Every catalog record reports its exact format and asset URL, so you never have to guess the file type.`
+        : "Every catalog record reports its exact format and asset URL, so you never have to guess the file type.";
+    return [
     ["What is Typace?",
-     "Typace is a free font library and font delivery service by The Ace Base. It publishes typefaces as WOFF2, TrueType (TTF), OpenType (OTF), and WOFF files, with a live catalog API, so you can preview a font, copy its ready-to-use CSS, and download the original file."],
+     `Typace is a free font library and font delivery service by The Ace Base. ${formatsSentence} so you can preview a font, copy its ready-to-use CSS, and download the original file.`],
     ["How do I add a Typace font to my website?",
      "Fetch the catalog at https://typace.ace-base.cc/api/fonts, pick a font, then add its @font-face rule to your stylesheet and set font-family on the elements that should use it. You can copy the rule from any font page, or load it with @import or a <link> tag."],
     ["Are Typace fonts free to use?",
      "Typace delivers the files but does not change their licenses. Each typeface keeps its own license, so check the license attached to the font before embedding, modifying, redistributing, or bundling it."],
     ["What font formats does Typace support?",
-     "Typace publishes WOFF2 (recommended for the web), TrueType (TTF), OpenType (OTF), and WOFF. Every catalog record reports its exact format and asset URL, so you never have to guess the file type."],
+     formatsAnswer],
     ["Can an AI agent or MCP client use Typace?",
      "Yes. https://typace.ace-base.cc/api/mcp is a stateless Model Context Protocol endpoint (JSON-RPC 2.0) exposing search_fonts, list_fonts, get_font, get_font_css, list_formats and catalog_health as read-only tools, plus catalogue resources and a pick-a-font prompt. It needs no key; the same per-IP rate limit applies."],
     ["How do I get the CSS for a font?",
@@ -39,7 +74,8 @@ const QA = [
      "Yes. Typace exposes a public read-only API with endpoints for the catalog, search, a single font record, generated CSS, and commit metadata. See the developer guide at https://typace.ace-base.cc/developers and the OpenAPI contract at https://typace.ace-base.cc/api/openapi.json."],
     ["Can I self-host a Typace font?",
      "Yes, if the font's license allows it. Download the original file from its font page and serve it yourself; the license, not the delivery method, governs what you may do."]
-];
+    ];
+}
 
 const HOWTO = [
     "Find a font in the catalog at https://typace.ace-base.cc/browse, or fetch https://typace.ace-base.cc/api/fonts.",
@@ -56,6 +92,16 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
     if (!(await enforceRateLimit(req, res))) return;
+
+    let QA;
+    try {
+        QA = buildQA(publishedFormatLabels(await listFonts()));
+    } catch (error) {
+        // The catalogue is the source of truth, but the FAQ must still answer
+        // if it is momentarily unreadable.
+        console.error("Typace FAQ format list failed:", error);
+        QA = buildQA([]);
+    }
 
     const canonical = `${BASE}/faq`;
     const description = "Answers to common questions about Typace: what it is, how to add a font to your website, supported formats, licensing, and the catalog API.";
