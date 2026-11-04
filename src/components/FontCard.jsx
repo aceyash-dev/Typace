@@ -36,7 +36,7 @@ export default function FontCard({ font, onPreview, onCopy, onDownload, copied }
       </button>
       <div className="font-card-bottom">
         <div className="font-card-name">
-          <h2>{font.name}</h2>
+          <h3 className="font-card-name-heading">{font.name}</h3>
           <p className="font-file-meta">
             <span>{format}</span>
             {font.isNew && <FontNewBadge variant={FONT_VIEW.CARD} />}

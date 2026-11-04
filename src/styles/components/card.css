@@ -71,7 +71,8 @@
   border-top: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
 }
 .font-card .font-card-name { min-width: 0; }
-.font-card .font-card-name h2 {
+.font-card .font-card-name h2,
+.font-card .font-card-name .font-card-name-heading {
   margin: 0 0 4px;
   font-size: 15px;
   font-weight: 800;
