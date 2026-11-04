@@ -7,7 +7,7 @@
 .header-cta {display: inline-flex; align-items: center; gap: 9px; padding: 12px 15px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 12px; font-weight: 750;}
 .header-cta .hgi {font-size: 15px;}
 .library-toolbar {display: flex; align-items: center; gap: 11px;}
-.search-box {display: flex; flex: 1; align-items: center; gap: 11px; min-width: 0; height: 50px; padding: 0 13px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface);}
+.search-box {display: flex; flex: 1; align-items: center; gap: 11px; min-width: 0; height: 50px; padding: 0 13px; border: 1px solid color-mix(in srgb, #ffffff 58%, var(--line)); border-radius: 13px; background: color-mix(in srgb, var(--surface) 76%, transparent); box-shadow: 0 6px 20px rgba(65,42,24,.055), inset 0 1px 0 rgba(255,255,255,.7); backdrop-filter: blur(16px) saturate(170%); -webkit-backdrop-filter: blur(16px) saturate(170%);}
 .search-box > .hgi {color: var(--muted); font-size: 19px;}
 .search-box input {width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font-size: 13px;}
 .search-box input::placeholder {color: var(--muted); opacity: .8;}
@@ -139,7 +139,7 @@
   .search-box {min-width: 0; width: 100%; height: 46px; gap: 8px; padding: 0 11px; border: 1px solid var(--line); border-radius: 10px; box-shadow: none;}
   .search-box input {min-width: 0; font-size: 14px;}
   .search-box kbd {display: none;}
-  .mobile-filter-toggle {display: inline-flex; height: 46px; position: relative; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; font-size: 12px; font-weight: 800;}
+  .mobile-filter-toggle {display: inline-flex; height: 46px; position: relative; align-items: center; justify-content: center; gap: 6px; border: 1px solid color-mix(in srgb, #ffffff 58%, var(--line)); border-radius: 13px; background: color-mix(in srgb, var(--surface) 76%, transparent); color: var(--text); font: inherit; font-size: 12px; font-weight: 800; box-shadow: inset 0 1px 0 rgba(255,255,255,.7); backdrop-filter: blur(16px) saturate(170%); -webkit-backdrop-filter: blur(16px) saturate(170%);}
   .mobile-filter-toggle .hgi {font-size: 17px;}
   /* The toggle already carried an .is-open class but nothing styled it, so
      tapping it changed nothing on screen and read as a dead button. */

@@ -50,12 +50,14 @@
   align-items: center;
   gap: 4px;
   padding: 5px;
-  border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  border: 1px solid color-mix(in srgb, #ffffff 62%, var(--line));
   border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  box-shadow: 0 8px 28px rgba(48,37,29,.08);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  /* Glass: translucent enough to read the page through it, with the saturation
+     boost that stops blurred cream turning grey, and a lit top edge. */
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  box-shadow: 0 12px 38px rgba(48,37,29,.16), inset 0 1px 0 rgba(255,255,255,.72);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
   transition: top .22s ease, box-shadow .22s ease, background .22s ease;
 }
 .main-nav.floating-nav a {
@@ -103,8 +105,6 @@
     gap: 4px;
     padding: 6px;
     border-radius: 22px;
-    background: color-mix(in srgb, var(--surface) 95%, transparent);
-    box-shadow: 0 12px 38px rgba(48,37,29,.18);
     transition: opacity .24s ease, transform .28s ease, visibility 0s;
   }
   /* Explicit heights: with only min-heights, the active pill grew taller than
@@ -152,9 +152,6 @@
 .main-nav {gap:clamp(16px, 2.8vw, 34px);}
 .main-nav a {display:inline-flex; align-items:center; gap:7px; white-space:nowrap;}
 .main-nav a > .hgi {font-size:15px;}
-.main-nav a.nav-explore {color:var(--accent-dark);}
-.main-nav a.nav-explore .hgi:last-child {font-size:12px;}
-.main-nav a.nav-explore.nav-active {color:var(--accent);}
 @media (max-width:760px) {
   .main-nav {gap:12px;}
   .main-nav a {gap:4px; font-size:11px;}
