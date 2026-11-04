@@ -1,5 +1,6 @@
 import { listFonts, fontSlug } from "./fonts.js";
 import { applyCommonHeaders } from "./respond.js";
+import notFound from "./pages/not-found.js";
 import { enforceRateLimit } from "./rate-limit.js";
 
 const BASE = "https://typace.ace-base.cc";
@@ -28,7 +29,7 @@ export default async function handler(req, res) {
 
     const key = String(req.query?.slug || "").toLowerCase();
     const format = Object.hasOwn(FORMATS, key) ? FORMATS[key] : null;
-    if (!format) return res.status(404).send("Font format not found.");
+    if (!format) return notFound(req, res);
 
     try {
         const [label, type, copy] = format;
@@ -102,6 +103,8 @@ ${faqs.map(([q, a]) => `<h3>${escapeHTML(q)}</h3><p>${escapeHTML(a)}</p>`).join(
         return res.status(200).send(html);
     } catch (error) {
         console.error("Typace format page failed:", error);
+        // A transient failure must not be cached by an intermediary.
+        res.setHeader("Cache-Control", "no-store");
         return res.status(500).send("Unable to load font format.");
     }
 }
