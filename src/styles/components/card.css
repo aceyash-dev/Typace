@@ -98,6 +98,23 @@
 .download-size { color: currentColor; font-size: 10px; font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
 .font-new-badge { display: inline-flex; align-items: center; border: 1px solid currentColor; border-radius: 999px; padding: 1px 5px; font-size: .65rem; font-weight: 800; letter-spacing: .07em; line-height: 1.4; }
 
+/* Bento rhythm -----------------------------------------------------------
+   A wide feature tile every fifth card, so the grid reads as a composition
+   rather than a uniform matrix. The spans are chosen so rows still pack
+   exactly: on three columns the wide tile takes 1-2, the next card takes 3,
+   then three singles fill the following row — no holes, no dense packing, so
+   DOM order and reading order stay identical. */
+@media (min-width: 1001px) {
+  .font-grid > .font-card:nth-child(5n + 1) { grid-column: span 2; }
+  .font-grid > .font-card:nth-child(5n + 1) .specimen-button { min-height: 216px; }
+  .font-grid > .font-card:nth-child(5n + 1) .specimen { font-size: clamp(56px, 15vw, 92px); }
+}
+@media (max-width: 1000px) {
+  /* Two columns: the feature tile becomes full width, every third card. */
+  .font-grid > .font-card:nth-child(3n + 1) { grid-column: span 2; }
+  .font-grid > .font-card:nth-child(3n + 1) .specimen-button { min-height: 190px; }
+  .font-grid > .font-card:nth-child(3n + 1) .specimen { font-size: clamp(52px, 14vw, 76px); }
+}
 @media (max-width: 1000px) {
   .font-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

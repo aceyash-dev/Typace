@@ -61,6 +61,9 @@
   .preview-sheet .preview-stage {padding: 15px;}
   .preview-sheet .preview-sample {font-size: clamp(28px, 9vw, 48px) !important;}
   .preview-sheet .preview-actions {display: grid; grid-template-columns: 1fr 1fr; gap: 9px;}
+  /* Copy is the primary action and takes the full width; Download and Share
+     share the row beneath instead of leaving a hole beside Share. */
+  .preview-sheet .preview-actions .button:first-child {grid-column: 1 / -1;}
   .preview-sheet .preview-actions .text-link {grid-column: 1 / -1;}
 }
 @media (prefers-reduced-motion: reduce) {
