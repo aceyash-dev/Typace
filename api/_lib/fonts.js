@@ -268,6 +268,11 @@ async function getFontMetadata(entry, manifest = {}, styles = {}) {
     const extension = path.extname(fileName).toLowerCase();
     const metadata = FONT_TYPES[extension];
     const name = fileName.slice(0, -extension.length).trim();
+    // Manifest and style index are keyed by the path relative to fonts/; fall
+    // back to the bare filename for manifests generated before nested support.
+    const lookupKey = relativePath.split(path.sep).join("/");
+    const manifestEntry = manifest[lookupKey] || manifest[fileName];
+    const styleEntry = styles[lookupKey] || styles[fileName];
     let sizeBytes = null;
     try { sizeBytes = (await fs.stat(absolutePath)).size; } catch { /* Metadata remains usable if stat is unavailable. */ }
     return {
@@ -280,10 +285,10 @@ async function getFontMetadata(entry, manifest = {}, styles = {}) {
             .split(path.sep)
             .map(encodeURIComponent)
             .join("/")}`,
-        createdAt: manifest[fileName]?.addedAt || null,
-        updatedAt: manifest[fileName]?.updatedAt || null,
-        isNew: isRecentlyAdded(manifest[fileName]?.addedAt),
-        style: styles[fileName] || null
+        createdAt: manifestEntry?.addedAt || null,
+        updatedAt: manifestEntry?.updatedAt || null,
+        isNew: isRecentlyAdded(manifestEntry?.addedAt),
+        style: styleEntry || null
     };
 }
 

@@ -25,8 +25,30 @@ function git(args) {
     }
 }
 
-const files = readdirSync(fontsDir)
-    .filter((name) => FONT_EXTENSIONS.has(path.extname(name).toLowerCase()))
+// Walk fonts/ the way api/_lib/fonts.js does. Listing only the top level meant
+// a font in a subdirectory got no manifest entry, so its dates, NEW badge and
+// style filters silently went missing from the catalogue.
+function listFontFiles(directory, relativeDirectory = "") {
+    const entries = readdirSync(directory, { withFileTypes: true });
+    const found = [];
+    for (const entry of entries) {
+        const relative = relativeDirectory
+            ? path.posix.join(relativeDirectory, entry.name)
+            : entry.name;
+        if (entry.isDirectory()) {
+            found.push(...listFontFiles(path.join(directory, entry.name), relative));
+            continue;
+        }
+        if (!entry.isFile()) continue;
+        if (FONT_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) found.push(relative);
+    }
+    return found;
+}
+
+// Keyed by the path relative to fonts/, so nested files cannot collide with a
+// same-named file elsewhere. Top-level keys are still bare filenames, which is
+// what the committed manifest already holds.
+const files = listFontFiles(fontsDir)
     .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 
 if (!files.length) {
