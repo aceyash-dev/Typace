@@ -490,6 +490,20 @@ test("primary orange controls use AA-contrast text in both themes", async () => 
     assert.match(css, /\.view-switch button\.active \{background: var\(--accent\); color: var\(--ink\);\}/);
 });
 
+test("toolbar selects keep a visible keyboard focus ring", async () => {
+    // controls.css loads after base.css, so an `outline: 0` here would win over
+    // select:focus-visible and leave the two catalogue selectors invisible to
+    // keyboard users.
+    const css = await readFile(new URL("../src/styles/components/controls.css", import.meta.url), "utf8");
+    const base = await readFile(new URL("../src/styles/base.css", import.meta.url), "utf8");
+    assert.match(base, /select:focus-visible \{outline: 3px solid var\(--accent\)/);
+    for (const selector of [".sort-control select", ".format-control select"]) {
+        const rule = css.match(new RegExp(selector.replace(".", "\\.") + " \\{[^}]*\\}"));
+        assert.ok(rule, `${selector} rule missing`);
+        assert.doesNotMatch(rule[0], /outline:\s*0/, `${selector} must not remove the focus ring`);
+    }
+});
+
 test("cookie consent buttons meet AA contrast in both themes", async () => {
     // --paper on --accent was 2.9:1 (light) and 2.49:1 (dark); --ink is 5.05:1
     // and 5.90:1. The consent buttons must be readable to be consented to.
