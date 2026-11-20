@@ -490,6 +490,27 @@ test("primary orange controls use AA-contrast text in both themes", async () => 
     assert.match(css, /\.view-switch button\.active \{background: var\(--accent\); color: var\(--ink\);\}/);
 });
 
+test("requests without a trusted client address are not pooled into one bucket", async () => {
+    // Every header-less caller used to share the key "unknown", so the per-IP
+    // budget became one global 60/min cap for the whole API.
+    const now = Date.now();
+    let pooled = null;
+    for (let i = 0; i < 65; i++) {
+        const result = checkRateLimit({ headers: {} }, now + i, "api");
+        if (!result.allowed) { pooled = i; break; }
+    }
+    assert.equal(pooled, null, "anonymous callers must not share one budget");
+
+    // An identified client is still limited on its own budget.
+    const client = { headers: { "x-real-ip": "203.0.113.9" } };
+    let blocked = null;
+    for (let i = 0; i < 65; i++) {
+        const result = checkRateLimit(client, now + i, "api");
+        if (!result.allowed) { blocked = i; break; }
+    }
+    assert.equal(blocked, 60);
+});
+
 test("an unparseable font set never overwrites the committed style index", async () => {
     // The generator used to write the index before checking whether anything
     // parsed, so a local run replaced every font's style data with {}.
