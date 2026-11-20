@@ -19,6 +19,10 @@ export function formatCounts(fonts) {
 }
 
 export function clamp(value, fallback, max) {
+    // A typed client may send null/""/false for an unset optional argument;
+    // Number() maps all of those to 0, which would clamp to a one-item page
+    // instead of the documented default.
+    if (value === undefined || value === null || value === "" || value === false) return fallback;
     const number = Number(value);
     if (!Number.isFinite(number)) return fallback;
     return Math.min(max, Math.max(1, Math.trunc(number)));
