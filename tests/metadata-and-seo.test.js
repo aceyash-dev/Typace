@@ -859,6 +859,20 @@ test("catalog supports batch slug lookup and sparse fields", async () => {
     await fontsHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.241" }, query: { fields: "name,bogus" } }, invalid);
     assert.equal(invalid.statusCode, 400);
     assert.equal(invalid.body.code, "INVALID_FIELDS");
+
+    // Every field a record carries must be selectable through ?fields=.
+    const full = mockResponse();
+    await fontsHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.242" }, query: { limit: "1" } }, full);
+    const record = full.body[0];
+    const styled = mockResponse();
+    await fontsHandler({
+        method: "GET",
+        headers: { "x-real-ip": "198.51.100.243" },
+        query: { limit: "1", fields: Object.keys(record).join(",") }
+    }, styled);
+    assert.equal(styled.statusCode, 200, "every emitted field must be in FONT_FIELDS");
+    assert.deepEqual(Object.keys(styled.body[0]).sort(), Object.keys(record).sort());
+    assert.ok(Object.hasOwn(styled.body[0], "style"));
 });
 
 test("image providers are keyless and stay in sync across client, proxy, and OpenAPI", async () => {
