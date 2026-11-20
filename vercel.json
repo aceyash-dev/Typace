@@ -145,7 +145,7 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Accept, Content-Type"
+          "value": "Accept, Content-Type, X-Request-Id"
         },
         {
           "key": "Access-Control-Max-Age",
@@ -170,7 +170,7 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Accept, Content-Type, MCP-Protocol-Version, Mcp-Session-Id"
+          "value": "Accept, Content-Type, X-Request-Id, MCP-Protocol-Version, Mcp-Session-Id"
         },
         {
           "key": "Access-Control-Expose-Headers",
