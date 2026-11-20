@@ -157,3 +157,14 @@
   .main-nav a {gap:4px; font-size:11px;}
   .main-nav a > .hgi {font-size:14px;}
 }
+
+/* Home page only: the floating nav shows labels instead of icons on small
+   screens. Moved out of pages/home.css — the nav is a layout concern, and the
+   .home-page prefix keeps the higher specificity it had there. */
+@media (max-width: 760px) {
+  .home-page .main-nav.floating-nav a > .hgi {display: none;}
+  .home-page .main-nav.floating-nav a > span {display: inline;}
+  .home-page .main-nav.floating-nav a {flex-direction: row; font-size: 11px; min-height: 44px;}
+  .home-page .main-nav.floating-nav a.nav-explore > .hgi:nth-of-type(2) {display: none;}
+  .home-page .main-nav.floating-nav {display: none !important;}
+}

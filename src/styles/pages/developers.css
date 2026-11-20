@@ -59,3 +59,8 @@
 @media (max-width:760px) {
   .developer-panels {grid-template-columns:1fr;}
 }
+
+/* Eyebrow overrides for this page. Moved out of pages/home.css, which has no
+   business styling the developers page. */
+.developers-page > .eyebrow {margin-bottom: 20px;}
+.developer-code .eyebrow {grid-column: 1 / -1; margin: 0;}
