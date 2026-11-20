@@ -74,8 +74,11 @@ export async function dispatch(message) {
                 if (argument.name !== "slug") return ok(id, { completion: { values: [], total: 0, hasMore: false } });
                 const prefix = String(argument.value || "").toLowerCase();
                 const slugs = [...new Set((await listFonts()).map((font) => fontSlug(font.name)))].sort();
-                const values = slugs.filter((slug) => slug.startsWith(prefix)).slice(0, 100);
-                return ok(id, { completion: { values, total: values.length, hasMore: values.length === 100 } });
+                const matches = slugs.filter((slug) => slug.startsWith(prefix));
+                const values = matches.slice(0, 100);
+                // total/hasMore describe the whole match set, not the page, so a
+                // catalogue of exactly 100 matches does not advertise a next page.
+                return ok(id, { completion: { values, total: matches.length, hasMore: matches.length > values.length } });
             }
 
             default:
