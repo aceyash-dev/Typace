@@ -447,6 +447,12 @@ test("privacy, terms, cookie, security, and disclosure files are present", async
     assert.match(vite, /security\.txt/);
     assert.match(security, /Canonical: https:\/\/typace\.ace-base\.cc\/.well-known\/security\.txt/);
     assert.match(security, /Policy: https:\/\/typace\.ace-base\.cc\/security/);
+
+    // RFC 9116: the canonical URL the file advertises must actually serve it.
+    const spec = JSON.parse(await readFile(new URL("../vercel.json", import.meta.url), "utf8"));
+    const wellKnown = spec.rewrites.find(rule => rule.source === "/.well-known/security.txt");
+    assert.ok(wellKnown, "vercel.json must serve /.well-known/security.txt");
+    assert.equal(wellKnown.destination, "/security.txt");
 });
 
 
