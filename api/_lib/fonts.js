@@ -163,7 +163,7 @@ export function matchesTerms(font, terms) {
 }
 
 /** Fields a client may request through ?fields=. */
-export const FONT_FIELDS = ["name", "file", "type", "format", "url", "sizeBytes", "createdAt", "updatedAt", "isNew"];
+export const FONT_FIELDS = ["name", "file", "type", "format", "url", "sizeBytes", "createdAt", "updatedAt", "isNew", "style"];
 
 /**
  * Parse ?fields= into a validated list. Returns null when the parameter is
