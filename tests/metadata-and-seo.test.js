@@ -702,6 +702,9 @@ test("MCP reports a bad argument as invalid params, not a server fault", async (
     const badUri = await callMcp({ jsonrpc: "2.0", id: 41, method: "resources/read", params: { uri: "typace://nope" } }, "198.51.100.283");
     assert.equal(badUri.body.error.code, -32602);
 
+    const malformed = await callMcp({ jsonrpc: "2.0", id: 43, method: "resources/read", params: { uri: "typace://fonts/%E0%A4%A" } }, "198.51.100.286");
+    assert.equal(malformed.body.error.code, -32602, "a malformed percent-escape is invalid params, not a server fault");
+
     // A genuine server fault must not leak internals.
     const unknownMethod = await callMcp({ jsonrpc: "2.0", id: 42, method: "nope/nope" }, "198.51.100.284");
     assert.equal(unknownMethod.body.error.code, -32601);

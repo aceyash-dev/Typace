@@ -13,6 +13,19 @@ export const RESOURCE_TEMPLATES = [
     { uriTemplate: "typace://font/{slug}.css", name: "Font @font-face rule", mimeType: "text/css" },
 ];
 
+/**
+ * Decode a client-supplied URI segment. A malformed escape is the caller's
+ * mistake, so it becomes InvalidParamsError (-32602) rather than an uncaught
+ * URIError that the dispatcher reports as an internal error.
+ */
+function decodeSegment(value) {
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        throw new InvalidParamsError("Malformed percent-encoding in resource URI.");
+    }
+}
+
 /** Throws for an unknown URI; the dispatcher turns that into a JSON-RPC error. */
 export async function readResource(uri) {
     const fonts = await listFonts();
@@ -26,14 +39,14 @@ export async function readResource(uri) {
 
     const fontMatch = /^typace:\/\/fonts\/(.+)$/.exec(uri);
     if (fontMatch) {
-        const font = findFont(fonts, decodeURIComponent(fontMatch[1]));
+        const font = findFont(fonts, decodeSegment(fontMatch[1]));
         if (!font) throw new InvalidParamsError("No font matches that URI.");
         return { contents: [{ uri, mimeType: "application/json", text: JSON.stringify(absolute(font)) }] };
     }
 
     const cssMatch = /^typace:\/\/font\/(.+)\.css$/.exec(uri);
     if (cssMatch) {
-        const font = findFont(fonts, decodeURIComponent(cssMatch[1]));
+        const font = findFont(fonts, decodeSegment(cssMatch[1]));
         if (!font) throw new InvalidParamsError("No font matches that URI.");
         return { contents: [{ uri, mimeType: "text/css", text: fontFaceCss(font) }] };
     }
