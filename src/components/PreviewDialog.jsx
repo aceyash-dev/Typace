@@ -136,7 +136,11 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
     track("share_font", { font: font.name });
     if (typeof navigator !== "undefined" && navigator.share) {
       try { await navigator.share(payload); return; }
-      catch { /* the user dismissed the sheet; fall through to copying */ }
+      catch (error) {
+        // Dismissing the share sheet is a decision, not a failure: do not
+        // overwrite the clipboard or claim the link was copied.
+        if (error && error.name === "AbortError") return;
+      }
     }
     try {
       await copyText(pageUrl);
@@ -266,7 +270,7 @@ export default function PreviewDialog({ font, onClose, onCopy, copied, onPrev, o
                 {theme === "image" && <button className="specimen-theme-shuffle" type="button" onClick={shufflePreviewPhoto} disabled={imageLoading} aria-label={imageLoading ? "Loading a different photo" : "Show a different photo"} title={imageLoading ? "Loading photo…" : "Show a different photo"}><Icon name="refresh" /></button>}
               </div>
             </div>
-            <div className="preview-sample" style={{ fontFamily: fontReady ? '"' + family + '", sans-serif' : "inherit", fontSize: "clamp(34px, 8vw, 62px)" }} aria-live="polite">
+            <div className="preview-sample" style={{ fontFamily: fontReady ? '"' + family + '", sans-serif' : "inherit", fontSize: "clamp(34px, 8vw, 62px)" }}>
               {sample || " "}
             </div>
             <label className="sample-label" htmlFor="sample-text">Try your own text</label>

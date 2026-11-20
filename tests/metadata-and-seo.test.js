@@ -477,6 +477,16 @@ test("legal disclosures accurately distinguish self-hosted fonts from external i
     assert.doesNotMatch(legal, /Grandstander font from Google Fonts|Grandstander is requested from Google Fonts/);
 });
 
+test("specimen dialog treats share cancellation as a decision, not a copy", async () => {
+    const dialog = await readFile(new URL("../src/components/PreviewDialog.jsx", import.meta.url), "utf8");
+    assert.match(dialog, /error\.name === "AbortError"\) return;/);
+    // The specimen itself is not a live region: the sample input reports its own
+    // value, so a live region here re-announces the whole specimen per keystroke.
+    const specimen = dialog.match(/<div className="preview-sample"[^>]*>/);
+    assert.ok(specimen, "specimen element missing");
+    assert.doesNotMatch(specimen[0], /aria-live/);
+});
+
 test("specimen dialog labels its preset and navigation groups", async () => {
     const dialog = await readFile(new URL("../src/components/PreviewDialog.jsx", import.meta.url), "utf8");
     assert.match(dialog, /className="preview-presets" role="group" aria-label="Specimen presets"/);
