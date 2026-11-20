@@ -711,6 +711,18 @@ test("MCP reports a bad argument as invalid params, not a server fault", async (
     assert.equal(unknownMethod.body.error.message.includes("at "), false);
 });
 
+test("CORS preflight allows the request id the API echoes and advertises", async () => {
+    const response = mockResponse();
+    await searchHandler({ method: "OPTIONS", headers: { "x-real-ip": "198.51.100.287" }, query: {} }, response);
+    assert.match(response.headers["Access-Control-Allow-Headers"], /X-Request-Id/);
+    assert.match(response.headers["Access-Control-Expose-Headers"], /X-Request-Id/);
+
+    const spec = JSON.parse(await readFile(new URL("../vercel.json", import.meta.url), "utf8"));
+    const apiHeaders = JSON.stringify(spec);
+    assert.equal((apiHeaders.match(/"Accept, Content-Type"/g) || []).length, 0,
+        "every vercel.json API block must allow X-Request-Id too");
+});
+
 test("OpenAPI declares every tag and documents the consolidated page function", async () => {
     const response = mockResponse();
     await openapiHandler({ method: "GET", headers: { "x-real-ip": "198.51.100.285" } }, response);
