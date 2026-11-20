@@ -1,3 +1,7 @@
+import { randomUUID } from "node:crypto";
+
+import { API_VERSION } from "./respond.js";
+
 const WINDOW_MS = 60_000;
 const MAX_KEYS = 10_000;
 
@@ -32,7 +36,11 @@ function getClientKey(req) {
     const realIp = req.headers?.["x-real-ip"];
     const candidate = Array.isArray(realIp) ? realIp[0] : realIp;
     const ip = String(candidate || "").trim().slice(0, 128);
-    return ip || "unknown";
+    // No client identity available (a proxy that strips the header, a local
+    // run). Pooling every such caller into one bucket would turn the per-IP
+    // budget into a global outage, so each anonymous request gets its own key
+    // and is limited on its own merits instead.
+    return ip || `anon:${randomUUID()}`;
 }
 
 function outcome(count, limit, windowStart, now) {
@@ -149,7 +157,7 @@ export async function enforceRateLimit(req, res, { scope = "api", now = Date.now
     res.setHeader("Access-Control-Allow-Methods", methods);
     res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type, X-Request-Id");
     res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
-    res.setHeader("X-API-Version", "1.1.0");
+    res.setHeader("X-API-Version", API_VERSION);
 
     let result;
     try {
