@@ -490,6 +490,14 @@ test("primary orange controls use AA-contrast text in both themes", async () => 
     assert.match(css, /\.view-switch button\.active \{background: var\(--accent\); color: var\(--ink\);\}/);
 });
 
+test("cookie consent buttons meet AA contrast in both themes", async () => {
+    // --paper on --accent was 2.9:1 (light) and 2.49:1 (dark); --ink is 5.05:1
+    // and 5.90:1. The consent buttons must be readable to be consented to.
+    const css = await readFile(new URL("../src/styles/components/cookie.css", import.meta.url), "utf8");
+    assert.match(css, /\.cookie-accept \{border-color: var\(--accent\); background: var\(--accent\); color: var\(--ink\);\}/);
+    assert.doesNotMatch(css, /\.cookie-accept \{[^}]*color: var\(--paper\)/);
+});
+
 test("theme seed is reused on reload instead of being regenerated", () => {
     const values = new Map([["typace-theme-seed", "stable-seed"]]);
     const previous = globalThis.localStorage;

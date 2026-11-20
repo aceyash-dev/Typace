@@ -49,7 +49,7 @@
 .cookie-button {min-height: 44px; padding: 0 15px; border-color: var(--line); border-radius: 4px;}
 .cookie-quiet {color: var(--text);}
 .cookie-settings {background: var(--surface-muted); color: var(--text);}
-.cookie-accept {border-color: var(--accent); background: var(--accent); color: var(--paper);}
+.cookie-accept {border-color: var(--accent); background: var(--accent); color: var(--ink);}
 .cookie-choice {padding: 18px 0; border-color: var(--line);}
 .cookie-choice span {color: var(--muted);}
 .cookie-always {color: var(--accent-dark) !important;}
