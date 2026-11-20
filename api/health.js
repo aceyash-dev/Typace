@@ -1,39 +1,37 @@
 import { enforceRateLimit, sharedLimiterConfigured } from "./_lib/rate-limit.js";
+import { API_VERSION, applyCommonHeaders } from "./_lib/respond.js";
 import { KEYLESS_PROVIDER_IDS } from "./image.js";
 import { listFonts, getCatalogStatus } from "./_lib/fonts.js";
 
-function setHeaders(res, status = 200) {
+// The shared helper emits the common contract (CORS, X-API-Version, a traceable
+// X-Request-Id, nosniff); health only adds its own content type and caching.
+function setHeaders(res, req, status = 200) {
+    applyCommonHeaders(res, req);
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
-    res.setHeader("Access-Control-Expose-Headers", "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After, X-API-Version");
-    res.setHeader("X-API-Version", "1.1.0");
-    res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("Cache-Control", status === 200 ? "public, max-age=10, s-maxage=30, stale-while-revalidate=60" : "no-store");
 }
 
-function sendJSON(res, status, payload) {
-    setHeaders(res, status);
+function sendJSON(req, res, status, payload) {
+    setHeaders(res, req, status);
     if (status === 405) res.setHeader("Allow", "GET, HEAD, OPTIONS");
     return res.status(status).json(payload);
 }
 
 export default async function handler(req, res) {
-    setHeaders(res, req.method === "OPTIONS" ? 204 : 200);
+    setHeaders(res, req, req.method === "OPTIONS" ? 204 : 200);
     if (req.method === "OPTIONS") return res.status(204).end();
     if (req.method !== "GET" && req.method !== "HEAD") {
-        return sendJSON(res, 405, { error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+        return sendJSON(req, res, 405, { error: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
     if (!(await enforceRateLimit(req, res))) return;
 
     try {
         const fonts = await listFonts();
         const catalog = getCatalogStatus();
-        return sendJSON(res, 200, {
+        return sendJSON(req, res, 200, {
             status: catalog.issue ? "degraded" : "ok",
             service: "typace-api",
-            apiVersion: "1.1.0",
+            apiVersion: API_VERSION,
             checkedAt: new Date().toISOString(),
             catalog: {
                 status: catalog.issue ? "degraded" : "ok",
@@ -61,10 +59,10 @@ export default async function handler(req, res) {
         });
     } catch (error) {
         console.error("Typace health check failed:", error);
-        return sendJSON(res, 503, {
+        return sendJSON(req, res, 503, {
             status: "degraded",
             service: "typace-api",
-            apiVersion: "1.1.0",
+            apiVersion: API_VERSION,
             error: "The font catalog is unavailable.",
             code: "CATALOG_UNAVAILABLE"
         });
