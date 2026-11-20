@@ -62,6 +62,14 @@ function main() {
     const { fonts, unsupported, failed } = listing;
     const parsed = Object.keys(fonts).length;
 
+    // A parser that suddenly parses nothing would otherwise replace the
+    // committed index with an empty one before this run reports the failure.
+    if (parsed === 0) {
+        console.error("No font could be parsed; refusing to overwrite fonts/style-index.json.");
+        process.exitCode = 1;
+        return;
+    }
+
     writeArtifact({
         path: STYLE_INDEX_PATH,
         note: STYLE_INDEX_NOTE,
@@ -73,12 +81,6 @@ function main() {
         }
     });
 
-    // A parser that suddenly parses nothing would otherwise land an empty index
-    // and still exit 0, because the write is skipped or trivially succeeds.
-    if (parsed === 0) {
-        console.error("No font could be parsed; refusing to treat this as success.");
-        process.exitCode = 1;
-    }
     if (failed.length) {
         console.error(`${failed.length} font(s) could not be read.`);
         process.exitCode = 1;

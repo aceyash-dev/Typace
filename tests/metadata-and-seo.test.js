@@ -490,6 +490,29 @@ test("primary orange controls use AA-contrast text in both themes", async () => 
     assert.match(css, /\.view-switch button\.active \{background: var\(--accent\); color: var\(--ink\);\}/);
 });
 
+test("an unparseable font set never overwrites the committed style index", async () => {
+    // The generator used to write the index before checking whether anything
+    // parsed, so a local run replaced every font's style data with {}.
+    const { mkdtemp, mkdir, writeFile, readFile: read } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const { spawnSync } = await import("node:child_process");
+    const dir = await mkdtemp(join(tmpdir(), "typace-index-"));
+    const fontsDir = join(dir, "fonts");
+    await mkdir(fontsDir);
+    await writeFile(join(fontsDir, "broken.ttf"), "not a font");
+    const indexPath = join(dir, "style-index.json");
+    const sentinel = JSON.stringify({ note: "keep me", fonts: { "a.ttf": { weightClass: "bold" } } });
+    await writeFile(indexPath, sentinel);
+
+    const run = spawnSync(process.execPath, ["scripts/font-style-index.mjs"], {
+        env: { ...process.env, FONTS_DIR: fontsDir, STYLE_INDEX_OUT: indexPath },
+        encoding: "utf8"
+    });
+    assert.equal(run.status, 1, "the run must fail when nothing parses");
+    assert.equal(await read(indexPath, "utf8"), sentinel, "the committed index must survive the failed run");
+});
+
 test("toolbar selects keep a visible keyboard focus ring", async () => {
     // controls.css loads after base.css, so an `outline: 0` here would win over
     // select:focus-visible and leave the two catalogue selectors invisible to
